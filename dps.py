@@ -51,13 +51,25 @@ class REPL(Cmd): # Read Eval Print Loop
         Cmd.__init__(self)
         super().__init__(use_ipython=True)
         # Intro Banner:
-        self.intro = style(' *** Welcome to the Demon Pentest Shell\n *** hit CTRL+D to exit to standard shell.\n'+
+        self.intro = style('\n *** Welcome to the Demon Pentest Shell\n *** hit CTRL+D to exit to standard shell.\n'+
             ' *** type cmd <command> to run basic shell commands.\n', bold=True)
         self.continuation_prompt="'-> "
         # Auto complete things, that don't do shit:
         self.allow_closing_quote = True
         self.allow_appended_space = True
         self.matches_delimited = False
+    ###
+    ### This section is for adding tab autocomplete to basic commands:
+    ###
+    def do_cat(self,line):
+        log_cmd(line)
+        run_cmd("cat "+line)
+    complete_cat=Cmd.path_complete
+
+    def do_pip3(self,line):
+        log_cmd(line)
+        run_cmd("pip3 "+line)
+    complete_pip3=Cmd.path_complete
 
     def do_cd(self,line):
         """[?] Change Directory. If space is in name, end with a double quote, \"."""
