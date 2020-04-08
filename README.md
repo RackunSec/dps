@@ -20,7 +20,7 @@ root@demon2:~/Code# ./dps.py
 
 dps> 
 ```
-## Exmaple Log Output
+## Example Log Output
 ```
 Date,Hostname,Network,Who,Command
 2020-04-07 21:52:34.516429,demon2.4,ens33:192.168.159.132,root,ifconfig
