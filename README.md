@@ -13,12 +13,13 @@ This project requires Python3 and the following Python modules,
 * datetime
 ## The Shell
 ```
-root@demon2:~/Code# ./dps.py 
+root@kali:/opt/dps# python3 dps.py 
+
  *** Welcome to the Demon Pentest Shell
  *** hit CTRL+D to exit to standard shell.
  *** type cmd <command> to run basic shell commands.
 
-dps> 
+root@kali [/opt/dps] >>
 ```
 ## Example Log Output
 ```
@@ -42,3 +43,14 @@ Because this is built with Cmd2, the shell has a lot of great built-in features.
 ## Command modules
 * ```x```: use this for tab-autocompletion of file system paths
 * ```exit```: use this, or ```quit``` or ```CTRL+D``` to exit DPS
+
+## Installation
+To install DPS, simply install the requirements using pip3 and copy the ```dps.py``` into your ```$PATH``` like ```/usr/local/bin```, etc:
+```
+root@kali:~# cd /tmp
+root@kali:/tmp# git clone https://github.com/weaknetlabs/dps.git
+root@kali:/tmp# cd dps
+root@kali:/tmp/dps# pip3 install -r requirements.txt
+root@kali:/tmp/dps# cp dps.py /usr/local/bin/
+root@kali:/tmp/dps# dps.py
+```
