@@ -45,7 +45,7 @@ def run_cmd(cmd):
 
 class REPL(Cmd): # Read Eval Print Loop
 
-    prompt = "("+os.getcwd()+") dps> "
+    prompt = UID+"@"+HOSTNAME+" ["+os.getcwd()+"] >> "
 
     def __init__(self):
         Cmd.__init__(self)
@@ -62,11 +62,19 @@ class REPL(Cmd): # Read Eval Print Loop
     ### This section is for adding tab autocomplete to basic commands:
     ###
     def do_cat(self,line):
+        """[?] Display file contents into the terminal."""
         log_cmd(line)
         run_cmd("cat "+line)
     complete_cat=Cmd.path_complete
 
+    def do_ls(self,line):
+        """[?] Display file contents into the terminal."""
+        log_cmd(line)
+        run_cmd("ls "+line)
+    complete_ls=Cmd.path_complete
+
     def do_pip3(self,line):
+        """[?] Python 3 PIP module installation."""
         log_cmd(line)
         run_cmd("pip3 "+line)
     complete_pip3=Cmd.path_complete
@@ -78,12 +86,12 @@ class REPL(Cmd): # Read Eval Print Loop
         if (nwd == ""):
             nwd = os.path.expanduser('~')
         os.chdir(nwd)
-        Cmd.async_update_prompt(self,"("+os.getcwd()+") dps> ")
+        Cmd.async_update_prompt(self,UID+"@"+HOSTNAME+" ["+os.getcwd()+"] >> ")
         print("\n")
     complete_cd=Cmd.path_complete
 
-    # This method is solely for tab autocompletion of file names:
     def do_x(self,line):
+        """[?] Execute shell command. Adds TAB-autocompletion of file names."""
         log_cmd(line)
         run_cmd(line)
     complete_x = Cmd.path_complete
