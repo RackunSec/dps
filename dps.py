@@ -26,7 +26,7 @@ UID = getpass.getuser()
 # Check if log file exists
 if not os.path.exists(LOG_FILENAME):
     with open(LOG_FILENAME, 'w+') as new_log_file:
-        new_log_file.write("Date,Hostname,Network,Who,Command\n")
+        new_log_file.write("Date,Hostname,Network,Who,Where,Command\n")
 
 for adapter in ADAPTERS: # loop over the adapters object
     if re.match("^e..[0-9]",adapter.nice_name): # looking for ethernet device here
@@ -36,7 +36,7 @@ for adapter in ADAPTERS: # loop over the adapters object
 def log_cmd(cmd): # logging a command:
     #os.system("echo $(date),$(hostname),"+str(NET_DEV)+",$(whoami),"+cmd+" >> "+LOG_FILENAME)
     with open(LOG_FILENAME,'a') as log_file:
-        log_file.write(str(datetime.datetime.now())+","+HOSTNAME+","+str(NET_DEV)+","+UID+","+cmd+"\n")
+        log_file.write(str(datetime.datetime.now())+","+HOSTNAME+","+str(NET_DEV)+","+UID+","+os.getcwd()+","+cmd+"\n")
     return 0
 
 def run_cmd(cmd):
@@ -63,25 +63,29 @@ class REPL(Cmd): # Read Eval Print Loop
     ###
     def do_cat(self,line):
         """[?] Display file contents into the terminal."""
-        log_cmd(line)
-        run_cmd("cat "+line)
+        cmd = "cat "+line
+        log_cmd(cmd)
+        run_cmd(cmd)
     complete_cat=Cmd.path_complete
 
     def do_ls(self,line):
-        """[?] Display file contents into the terminal."""
-        log_cmd(line)
-        run_cmd("ls "+line)
+        """[?] Display directory contents into the terminal."""
+        cmd = "ls "+line
+        log_cmd(cmd)
+        run_cmd(cmd)
     complete_ls=Cmd.path_complete
 
     def do_pip3(self,line):
         """[?] Python 3 PIP module installation."""
-        log_cmd(line)
-        run_cmd("pip3 "+line)
+        cmd = "pip3 "+line
+        log_cmd(cmd)
+        run_cmd(cmd)
     complete_pip3=Cmd.path_complete
 
     def do_cd(self,line):
         """[?] Change Directory. If space is in name, end with a double quote, \"."""
-        log_cmd(line)
+        cmd = "cd "+line
+        log_cmd(cmd)
         nwd = re.sub(r'["]','',line)
         if (nwd == ""):
             nwd = os.path.expanduser('~')
@@ -92,6 +96,7 @@ class REPL(Cmd): # Read Eval Print Loop
 
     def do_x(self,line):
         """[?] Execute shell command. Adds TAB-autocompletion of file names."""
+        # in this method, we don't log "x"
         log_cmd(line)
         run_cmd(line)
     complete_x = Cmd.path_complete
