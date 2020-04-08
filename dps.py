@@ -10,6 +10,7 @@ import subprocess # for piping commands
 import sys # for exit
 import re # regexps
 from cmd2 import Cmd # The actual command-line lib
+from cmd2 import style, fg, bg
 import ifaddr # NIC info
 import socket # for HOSTNAME
 import getpass # for logging the username
@@ -43,10 +44,31 @@ def run_cmd(cmd):
     return 0
 
 class REPL(Cmd): # Read Eval Print Loop
-    prompt = "dps> "
+
+    prompt = "("+os.getcwd()+") dps> "
 
     def __init__(self):
         Cmd.__init__(self)
+        super().__init__(use_ipython=True)
+        # Intro Banner:
+        self.intro = style(' *** Welcome to the Demon Pentest Shell\n *** hit CTRL+D to exit to standard shell.\n'+
+            ' *** type cmd <command> to run basic shell commands.\n', bold=True)
+        self.continuation_prompt="'-> "
+        # Auto complete things, that don't do shit:
+        self.allow_closing_quote = True
+        self.allow_appended_space = True
+        self.matches_delimited = False
+
+    def do_cd(self,line):
+        """[?] Change Directory. If space is in name, end with a double quote, \"."""
+        log_cmd(line)
+        nwd = re.sub(r'["]','',line)
+        if (nwd == ""):
+            nwd = os.path.expanduser('~')
+        os.chdir(nwd)
+        Cmd.async_update_prompt(self,"("+os.getcwd()+") dps> ")
+        print("\n")
+    complete_cd=Cmd.path_complete
 
     # This method is solely for tab autocompletion of file names:
     def do_x(self,line):
@@ -60,10 +82,9 @@ class REPL(Cmd): # Read Eval Print Loop
     # complete_default = Cmd.path_complete # doesn't work, unfortunately.
 
     def do_exit(self,line):
-        """ Exit the Demon Pentest Shell. """
+        """[?] Exit the Demon Pentest Shell."""
         sys.exit()
 
 if __name__ == '__main__':
-    print (" *** Welcome to the Demon Pentest Shell\n *** hit CTRL+D to exit to standard shell.\n *** type cmd <command> to run basic shell commands.\n")
     app = REPL()
     app.cmdloop()
