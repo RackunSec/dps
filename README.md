@@ -22,15 +22,15 @@ dps>
 ```
 ## Example Log Output
 ```
-Date,Hostname,Network,Who,Command
-2020-04-07 21:52:34.516429,demon2.4,ens33:192.168.159.132,root,ifconfig
-2020-04-07 21:52:39.497779,demon2.4,ens33:192.168.159.132,root,ls -lah
-2020-04-07 21:52:48.911536,demon2.4,ens33:192.168.159.132,root,iw dev
-2020-04-07 21:53:16.428270,demon2.4,ens33:192.168.159.132,root,top
-2020-04-07 22:11:51.024047,demon2.4,ens33:192.168.159.132,root,ifconfig
-2020-04-07 22:15:04.322567,demon2.4,ens33:192.168.159.132,root,nmap localhost
-2020-04-07 22:15:28.055986,demon2.4,ens33:192.168.159.132,root,wc -l /root/Code/dps.py
-2020-04-07 22:15:39.899211,demon2.4,ens33:192.168.159.132,root,cat ~/.log_dps_history.csv
+Date,Hostname,Network,Who,Where,Command
+2020-04-08 16:30:13.219498,kali,eth0:192.168.44.140,root,/opt/dps,ls 
+2020-04-08 16:30:17.141034,kali,eth0:192.168.44.140,root,/opt/dps,cd "this new/"
+2020-04-08 16:30:17.688497,kali,eth0:192.168.44.140,root,/opt/dps/this new,ls 
+2020-04-08 16:30:19.093417,kali,eth0:192.168.44.140,root,/opt/dps/this new,cd test
+2020-04-08 16:30:20.588323,kali,eth0:192.168.44.140,root,/opt/dps/this new/test,ls 
+2020-04-08 16:30:25.399867,kali,eth0:192.168.44.140,root,/opt/dps/this new/test,touch file.txt
+2020-04-08 16:30:26.505094,kali,eth0:192.168.44.140,root,/opt/dps/this new/test,ls 
+2020-04-08 16:30:28.711438,kali,eth0:192.168.44.140,root,/opt/dps/this new/test,cat file.txt
 ```
 ## Shiny Features
 Because this is built with Cmd2, the shell has a lot of great built-in features. 
