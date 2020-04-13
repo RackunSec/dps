@@ -4,7 +4,7 @@
 # requires Python 3+
 #
 # 2020 - Douglas Berdeaux
-#
+# version 1.2
 import readline
 import os # for the commands, of course. These will be passed ot the shell.
 import subprocess # for piping commands
@@ -21,6 +21,7 @@ LOG_FILENAME = os.path.expanduser("~")+"/.log_dps_history.csv"
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser()
 REDIRECTION_PIPE = '_'
+my_env = os.environ.copy()
 
 class bcolors:
     HEADER = '\033[95m'
@@ -41,12 +42,29 @@ def log_cmd(cmd): # logging a command:
     return 0
 
 def run_cmd(cmd):
-    if re.match("^cd\s",cmd):
-        dir = re.sub('^cd\s+','',cmd)
-        os.chdir(dir)
+
+    cmd_delta = cmd
+    cmd_delta = re.sub("~",os.path.expanduser("~"),cmd_delta)
+    log_cmd(cmd_delta) # first, log the command.
+
+    # Handle built-in commands:
+    if (cmd == "exit" or cmd == "quit"):
+        sys.exit()
+        return 0
+    if re.match("^ls",cmd):
+        cmd_delta = re.sub("^ls","ls --color=auto",cmd)
+    if re.match("^cd",cmd_delta):
+        dir = re.sub('^cd\s+','',cmd_delta) # take off the path
+        if (dir == "cd"): # go home
+            dir = os.path.expanduser("~")
+        os.chdir(dir) # goto path
+        shell() # go back to prompt.
     else:
-        os.system(cmd)
-    return 0
+        #subprocess.Popen(cmd, env=my_env).wait() # kinda works?
+        #subprocess.Popen(['/bin/bash', '-c', cmd],shell=True,env=my_env) # does not work?
+        subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
+        shell()
+
 
 def list_folder(path):
     """
@@ -74,3 +92,10 @@ def completer(text, state):
 readline.set_completer(completer)
 readline.parse_and_bind('tab: complete')
 readline.set_completer_delims(' \t\n`~!@#$%^&*()-=+[{]}\\|;:\'",<>?')
+
+
+def shell():
+    last_string = input(UID+bcolors.BOLD+"@"+bcolors.ENDC+HOSTNAME+bcolors.BOLD+"["+bcolors.ENDC+os.getcwd()+bcolors.BOLD+"]"+">> "+bcolors.ENDC)
+    run_cmd(last_string)
+
+shell() # start the app
