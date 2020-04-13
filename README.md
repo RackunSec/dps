@@ -2,24 +2,26 @@
 A simple shell wrapper for superior logging capabilities. All commands are logged to ```~/log_dps_history.csv``` with with time,hostname,network:ip,who,command.
 
 This project requires Python3 and the following Python modules,
-* os
-* subprocess
-* sys
-* re
-* cmd2
-* ifaddr
-* socket
-* getpass
-* datetime
+* readline
+* os # for the commands, of course. These will be passed ot the shell.
+* sys # for exit
+* re # regexps
+* ifaddr # NIC info
+* socket # for HOSTNAME
+* getpass # for logging the username
+* datetime # for logging the datetime
+
 ## The Shell
 ```
-root@kali:/opt/dps# python3 dps.py 
+root@demon2:~/Code/dps# ./dps.py 
 
  *** Welcome to the Demon Pentest Shell
  *** hit CTRL+D to exit to standard shell.
  *** type cmd <command> to run basic shell commands.
 
-root@kali [/opt/dps] >>
+root@demon2.4[/root/Code/dps]>> ls
+dps.py  README.md  requirements.txt
+root@demon2.4[/root/Code/dps]>> 
 ```
 ## Example Log Output
 ```
@@ -39,10 +41,6 @@ Because this is built with Cmd2, the shell has a lot of great built-in features.
 * Use CTRL+R to do a reverse history search lookup
 * Use pipes for stdout, stderr just like you would in a native shell
 * Easily create "command modules"
-
-## Command modules
-* ```x```: use this for tab-autocompletion of file system paths
-* ```exit```: use this, or ```quit``` or ```CTRL+D``` to exit DPS
 
 ## Installation
 To install DPS, simply install the requirements using pip3 and copy the ```dps.py``` into your ```$PATH``` like ```/usr/local/bin```, etc:
