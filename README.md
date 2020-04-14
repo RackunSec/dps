@@ -2,13 +2,14 @@
 A simple shell wrapper for superior logging capabilities. All commands are logged to ```~/log_dps_history.csv``` with with ```When,Host,Network,Who,Where,What```.
 This project requires Python3 and the following Python modules,
 * readline
-* os # for the commands, of course. These will be passed ot the shell.
+* os # for path object
 * sys # for exit
-* re # regexps
+* re # regular expressions
 * ifaddr # NIC info
-* socket # for HOSTNAME
-* getpass # for logging the username
-* datetime # for logging the datetime
+* socket # for hostname
+* getpass # for username
+* datetime # for dates and times
+* subprocess # executes cmds by passing them to `/bin/bash`
 
 ## The Shell
 ```
