@@ -1,6 +1,5 @@
 # Demon Pentest Shell
-A simple shell wrapper for superior logging capabilities. All commands are logged to ```~/log_dps_history.csv``` with with time,hostname,network:ip,who,command.
-
+A simple shell wrapper for superior logging capabilities. All commands are logged to ```~/log_dps_history.csv``` with with ```When,Host,Network,Who,Where,What```.
 This project requires Python3 and the following Python modules,
 * readline
 * os # for the commands, of course. These will be passed ot the shell.
