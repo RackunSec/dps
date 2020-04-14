@@ -1,7 +1,7 @@
 # Demon Pentest Shell
 A simple shell wrapper for superior logging capabilities. All commands are logged to ```~/log_dps_history.csv``` with with ```When,Host,Network,Who,Where,What```.
 This project requires Python3 and the following Python modules,
-* readline
+* readline # for TAB autocompletion of $PATH (not cmds)
 * os # for path object
 * sys # for exit
 * re # regular expressions
