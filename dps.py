@@ -4,7 +4,7 @@
 # requires Python 3+
 #
 # 2020 - Douglas Berdeaux
-# version 1.2
+# v1.2.14.1
 import readline
 import os # for the commands, of course. These will be passed ot the shell.
 import subprocess # for piping commands
@@ -22,6 +22,11 @@ HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser()
 REDIRECTION_PIPE = '_'
 my_env = os.environ.copy()
+
+# Get the adapter and IP address:
+for adapter in ADAPTERS:
+    if re.match("^e..[0-9]+",adapter.nice_name):
+        NET_DEV = adapter.nice_name+":"+adapter.ips[0].ip
 
 class bcolors:
     HEADER = '\033[95m'
@@ -51,19 +56,19 @@ def run_cmd(cmd):
     if (cmd == "exit" or cmd == "quit"):
         sys.exit()
         return 0
-    if re.match("^ls",cmd):
+    elif(cmd_delta=="help"):
+        print("Help: ... ")
+    elif(re.match("^ls",cmd_delta)):
         cmd_delta = re.sub("^ls","ls --color=auto",cmd)
-    if re.match("^cd",cmd_delta):
+    elif(re.match("^cd",cmd_delta)):
         dir = re.sub('^cd\s+','',cmd_delta) # take off the path
         if (dir == "cd"): # go home
             dir = os.path.expanduser("~")
         os.chdir(dir) # goto path
-        shell() # go back to prompt.
     else:
-        #subprocess.Popen(cmd, env=my_env).wait() # kinda works?
-        #subprocess.Popen(['/bin/bash', '-c', cmd],shell=True,env=my_env) # does not work?
-        subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
-        shell()
+        pass
+    subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
+    shell() # or else return to shell
 
 
 def list_folder(path):
@@ -97,5 +102,10 @@ readline.set_completer_delims(' \t\n`~!@#$%^&*()-=+[{]}\\|;:\'",<>?')
 def shell():
     last_string = input(UID+bcolors.BOLD+"@"+bcolors.ENDC+HOSTNAME+bcolors.BOLD+"["+bcolors.ENDC+os.getcwd()+bcolors.BOLD+"]"+">> "+bcolors.ENDC)
     run_cmd(last_string)
-
+print(bcolors.BOLD+
+"""
+ *** Welcome to the Demon Pentest Shell
+ *** Type exit to return to standard shell
+"""
++bcolors.ENDC)
 shell() # start the app
