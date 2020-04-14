@@ -4,7 +4,6 @@
 # requires Python 3+
 #
 # 2020 - Douglas Berdeaux
-# v1.2.14.1
 import readline
 import os # for the commands, of course. These will be passed ot the shell.
 import subprocess # for piping commands
@@ -22,7 +21,7 @@ HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser()
 REDIRECTION_PIPE = '_'
 my_env = os.environ.copy()
-
+VERSION="v1.2.14.2"
 # Get the adapter and IP address:
 for adapter in ADAPTERS:
     if re.match("^e..[0-9]+",adapter.nice_name):
@@ -58,16 +57,18 @@ def run_cmd(cmd):
         return 0
     elif(cmd_delta=="help"):
         print("Help: ... ")
+    elif(cmd_delta=="version"):
+        print(bcolors.OKGREEN+VERSION+bcolors.ENDC)
     elif(re.match("^ls",cmd_delta)):
         cmd_delta = re.sub("^ls","ls --color=auto",cmd)
+        subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
     elif(re.match("^cd",cmd_delta)):
         dir = re.sub('^cd\s+','',cmd_delta) # take off the path
         if (dir == "cd"): # go home
             dir = os.path.expanduser("~")
         os.chdir(dir) # goto path
     else:
-        pass
-    subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
+        subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
     shell() # or else return to shell
 
 
