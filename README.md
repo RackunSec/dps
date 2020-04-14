@@ -39,11 +39,10 @@ When,Host,Network,Who,Where,What
 root@demon2:~/Code/dps#
 ```
 ## Shiny Features
-Because this is built with Cmd2, the shell has a lot of great built-in features. 
+Because this is built with readline, the shell has a lot of great built-in features. 
 * Use the up and down arrows to scroll through history
 * Use CTRL+R to do a reverse history search lookup
 * Use pipes for stdout, stderr just like you would in a native shell
-* Easily create "command modules"
 
 ## Installation
 To install DPS, simply install the requirements using pip3 and copy the ```dps.py``` into your ```$PATH``` like ```/usr/local/bin```, etc:
