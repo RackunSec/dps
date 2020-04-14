@@ -25,15 +25,18 @@ root@demon2.4[/root/Code/dps]>>
 ```
 ## Example Log Output
 ```
-Date,Hostname,Network,Who,Where,Command
-2020-04-08 16:30:13.219498,kali,eth0:192.168.44.140,root,/opt/dps,ls 
-2020-04-08 16:30:17.141034,kali,eth0:192.168.44.140,root,/opt/dps,cd "this new/"
-2020-04-08 16:30:17.688497,kali,eth0:192.168.44.140,root,/opt/dps/this new,ls 
-2020-04-08 16:30:19.093417,kali,eth0:192.168.44.140,root,/opt/dps/this new,cd test
-2020-04-08 16:30:20.588323,kali,eth0:192.168.44.140,root,/opt/dps/this new/test,ls 
-2020-04-08 16:30:25.399867,kali,eth0:192.168.44.140,root,/opt/dps/this new/test,touch file.txt
-2020-04-08 16:30:26.505094,kali,eth0:192.168.44.140,root,/opt/dps/this new/test,ls 
-2020-04-08 16:30:28.711438,kali,eth0:192.168.44.140,root,/opt/dps/this new/test,cat file.txt
+root@demon2:~/Code/dps# cat ~/.log_dps_history.csv 
+When,Host,Network,Who,Where,What
+2020-04-14 07:56:52.412353,demon2.4,ens33:192.168.159.132,root,/root/Code/dps,ls
+2020-04-14 07:56:53.177506,demon2.4,ens33:192.168.159.132,root,/root/Code/dps,cd
+2020-04-14 07:56:53.641559,demon2.4,ens33:192.168.159.132,root,/root,ls
+2020-04-14 07:56:56.756188,demon2.4,ens33:192.168.159.132,root,/root,cd Penetration Testing
+2020-04-14 07:56:58.374275,demon2.4,ens33:192.168.159.132,root,/root/Penetration Testing,ls
+2020-04-14 07:57:00.117010,demon2.4,ens33:192.168.159.132,root,/root/Penetration Testing,cd Clients
+2020-04-14 07:57:00.389277,demon2.4,ens33:192.168.159.132,root,/root/Penetration Testing/Clients,ls
+2020-04-14 07:57:18.294996,demon2.4,ens33:192.168.159.132,root,/root/Penetration Testing/Clients,ifconfig | grep inet
+2020-04-14 07:57:31.235330,demon2.4,ens33:192.168.159.132,root,/root/Penetration Testing/Clients,exit
+root@demon2:~/Code/dps#
 ```
 ## Shiny Features
 Because this is built with Cmd2, the shell has a lot of great built-in features. 
