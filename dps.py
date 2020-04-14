@@ -16,12 +16,20 @@ import datetime # for logging the datetime
 
 ADAPTERS = ifaddr.get_adapters() # get network device info
 NET_DEV = "" # store the network device
-LOG_FILENAME = os.path.expanduser("~")+"/.log_dps_history.csv"
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser()
 REDIRECTION_PIPE = '_'
-my_env = os.environ.copy()
-VERSION="v1.2.14.2"
+VERSION="v1.2.14.3"
+LOG_DAY=datetime.datetime.today().strftime('%Y-%m-%d')
+LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv"
+
+# Set up the log file directory:
+if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")):
+    os.mkdir(os.path.join(os.path.expanduser("~"),".dps"))
+# Set up the log file itself:
+if not os.path.exists(LOG_FILENAME):
+    with open(LOG_FILENAME,'a') as log_file:
+        log_file.write("When,Host,Network,Who,Where,What\n")
 # Get the adapter and IP address:
 for adapter in ADAPTERS:
     if re.match("^e..[0-9]+",adapter.nice_name):
