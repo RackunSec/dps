@@ -19,9 +19,10 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser()
 REDIRECTION_PIPE = '_'
-VERSION="v0.4.16.0"
+VERSION="v0.4.17.0"
 LOG_DAY=datetime.datetime.today().strftime('%Y-%m-%d')
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv"
+PATHS=os.getenv('PATH').split(":")
 
 # Set up the log file directory:
 if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")):
@@ -31,9 +32,9 @@ if not os.path.exists(LOG_FILENAME):
     with open(LOG_FILENAME,'a') as log_file:
         log_file.write("When,Host,Network,Who,Where,What\n")
 # Get the adapter and IP address:
-for adapter in ADAPTERS:
-    if re.match("^e..[0-9]+",adapter.nice_name):
-        NET_DEV = adapter.nice_name+":"+adapter.ips[0].ip
+#for adapter in ADAPTERS:
+    #if re.match("^e..[0-9]+",adapter.nice_name):
+        #NET_DEV = adapter.nice_name+":"+adapter.ips[0].ip
 
 class bcolors:
     HEADER = '\033[95m'
@@ -86,11 +87,11 @@ def run_cmd(cmd):
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
     shell() # or else return to shell
 
-
 def list_folder(path):
     """
     Lists folder contents
     """
+    # starts with "/"
     if path.startswith(os.path.sep):
         # absolute path
         basedir = os.path.dirname(path)
@@ -98,8 +99,18 @@ def list_folder(path):
         # add back the parent
         contents = [os.path.join(basedir, d) for d in contents]
     else:
-        # relative path
-        contents = os.listdir(os.curdir)
+        # absolute (home) path:
+        if path.startswith("~/"):
+            contents = os.listdir(os.path.expanduser("~/"))
+        else:
+            # This could be a command so try paths:
+            # TODO get environment $PATH's and break them up testing each one:
+            contents=os.listdir(os.curdir)
+            for path_entry in PATHS:
+                try: # just learnt my first try/catch in Python - woohoo! :D
+                    contents+=os.listdir(path_entry)
+                except:
+                    pass
     return contents
 
 
@@ -112,8 +123,7 @@ def completer(text, state):
 
 readline.set_completer(completer)
 readline.parse_and_bind('tab: complete')
-readline.set_completer_delims(' \t\n`~!@#$%^&*()-=+[{]}\\|;:\'",<>?')
-
+readline.set_completer_delims('~ \t\n`!@#$%^&*()-=+[{]}\\|;:\'",<>?')
 
 def shell():
     last_string = input(UID+bcolors.BOLD+"@"+bcolors.ENDC+HOSTNAME+bcolors.BOLD+"["+bcolors.ENDC+os.getcwd()+bcolors.BOLD+"]"+">> "+bcolors.ENDC)
