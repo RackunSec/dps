@@ -32,9 +32,9 @@ if not os.path.exists(LOG_FILENAME):
     with open(LOG_FILENAME,'a') as log_file:
         log_file.write("When,Host,Network,Who,Where,What\n")
 # Get the adapter and IP address:
-#for adapter in ADAPTERS:
-    #if re.match("^e..[0-9]+",adapter.nice_name):
-        #NET_DEV = adapter.nice_name+":"+adapter.ips[0].ip
+for adapter in ADAPTERS:
+    if re.match("^e..[0-9]+",adapter.nice_name):
+        NET_DEV = adapter.nice_name+":"+adapter.ips[0].ip
 
 class bcolors:
     HEADER = '\033[95m'
