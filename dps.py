@@ -56,12 +56,10 @@ def log_cmd(cmd): # logging a command:
     return 0
 
 def run_cmd(cmd):
-
     cmd_delta = cmd
     cmd_delta = re.sub("~",os.path.expanduser("~"),cmd_delta)
     cmd_delta = re.sub("^\s+","",cmd_delta) # remove any prepended spaces
     log_cmd(cmd_delta) # first, log the command.
-
     # Handle built-in commands:
     if (cmd_delta == "exit" or cmd_delta == "quit"):
         sys.exit()
@@ -91,11 +89,10 @@ def run_cmd(cmd):
 def exit_gracefully():
         ans = input(bcolors.FAIL+"\n[!] CTRL+C DETECTED\n[?] Do you wish to quit the Demon Pentest Shell (y/n)? "+bcolors.ENDC)
         if ans == "y":
+            print("[+] Quitting Demon Penetst Shell. File logged: "+LOG_FILENAME)
             sys.exit(1)
         else:
             shell()
-        print("[+] Quitting Demon Penetst Shell. File logged: "+LOG_FILENAME)
-        sys.exit(1)
 
 def list_folder(path):
     """
@@ -141,12 +138,7 @@ def shell():
         run_cmd(last_string)
     except KeyboardInterrupt:
         exit_gracefully()
-        
-print(bcolors.BOLD+
-"""
- *** Welcome to the Demon Pentest Shell
- *** Type exit to return to standard shell
-"""
-+bcolors.ENDC)
+
+print(bcolors.BOLD+"\n *** Welcome to the Demon Pentest Shell ("+VERSION+")\n *** Type \"exit\" to return to standard shell.\n"+bcolors.ENDC)
 
 shell() # start the app
