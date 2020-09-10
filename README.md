@@ -15,8 +15,8 @@ This project requires Python3 and the following Python modules,
 ```
 root@demon2:~/Code/dps# ./dps.py 
 
- *** Welcome to the Demon Pentest Shell
- *** Type exit to return to standard shell
+ *** Welcome to the Demon Pentest Shell (0.x.x.x)
+ *** Type "exit" to return to standard shell.
 
 root@demon2.4[/root/Code/dps]>> ls
 dps.py  README.md  requirements.txt
