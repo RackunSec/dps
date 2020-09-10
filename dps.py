@@ -4,6 +4,7 @@
 # requires Python 3+
 #
 # 2020 - Douglas Berdeaux
+
 import readline
 import os # for the commands, of course. These will be passed ot the shell.
 import subprocess # for piping commands
@@ -19,7 +20,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser()
 REDIRECTION_PIPE = '_'
-VERSION="v0.4.17.0"
+VERSION="v0.9.10.0"
 LOG_DAY=datetime.datetime.today().strftime('%Y-%m-%d')
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv"
 PATHS=os.getenv('PATH').split(":")
@@ -87,6 +88,15 @@ def run_cmd(cmd):
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
     shell() # or else return to shell
 
+def exit_gracefully():
+        ans = input(bcolors.FAIL+"\n[!] CTRL+C DETECTED\n[?] Do you wish to quit the Demon Pentest Shell (y/n)? "+bcolors.ENDC)
+        if ans == "y":
+            sys.exit(1)
+        else:
+            shell()
+        print("[+] Quitting Demon Penetst Shell. File logged: "+LOG_FILENAME)
+        sys.exit(1)
+
 def list_folder(path):
     """
     Lists folder contents
@@ -126,12 +136,17 @@ readline.parse_and_bind('tab: complete')
 readline.set_completer_delims('~ \t\n`!@#$%^&*()-=+[{]}\\|;:\'",<>?')
 
 def shell():
-    last_string = input(UID+bcolors.BOLD+"@"+bcolors.ENDC+HOSTNAME+bcolors.BOLD+"["+bcolors.ENDC+os.getcwd()+bcolors.BOLD+"]"+">> "+bcolors.ENDC)
-    run_cmd(last_string)
+    try:
+        last_string = input(UID+bcolors.BOLD+"@"+bcolors.ENDC+HOSTNAME+bcolors.BOLD+"["+bcolors.ENDC+os.getcwd()+bcolors.BOLD+"]"+">> "+bcolors.ENDC)
+        run_cmd(last_string)
+    except KeyboardInterrupt:
+        exit_gracefully()
+        
 print(bcolors.BOLD+
 """
  *** Welcome to the Demon Pentest Shell
  *** Type exit to return to standard shell
 """
 +bcolors.ENDC)
+
 shell() # start the app
