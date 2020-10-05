@@ -20,7 +20,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser()
 REDIRECTION_PIPE = '_'
-VERSION="v0.10.05.0"
+VERSION="v0.10.05.1"
 LOG_DAY=datetime.datetime.today().strftime('%Y-%m-%d')
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv"
 PATHS=os.getenv('PATH').split(":")
@@ -67,6 +67,7 @@ def run_cmd(cmd):
     elif(re.match("^\s?sudo",cmd_delta)): # for sudo, we will need the command's full path:
         sudo_regexp = re.compile("sudo ([^ ]+)")
         cmd_delta=re.sub(sudo_regexp,'sudo $(which \\1)',cmd_delta)
+        subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
         #print("DGB: CMD: '"+cmd_delta+"'")
         #sys.exit()
     elif(cmd_delta=="help"):
