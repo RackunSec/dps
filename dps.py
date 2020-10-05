@@ -20,7 +20,8 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser()
 REDIRECTION_PIPE = '_'
-VERSION="v0.10.05.1"
+VERSION="v0.10.05.3"
+CHANGES="READLINE issues resolved!"
 LOG_DAY=datetime.datetime.today().strftime('%Y-%m-%d')
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv"
 PATHS=os.getenv('PATH').split(":")
@@ -46,9 +47,17 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+    END = '\e[0m'
 
 readline.parse_and_bind('tab: complete')
 readline.parse_and_bind('set editing-mode vi')
+#readline.parse_and_bind('set horizontal-scroll-mode On') # will scroll horizontally, because wrapping is not working :/
+readline.parse_and_bind('set colored-completion-prefix On') # colors types for TAB autocompletion.
+readline.parse_and_bind('set colored-stats On') # colored stats
+readline.parse_and_bind('set completion-display-width 2') # columns to display auto completion options available # Not Working
+readline.parse_and_bind('set enable-keypad On') # ?
+readline.parse_and_bind('set expand-tilde On') # expand tilde? # Not working, I do this manually.
+readline.parse_and_bind('set history-preserve-point On') # set the cursor point in history.
 
 def log_cmd(cmd): # logging a command:
     with open(LOG_FILENAME,'a') as log_file:
@@ -140,7 +149,8 @@ readline.set_completer_delims('~ \t\n`!@#$%^&*()-=+[{]}\\|;:\'",<>?')
 
 def shell():
     try:
-        last_string = input(UID+bcolors.BOLD+"@"+bcolors.ENDC+HOSTNAME+bcolors.BOLD+"["+bcolors.ENDC+os.getcwd()+bcolors.BOLD+"]"+">> "+bcolors.ENDC)
+        #last_string = input(UID+bcolors.BOLD+"@"+bcolors.ENDC+HOSTNAME+bcolors.BOLD+"["+bcolors.ENDC+os.getcwd()+bcolors.BOLD+"]"+">> "+bcolors.ENDC)
+        last_string = input(UID+"@"+HOSTNAME+"["+os.getcwd()+"]"+">> ")
         run_cmd(last_string)
     except KeyboardInterrupt:
         exit_gracefully()
