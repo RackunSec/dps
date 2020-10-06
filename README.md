@@ -19,7 +19,6 @@ root@DESKTOP-123710:/tmp/dps# ./dps.py
  *** Type "exit" to return to standard shell.
 
 root@DESKTOP-123710[/tmp/dps]> 
-
 ```
 ## Example Log Output
 ```
