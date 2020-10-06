@@ -13,14 +13,13 @@ This project requires Python3 and the following Python modules,
 
 ## The Shell
 ```
-root@demon2:~/Code/dps# ./dps.py 
+root@DESKTOP-123710:/tmp/dps# ./dps.py 
 
- *** Welcome to the Demon Pentest Shell (0.x.x.x)
+ *** Welcome to the Demon Pentest Shell (vX.X.X-n)
  *** Type "exit" to return to standard shell.
 
-root@demon2.4[/root/Code/dps]>> ls
-dps.py  README.md  requirements.txt
-root@demon2.4[/root/Code/dps]>> 
+root@DESKTOP-123710[/tmp/dps]> 
+
 ```
 ## Example Log Output
 ```
