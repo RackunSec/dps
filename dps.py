@@ -134,6 +134,9 @@ def list_folder(path):
             # This could be a command so try paths:
             # TODO get environment $PATH's and break them up testing each one:
             contents=os.listdir(os.curdir)
+            for item in contents:
+                if re.match(path,item):
+                    return contents
             for path_entry in PATHS:
                 try: # just learnt my first try/catch in Python - woohoo! :D
                     contents+=os.listdir(path_entry)
