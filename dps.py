@@ -20,10 +20,9 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser()
 REDIRECTION_PIPE = '_'
-VERSION="v0.10.6-1"
+VERSION="v0.10.6-4"
 LOG_DAY=datetime.datetime.today().strftime('%Y-%m-%d')
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv"
-PATHS=os.getenv('PATH').split(":")
 
 # Set up the log file directory:
 if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")):
@@ -48,7 +47,6 @@ class bcolors:
     UNDERLINE = '\033[4m'
     END = '\e[0m'
 
-#readline.parse_and_bind('tab: complete')
 #readline.parse_and_bind('set editing-mode vi')
 #readline.parse_and_bind('set horizontal-scroll-mode On') # will scroll horizontally, because wrapping is not working :/
 readline.parse_and_bind('set colored-completion-prefix On') # colors types for TAB autocompletion.
@@ -161,8 +159,15 @@ readline.set_completer_delims('~ \t\n`!@#$%^&*()-=+[{]}\\|;:\'",<>?')
 
 def shell():
     try:
+        # Build out the prompt fo rthe user:
+        PATHS=os.getenv('PATH').split(":")
+        if UID == "root":
+            prompt_tail = "# "
+        else:
+            prompt_tail = "> " # added promt indicator for root
+        prompt = UID+"@"+HOSTNAME+":"+os.getcwd()+"(dps)"+prompt_tail
         #last_string = input(UID+bcolors.BOLD+"@"+bcolors.ENDC+HOSTNAME+bcolors.BOLD+"["+bcolors.ENDC+os.getcwd()+bcolors.BOLD+"]"+">> "+bcolors.ENDC)
-        last_string = input(UID+"@"+HOSTNAME+"["+os.getcwd()+"]"+"> ")
+        last_string = input(prompt)
         run_cmd(last_string)
     except KeyboardInterrupt:
         exit_gracefully()
