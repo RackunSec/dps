@@ -20,7 +20,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser()
 REDIRECTION_PIPE = '_'
-VERSION="v0.10.05.3"
+VERSION="v0.10.05.5"
 CHANGES="READLINE issues resolved!"
 LOG_DAY=datetime.datetime.today().strftime('%Y-%m-%d')
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv"
@@ -49,15 +49,21 @@ class bcolors:
     UNDERLINE = '\033[4m'
     END = '\e[0m'
 
-readline.parse_and_bind('tab: complete')
-readline.parse_and_bind('set editing-mode vi')
+#readline.parse_and_bind('tab: complete')
+#readline.parse_and_bind('set editing-mode vi')
 #readline.parse_and_bind('set horizontal-scroll-mode On') # will scroll horizontally, because wrapping is not working :/
 readline.parse_and_bind('set colored-completion-prefix On') # colors types for TAB autocompletion.
-readline.parse_and_bind('set colored-stats On') # colored stats
+readline.parse_and_bind('set colored-stats On') # colored tab-autocomplete file names (LS_COLORS)
 readline.parse_and_bind('set completion-display-width 2') # columns to display auto completion options available # Not Working
-readline.parse_and_bind('set enable-keypad On') # ?
-readline.parse_and_bind('set expand-tilde On') # expand tilde? # Not working, I do this manually.
+#readline.parse_and_bind('set expand-tilde On') # expand tilde? # Not working, I do this manually.
 readline.parse_and_bind('set history-preserve-point On') # set the cursor point in history.
+readline.parse_and_bind('set mark-directories On') # for appending a slash # supposedly "On" by default, but not working.
+readline.parse_and_bind('set match-hidden-files On')
+#readline.parse_and_bind('set page-completions On')
+readline.parse_and_bind('set print-completions-horizontally On')
+#readline.parse_and_bind('set show-all-if-ambiguous On')
+#readline.parse_and_bind('set skip-completed-text On')
+#readline.parse_and_bind('set visible-stats On')
 
 def log_cmd(cmd): # logging a command:
     with open(LOG_FILENAME,'a') as log_file:
@@ -136,14 +142,16 @@ def list_folder(path):
     return contents
 
 
-def completer(text, state):
-    """
-    Our custom completer function
-    """
-    options = [x for x in list_folder(text) if x.startswith(text)]
-    return options[state]
+#def completer(text, state):
+#    """
+#    Our custom completer function
+#    """
+#    options = [x for x in list_folder(text) if x.startswith(text)]
+#    return options[state]
 
-readline.set_completer(completer)
+# REQUIRED:
+readline.set_completer()
+#readline.set_completer(completer)
 readline.parse_and_bind('tab: complete')
 readline.set_completer_delims('~ \t\n`!@#$%^&*()-=+[{]}\\|;:\'",<>?')
 
