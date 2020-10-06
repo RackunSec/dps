@@ -20,9 +20,10 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser()
 REDIRECTION_PIPE = '_'
-VERSION="v0.10.6-4"
-LOG_DAY=datetime.datetime.today().strftime('%Y-%m-%d')
+VERSION = "v0.10.6-7"
+LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d')
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv"
+OWD=os.getcwd() # historical purposes
 
 # Set up the log file directory:
 if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")):
@@ -91,12 +92,22 @@ def run_cmd(cmd):
         cmd_delta = re.sub("^ls","ls --color=auto",cmd)
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
     elif(re.match("^cd",cmd_delta)):
+        # TODO: make this a single re.sub() call:
         dir = re.sub('^cd\s+','',cmd_delta) # take off the path
         dir = re.sub('\s+$','',dir) # remove trailing spaces
         if (re.match("^cd(\s+)?",dir)): # go home
             dir = os.path.expanduser("~")
         if (dir==""):
             dir=os.path.expanduser("~")
+        # changin directories using "-" and history:
+        global OWD # our shell global needs referenced
+        if (dir=="-"):
+            BOWD=OWD # backup the OWD
+            OWD=os.getcwd()
+            os.chdir(BOWD)
+            shell()
+        else:
+            OWD=os.getcwd() # store the directory that we are in for "-" purposes/historical
         if os.path.isdir(dir): # does it even exist?
             os.chdir(dir) # goto path
         else:
