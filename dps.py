@@ -20,7 +20,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_'
-VERSION = "v0.10.6-9" # update this each time we push to the repo
+VERSION = "v0.10.6-10" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 OWD=os.getcwd() # historical purposes
@@ -53,7 +53,7 @@ class bcolors:
 readline.parse_and_bind('set colored-completion-prefix On') # colors types for TAB autocompletion.
 readline.parse_and_bind('set colored-stats On') # colored tab-autocomplete file names (LS_COLORS)
     #readline.parse_and_bind('set completion-display-width 2') # columns to display auto completion options available # Not Working
-    #readline.parse_and_bind('set expand-tilde On') # expand tilde? # Not working, I do this manually.
+readline.parse_and_bind('set expand-tilde On') # expand tilde? # Not working, I do this manually.
 readline.parse_and_bind('set history-preserve-point On') # set the cursor point in history.
 readline.parse_and_bind('set match-hidden-files On')
     #readline.parse_and_bind('set page-completions On')
@@ -145,6 +145,7 @@ def exit_gracefully():
             shell()
 
 def list_folder(path):
+    PATHS=os.getenv('PATH').split(":")
     """
     Lists folder contents
     """
