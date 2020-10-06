@@ -142,16 +142,16 @@ def list_folder(path):
     return contents
 
 
-#def completer(text, state):
-#    """
-#    Our custom completer function
-#    """
-#    options = [x for x in list_folder(text) if x.startswith(text)]
-#    return options[state]
+def completer(text, state):
+    """
+    Our custom completer function
+    """
+    options = [x for x in list_folder(text) if x.startswith(text)]
+    return options[state]
 
 # REQUIRED:
-readline.set_completer()
-#readline.set_completer(completer)
+#readline.set_completer()
+readline.set_completer(completer)
 readline.parse_and_bind('tab: complete')
 readline.set_completer_delims('~ \t\n`!@#$%^&*()-=+[{]}\\|;:\'",<>?')
 
