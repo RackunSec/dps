@@ -20,8 +20,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser()
 REDIRECTION_PIPE = '_'
-VERSION="v0.10.05.5"
-CHANGES="READLINE issues resolved!"
+VERSION="v0.10.6.1"
 LOG_DAY=datetime.datetime.today().strftime('%Y-%m-%d')
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv"
 PATHS=os.getenv('PATH').split(":")
@@ -77,8 +76,9 @@ def run_cmd(cmd):
     log_cmd(cmd_delta) # first, log the command.
     # Handle built-in commands:
     if (cmd_delta == "exit" or cmd_delta == "quit"):
-        sys.exit()
-        return 0
+        exit_gracefully()
+        #sys.exit()
+        #return 0
     elif(re.match("^\s?sudo",cmd_delta)): # for sudo, we will need the command's full path:
         sudo_regexp = re.compile("sudo ([^ ]+)")
         cmd_delta=re.sub(sudo_regexp,'sudo $(which \\1)',cmd_delta)
@@ -108,7 +108,8 @@ def run_cmd(cmd):
     shell() # or else return to shell
 
 def exit_gracefully():
-        ans = input(bcolors.FAIL+"\n[!] CTRL+C DETECTED\n[?] Do you wish to quit the Demon Pentest Shell (y/n)? "+bcolors.ENDC)
+        #ans = input(bcolors.FAIL+"\n[!] CTRL+C DETECTED\n[?] Do you wish to quit the Demon Pentest Shell (y/n)? "+bcolors.ENDC)
+        ans = input(bcolors.FAIL+"\n[?]"+bcolors.ENDC+" Do you wish to quit the Demon Pentest Shell (y/n)? ")
         if ans == "y":
             print("[+] Quitting Demon Penetst Shell. File logged: "+LOG_FILENAME)
             sys.exit(1)
@@ -161,7 +162,7 @@ readline.set_completer_delims('~ \t\n`!@#$%^&*()-=+[{]}\\|;:\'",<>?')
 def shell():
     try:
         #last_string = input(UID+bcolors.BOLD+"@"+bcolors.ENDC+HOSTNAME+bcolors.BOLD+"["+bcolors.ENDC+os.getcwd()+bcolors.BOLD+"]"+">> "+bcolors.ENDC)
-        last_string = input(UID+"@"+HOSTNAME+"["+os.getcwd()+"]"+">> ")
+        last_string = input(UID+"@"+HOSTNAME+"["+os.getcwd()+"]"+"> ")
         run_cmd(last_string)
     except KeyboardInterrupt:
         exit_gracefully()
