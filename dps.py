@@ -18,25 +18,25 @@ import datetime # for logging the datetime
 ADAPTERS = ifaddr.get_adapters() # get network device info
 NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
-UID = getpass.getuser()
+UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_'
-VERSION = "v0.10.6-7"
-LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d')
-LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv"
+VERSION = "v0.10.6-8" # update this each time we push to the repo
+LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
+LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 OWD=os.getcwd() # historical purposes
 
 # Set up the log file directory:
-if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")):
-    os.mkdir(os.path.join(os.path.expanduser("~"),".dps"))
+if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")): # create the directory if it does not exist
+    os.mkdir(os.path.join(os.path.expanduser("~"),".dps")) # mkdir
 # Set up the log file itself:
 if not os.path.exists(LOG_FILENAME):
     with open(LOG_FILENAME,'a') as log_file:
         log_file.write("When,Host,Network,Who,Where,What\n")
 # Get the adapter and IP address:
-for adapter in ADAPTERS:
+for adapter in ADAPTERS: # loop through adapters
     if re.match("^e..[0-9]+",adapter.nice_name):
         NET_DEV = adapter.nice_name+":"+adapter.ips[0].ip
-
+# colored output (does not work with the prompt - causes issues with line wrapping)
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -48,28 +48,48 @@ class bcolors:
     UNDERLINE = '\033[4m'
     END = '\e[0m'
 
-#readline.parse_and_bind('set editing-mode vi')
-#readline.parse_and_bind('set horizontal-scroll-mode On') # will scroll horizontally, because wrapping is not working :/
+    #readline.parse_and_bind('set editing-mode vi')
+    #readline.parse_and_bind('set horizontal-scroll-mode On') # will scroll horizontally, because wrapping is not working :/
 readline.parse_and_bind('set colored-completion-prefix On') # colors types for TAB autocompletion.
 readline.parse_and_bind('set colored-stats On') # colored tab-autocomplete file names (LS_COLORS)
-readline.parse_and_bind('set completion-display-width 2') # columns to display auto completion options available # Not Working
-#readline.parse_and_bind('set expand-tilde On') # expand tilde? # Not working, I do this manually.
+    #readline.parse_and_bind('set completion-display-width 2') # columns to display auto completion options available # Not Working
+    #readline.parse_and_bind('set expand-tilde On') # expand tilde? # Not working, I do this manually.
 readline.parse_and_bind('set history-preserve-point On') # set the cursor point in history.
-readline.parse_and_bind('set mark-directories On') # for appending a slash # supposedly "On" by default, but not working.
 readline.parse_and_bind('set match-hidden-files On')
-#readline.parse_and_bind('set page-completions On')
-readline.parse_and_bind('set print-completions-horizontally On')
-#readline.parse_and_bind('set show-all-if-ambiguous On')
-#readline.parse_and_bind('set skip-completed-text On')
-#readline.parse_and_bind('set visible-stats On')
+    #readline.parse_and_bind('set page-completions On')
+    #readline.parse_and_bind('set print-completions-horizontally On')
+    #readline.parse_and_bind('set show-all-if-ambiguous On')
+    #readline.parse_and_bind('set skip-completed-text On')
+    #readline.parse_and_bind('set visible-stats On')
+readline.parse_and_bind('set mark-directories On') # for appending a slash # supposedly "On" by default, but not working.
 
-def log_cmd(cmd): # logging a command:
+def log_cmd(cmd): # logging a command to the log file:
     with open(LOG_FILENAME,'a') as log_file:
         log_file.write(str(datetime.datetime.now())+","+HOSTNAME+","+str(NET_DEV)+","+UID+","+os.getcwd()+","+cmd+"\n")
     return 0
 
-def run_cmd(cmd):
-    cmd_delta = cmd
+# Define the help dialog:
+def help():
+    print("""
+    -- \033[1mDemon Pentest Shell\033[0m --
+
+     \033[1m:: Built-In Commands ::\033[0m
+      \033[92mhelp\033[0m: this cruft.
+      \033[92mexit/quit\033[0m: return to terminal OS shell.
+
+     \033[1m:: Keyboard Shortcuts ::\033[0m
+      \033[92mCTRL+R\033[0m: Search command history.
+      \033[92mCTRL+A\033[0m: Move cursor to beginning of line (similar to "HOME" key).
+      \033[92mCTRL+P\033[0m: Place the previously ran command into the command line.
+      \033[92mCTRL+B\033[0m: Move one character before cursor.
+      \033[92mALT+F\033[0m:  Move one character forward.
+      \033[92mCTRL+C or D\033[0m: Exit the shell gracefully.
+
+    """)
+    shell() # return to our shell() function to capture more input.
+
+def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit","quit","cd","sudo",etc:
+    cmd_delta = cmd # the delta will be mangled user input as we see later:
     cmd_delta = re.sub("~",os.path.expanduser("~"),cmd_delta)
     cmd_delta = re.sub("^\s+","",cmd_delta) # remove any prepended spaces
     log_cmd(cmd_delta) # first, log the command.
@@ -85,7 +105,7 @@ def run_cmd(cmd):
         #print("DGB: CMD: '"+cmd_delta+"'")
         #sys.exit()
     elif(cmd_delta=="help"):
-        print("Help: ... ")
+        help()
     elif(cmd_delta=="version"):
         print(bcolors.OKGREEN+VERSION+bcolors.ENDC)
     elif(re.match("^ls",cmd_delta)):
@@ -181,6 +201,8 @@ def shell():
         last_string = input(prompt)
         run_cmd(last_string)
     except KeyboardInterrupt:
+        exit_gracefully()
+    except EOFError:
         exit_gracefully()
 
 print(bcolors.BOLD+"\n *** Welcome to the Demon Pentest Shell ("+VERSION+")\n *** Type \"exit\" to return to standard shell.\n"+bcolors.ENDC)
