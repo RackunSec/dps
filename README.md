@@ -39,10 +39,14 @@ root@demon2:~/Code/dps#
 ```
 ## Shiny Features
 Because this is built with readline, the shell has a lot of great built-in features. 
-* Use the up and down arrows to scroll through history
-* Use CTRL+R to do a reverse history search lookup
 * Use pipes for stdout, stderr just like you would in a native shell
-
+### Keyboard Shortcuts
+The following keyboard shortcuts are available,
+* CTRL+A - move the cursor to the beginning of the line
+* CTRL+P - enter the previous command into the temrinal
+* CTRL+C - exit the shell gracefully
+* CTRL+R - search history
+* Up and Down arrows - flip through command history
 ## Installation
 To install DPS, simply install the requirements using pip3 and copy the ```dps.py``` into your ```$PATH``` like ```/usr/local/bin```, etc:
 ```
