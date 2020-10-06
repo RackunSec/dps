@@ -20,7 +20,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_'
-VERSION = "v0.10.6-8" # update this each time we push to the repo
+VERSION = "v0.10.6-9" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 OWD=os.getcwd() # historical purposes
@@ -74,17 +74,16 @@ def help():
     -- \033[1mDemon Pentest Shell\033[0m --
 
      \033[1m:: Built-In Commands ::\033[0m
-      \033[92mhelp\033[0m: this cruft.
-      \033[92mexit/quit\033[0m: return to terminal OS shell.
+      \033[1m\033[92mhelp\033[0m: this cruft.
+      \033[1m\033[92mexit/quit\033[0m: return to terminal OS shell.
 
      \033[1m:: Keyboard Shortcuts ::\033[0m
-      \033[92mCTRL+R\033[0m: Search command history.
-      \033[92mCTRL+A\033[0m: Move cursor to beginning of line (similar to "HOME" key).
-      \033[92mCTRL+P\033[0m: Place the previously ran command into the command line.
-      \033[92mCTRL+B\033[0m: Move one character before cursor.
-      \033[92mALT+F\033[0m:  Move one character forward.
-      \033[92mCTRL+C or D\033[0m: Exit the shell gracefully.
-
+      \033[1m\033[92mCTRL+R\033[0m: Search command history.
+      \033[1m\033[92mCTRL+A\033[0m: Move cursor to beginning of line (similar to "HOME" key).
+      \033[1m\033[92mCTRL+P\033[0m: Place the previously ran command into the command line.
+      \033[1m\033[92mCTRL+B\033[0m: Move one character before cursor.
+      \033[1m\033[92mALT+F\033[0m:  Move one character forward.
+      \033[1m\033[92mCTRL+C/D\033[0m: Exit the shell gracefully.
     """)
     shell() # return to our shell() function to capture more input.
 
