@@ -20,10 +20,11 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_'
-VERSION = "v0.10.6-13e" # update this each time we push to the repo
+VERSION = "v0.10.7-1" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 OWD=os.getcwd() # historical purposes
+BUILTINS=['dps_stats','dps_uid_gen','help']
 
 # Set up the log file directory:
 if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")): # create the directory if it does not exist
@@ -70,23 +71,41 @@ def log_cmd(cmd): # logging a command to the log file:
     return 0
 
 # Define the help dialog:
-def help():
-    print("""
- -- \033[1mDemon Pentest Shell\033[0m --
+def help(cmd_name):
+    if cmd_name != "":
+        if cmd_name == "dps_uid_gen":
+                print("""
+    -- DPS_UID_GEN Usage --
 
- \033[1m:: Built-In Commands ::\033[0m
-  • \033[1m\033[94mhelp\033[0m: this cruft.
-  • \033[1m\033[94mstats\033[0m: all logging stats.
-  • \033[1m\033[94mexit/quit\033[0m: return to terminal OS shell.
+      dps_uid_gen (format specifier) (csv file)
+      :: Format Specifier ::
+        %F == First Name
+        %f == First Initial
+        %L == Last Name
+        %l == Last Initial
 
- \033[1m:: Keyboard Shortcuts ::\033[0m
-  • \033[1m\033[94mCTRL+R\033[0m: Search command history.
-  • \033[1m\033[94mCTRL+A\033[0m: Move cursor to beginning of line (similar to "HOME" key).
-  • \033[1m\033[94mCTRL+P\033[0m: Place the previously ran command into the command line.
-  • \033[1m\033[94mCTRL+B\033[0m: Move one character before cursor.
-  • \033[1m\033[94mALT+F\033[0m:  Move one character forward.
-  • \033[1m\033[94mCTRL+C/D\033[0m: Exit the shell gracefully.
-    """)
+        You can add anything else you wish, such as,
+         e.g: %f.%L123@client.org
+          result: j.doe123@client.org
+                    """)
+    else:
+        print("""
+     -- \033[1mDemon Pentest Shell\033[0m --
+
+     \033[1m:: Built-In Commands ::\033[0m
+      • \033[1m\033[94mhelp\033[0m: this cruft.
+      • \033[1m\033[94mdps_stats\033[0m: all logging stats.
+      • \033[1m\033[94mdps_uid_gen\033[0m: generate UIDs using CSV file.
+      • \033[1m\033[94mexit/quit\033[0m: return to terminal OS shell.
+
+     \033[1m:: Keyboard Shortcuts ::\033[0m
+      • \033[1m\033[94mCTRL+R\033[0m: Search command history.
+      • \033[1m\033[94mCTRL+A\033[0m: Move cursor to beginning of line (similar to "HOME" key).
+      • \033[1m\033[94mCTRL+P\033[0m: Place the previously ran command into the command line.
+      • \033[1m\033[94mCTRL+B\033[0m: Move one character before cursor.
+      • \033[1m\033[94mALT+F\033[0m:  Move one character forward.
+      • \033[1m\033[94mCTRL+C/D\033[0m: Exit the shell gracefully.
+        """)
     shell() # return to our shell() function to capture more input.
 
 def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit","quit","cd","sudo",etc:
@@ -103,13 +122,21 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
         sudo_regexp = re.compile("sudo ([^ ]+)")
         cmd_delta=re.sub(sudo_regexp,'sudo $(which \\1)',cmd_delta)
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
-        #print("DGB: CMD: '"+cmd_delta+"'")
-        #sys.exit()
-    elif(cmd_delta=="stats"):
-        stats()
+    elif(cmd_delta.startswith("dps_uid_gen")):
+        args = cmd_delta.split()
+        if len(args)==3:
+            dps_uid_gen(args[1],args[2]) # should be "format specifier, filename"
+        else:
+            help("dps_uid_gen")
+    elif(cmd_delta=="dps_stats"):
+        dps_stats()
         shell()
-    elif(cmd_delta=="help"):
-        help()
+    elif(cmd_delta.startswith("help")):
+        args = cmd_delta.split()
+        if(len(args)>1):
+            help(args[1])
+        else:
+            help("")
     elif(cmd_delta=="version"):
         print(bcolors.OKGREEN+VERSION+bcolors.ENDC)
     elif(re.match("^ls",cmd_delta)):
@@ -140,7 +167,7 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
     shell() # or else return to shell
 
-def exit_gracefully():
+def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
         #ans = input(bcolors.FAIL+"\n[!] CTRL+C DETECTED\n[?] Do you wish to quit the Demon Pentest Shell (y/n)? "+bcolors.ENDC)
         ans = input(bcolors.FAIL+"\n[?]"+bcolors.ENDC+" Do you wish to quit the Demon Pentest Shell (y/n)? ")
         if ans == "y":
@@ -148,6 +175,29 @@ def exit_gracefully():
             sys.exit(1)
         else:
             shell()
+
+def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format specifier from the user
+    # Usage:
+    # Use the following syntax, see case sensitivity:
+    # format_specifier = "%f.%L" # (first initial).(Last name)
+    # format_specifier = "%F.%L" # (First name).(Last name)
+    # format_specifier = "%F.%l@client.org" # (First name).(last initial)
+    # format_specifier = "%F.%L123@client.org" # (First name).(last initial)
+    try:
+        with open(csv_file) as nfh: # names file handle
+            for line in nfh: # loop over each line
+                name = line.split(',') # split up the line
+                if name[0] == "First": continue # we don't need the first line
+                f_init = re.sub("^([A-Za-z]).*","\\1",name[0]).rstrip()
+                l_init = re.sub("^([A-Za-z]).*","\\1",name[1]).rstrip()
+                formatted = re.sub("%f",f_init,fs)
+                formatted = re.sub("%l",l_init,formatted)
+                formatted = re.sub("%F",name[0],formatted)
+                formatted = re.sub("%L",name[1],formatted)
+                print(formatted)
+    except:
+        print(bcolors.FAIL+"[!]"+bcolors.ENDC+" Could not open file: "+csv_file+" for reading.")
+    shell() # return to shell
 
 def list_folder(path):
     PATHS=os.getenv('PATH').split(":")
@@ -167,20 +217,20 @@ def list_folder(path):
             contents = os.listdir(os.path.expanduser("~/"))
         else:
             # This could be a command so try paths:
-            # TODO get environment $PATH's and break them up testing each one:
-            contents=os.listdir(os.curdir)
-            for item in contents:
+            contents=os.listdir(os.curdir) # current directory
+            for item in contents: # if here, just return it
                 if re.match(path,item):
                     return contents
             for path_entry in PATHS:
                 try: # just learnt my first try/catch in Python - woohoo! :D
                     contents+=os.listdir(path_entry)
+                    contents+=BUILTINS
                 except:
                     pass
     return contents
 
 # stats for shell logging
-def stats():
+def dps_stats():
     file_count = len(os.listdir(os.path.expanduser("~/.dps/")))
     print(bcolors.BOLD+"\n :: DPS Logging Stats :: "+bcolors.ENDC)
     print("  • Log file count: "+bcolors.BOLD+bcolors.OKBLUE+str(file_count)+bcolors.ENDC)
