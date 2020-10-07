@@ -20,7 +20,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_'
-VERSION = "v0.10.6-10" # update this each time we push to the repo
+VERSION = "v0.10.6-12" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 OWD=os.getcwd() # historical purposes
@@ -39,6 +39,7 @@ for adapter in ADAPTERS: # loop through adapters
 # colored output (does not work with the prompt - causes issues with line wrapping)
 class bcolors:
     HEADER = '\033[95m'
+    WHT = '\033[97m'
     OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'
     WARNING = '\033[93m'
@@ -58,7 +59,7 @@ readline.parse_and_bind('set history-preserve-point On') # set the cursor point 
 readline.parse_and_bind('set match-hidden-files On')
     #readline.parse_and_bind('set page-completions On')
     #readline.parse_and_bind('set print-completions-horizontally On')
-    #readline.parse_and_bind('set show-all-if-ambiguous On')
+readline.parse_and_bind('set show-all-if-ambiguous On')
     #readline.parse_and_bind('set skip-completed-text On')
     #readline.parse_and_bind('set visible-stats On')
 readline.parse_and_bind('set mark-directories On') # for appending a slash # supposedly "On" by default, but not working.
@@ -71,19 +72,20 @@ def log_cmd(cmd): # logging a command to the log file:
 # Define the help dialog:
 def help():
     print("""
-    -- \033[1mDemon Pentest Shell\033[0m --
+ -- \033[1mDemon Pentest Shell\033[0m --
 
-     \033[1m:: Built-In Commands ::\033[0m
-      \033[1m\033[92mhelp\033[0m: this cruft.
-      \033[1m\033[92mexit/quit\033[0m: return to terminal OS shell.
+ \033[1m:: Built-In Commands ::\033[0m
+  • \033[1m\033[94mhelp\033[0m: this cruft.
+  • \033[1m\033[94mstats\033[0m: all logging stats.
+  • \033[1m\033[94mexit/quit\033[0m: return to terminal OS shell.
 
-     \033[1m:: Keyboard Shortcuts ::\033[0m
-      \033[1m\033[92mCTRL+R\033[0m: Search command history.
-      \033[1m\033[92mCTRL+A\033[0m: Move cursor to beginning of line (similar to "HOME" key).
-      \033[1m\033[92mCTRL+P\033[0m: Place the previously ran command into the command line.
-      \033[1m\033[92mCTRL+B\033[0m: Move one character before cursor.
-      \033[1m\033[92mALT+F\033[0m:  Move one character forward.
-      \033[1m\033[92mCTRL+C/D\033[0m: Exit the shell gracefully.
+ \033[1m:: Keyboard Shortcuts ::\033[0m
+  • \033[1m\033[94mCTRL+R\033[0m: Search command history.
+  • \033[1m\033[94mCTRL+A\033[0m: Move cursor to beginning of line (similar to "HOME" key).
+  • \033[1m\033[94mCTRL+P\033[0m: Place the previously ran command into the command line.
+  • \033[1m\033[94mCTRL+B\033[0m: Move one character before cursor.
+  • \033[1m\033[94mALT+F\033[0m:  Move one character forward.
+  • \033[1m\033[94mCTRL+C/D\033[0m: Exit the shell gracefully.
     """)
     shell() # return to our shell() function to capture more input.
 
@@ -103,6 +105,9 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
         #print("DGB: CMD: '"+cmd_delta+"'")
         #sys.exit()
+    elif(cmd_delta=="stats"):
+        stats()
+        shell()
     elif(cmd_delta=="help"):
         help()
     elif(cmd_delta=="version"):
@@ -174,11 +179,24 @@ def list_folder(path):
                     pass
     return contents
 
+# stats for shell logging
+def stats():
+    file_count = len(os.listdir(os.path.expanduser("~/.dps/")))
+    print(bcolors.OKBLUE+" "+bcolors.BOLD+" [i] DPS Logging Stats: "+bcolors.ENDC)
+    print("  • Log file count: "+str(file_count)+bcolors.ENDC)
+    print("  • Log file location: "+os.path.expanduser("~/.dps/"))
+    line_count = int(0) # declare this
+    for file in os.listdir(os.path.expanduser("~/.dps/")):
+        line_count += len(open(os.path.expanduser("~/.dps/")+file).readlines())
+    print("  • Total entries: "+str(line_count)+bcolors.ENDC)
 
+# Our custom completer function:
 def completer(text, state):
     """
     Our custom completer function
     """
+    if text == "~/":
+        text = os.path.expanduser("~/")
     options = [x for x in list_folder(text) if x.startswith(text)]
     return options[state]
 
