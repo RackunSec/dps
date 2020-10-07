@@ -20,7 +20,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_'
-VERSION = "v0.10.6-12" # update this each time we push to the repo
+VERSION = "v0.10.6-13e" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 OWD=os.getcwd() # historical purposes
@@ -182,13 +182,13 @@ def list_folder(path):
 # stats for shell logging
 def stats():
     file_count = len(os.listdir(os.path.expanduser("~/.dps/")))
-    print(bcolors.OKBLUE+" "+bcolors.BOLD+" [i] DPS Logging Stats: "+bcolors.ENDC)
-    print("  • Log file count: "+str(file_count)+bcolors.ENDC)
-    print("  • Log file location: "+os.path.expanduser("~/.dps/"))
+    print(bcolors.BOLD+"\n :: DPS Logging Stats :: "+bcolors.ENDC)
+    print("  • Log file count: "+bcolors.BOLD+bcolors.OKBLUE+str(file_count)+bcolors.ENDC)
+    print("  • Log file location: "+bcolors.BOLD+bcolors.OKBLUE+os.path.expanduser("~/.dps/")+bcolors.ENDC)
     line_count = int(0) # declare this
     for file in os.listdir(os.path.expanduser("~/.dps/")):
         line_count += len(open(os.path.expanduser("~/.dps/")+file).readlines())
-    print("  • Total entries: "+str(line_count)+bcolors.ENDC)
+    print("  • Total entries: "+bcolors.BOLD+bcolors.OKBLUE+str(line_count)+bcolors.ENDC+"\n")
 
 # Our custom completer function:
 def completer(text, state):
