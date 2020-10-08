@@ -197,7 +197,7 @@ def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
             sys.exit(1)
         else:
             shell()
-            
+
 ###===========================================
 ## DPS CUSTOM BUILT-IN SHELL CMD METHODS:
 ###===========================================
@@ -229,8 +229,8 @@ def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format spec
                 l_init = re.sub("^([A-Za-z]).*","\\1",name[1]).rstrip()
                 formatted = re.sub("%f",f_init,fs)
                 formatted = re.sub("%l",l_init,formatted)
-                formatted = re.sub("%F",name[0],formatted)
-                formatted = re.sub("%L",name[1],formatted)
+                formatted = re.sub("%F",name[0].rstrip(),formatted)
+                formatted = re.sub("%L",name[1].rstrip(),formatted)
                 print(formatted)
     except:
         print(bcolors.FAIL+"[!]"+bcolors.ENDC+" Could not open file: "+csv_file+" for reading.")
