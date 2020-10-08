@@ -20,11 +20,12 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_'
-VERSION = "v0.10.7-1" # update this each time we push to the repo
+VERSION = "v0.10.7-2" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 OWD=os.getcwd() # historical purposes
-BUILTINS=['dps_stats','dps_uid_gen','help']
+# Add all built-in commands here so they populate in the tab-autocompler:
+BUILTINS=['dps_stats','dps_uid_gen','dps_wifi_mon']
 
 # Set up the log file directory:
 if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")): # create the directory if it does not exist
@@ -70,24 +71,38 @@ def log_cmd(cmd): # logging a command to the log file:
         log_file.write(str(datetime.datetime.now())+","+HOSTNAME+","+str(NET_DEV)+","+UID+","+os.getcwd()+","+cmd+"\n")
     return 0
 
-# Define the help dialog:
+###===========================================
+## CUSTOM HELP DIALOGS:
+###===========================================
 def help(cmd_name):
     if cmd_name != "":
         if cmd_name == "dps_uid_gen":
                 print("""
-    -- DPS_UID_GEN Usage --
+    -- \033[1mDPS UID Generator Usage\033[0m --
 
-      dps_uid_gen (format specifier) (csv file)
-      :: Format Specifier ::
-        %F == First Name
-        %f == First Initial
-        %L == Last Name
-        %l == Last Initial
+      \033[1m\033[94mdps_uid_gen \033[0m(format specifier) (csv file)
 
-        You can add anything else you wish, such as,
-         e.g: %f.%L123@client.org
-          result: j.doe123@client.org
+      :: \033[1mFormat Specifiers\033[0m ::
+      • \033[1m\033[94m%F\033[0m: First Name.
+      • \033[1m\033[94m%f\033[0m: First Initial.
+      • \033[1m\033[94m%L\033[0m: Last Name.
+      • \033[1m\033[94m%l\033[0m: Last Initial.
+
+      You can add anything else you wish, such as,
+       e.g: %f.%L123@client.org
+       result: j.doe123@client.org
                     """)
+        else:
+            print("""
+    -- \033[1mDPS Wi-Fi Monitor Mode\033[0m --
+
+      \033[1m\033[94mdps_wifi_mon \033[0m(wi-fi device)
+
+      :: \033[1mRequirements\033[0m ::
+      • \033[1m\033[94miw\033[0m
+      • \033[1m\033[94mairmon-ng\033[0m
+      • \033[1m\033[94mifconfig\033[0m
+            """)
     else:
         print("""
      -- \033[1mDemon Pentest Shell\033[0m --
@@ -95,7 +110,8 @@ def help(cmd_name):
      \033[1m:: Built-In Commands ::\033[0m
       • \033[1m\033[94mhelp\033[0m: this cruft.
       • \033[1m\033[94mdps_stats\033[0m: all logging stats.
-      • \033[1m\033[94mdps_uid_gen\033[0m: generate UIDs using CSV file.
+      • \033[1m\033[94mdps_uid_gen\033[0m: generate UIDs using "Firstname,Lastname" CSV file.
+      • \033[1m\033[94mdps_wifi_mon\033[0m: Set Wi-Fi radio to RFMON.
       • \033[1m\033[94mexit/quit\033[0m: return to terminal OS shell.
 
      \033[1m:: Keyboard Shortcuts ::\033[0m
@@ -118,6 +134,12 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
         exit_gracefully()
         #sys.exit()
         #return 0
+    elif(cmd_delta.startswith("dps_wifi_mon")):
+        args = cmd_delta.split()
+        if len(args)>1:
+            dps_wifi_mon(args[1]) # should be the device
+        else:
+            help("dps_wifi_mon")
     elif(re.match("^\s?sudo",cmd_delta)): # for sudo, we will need the command's full path:
         sudo_regexp = re.compile("sudo ([^ ]+)")
         cmd_delta=re.sub(sudo_regexp,'sudo $(which \\1)',cmd_delta)
@@ -175,7 +197,22 @@ def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
             sys.exit(1)
         else:
             shell()
-
+            
+###===========================================
+## DPS CUSTOM BUILT-IN SHELL CMD METHODS:
+###===========================================
+def dps_wifi_mon(dev): # set an AC device into monitor mode using iw
+    print("Set device "+dev+" into RFMON monitor mode.")
+# stats for shell logging
+def dps_stats():
+    file_count = len(os.listdir(os.path.expanduser("~/.dps/")))
+    print(bcolors.BOLD+"\n :: DPS Logging Stats :: "+bcolors.ENDC)
+    print("  • Log file count: "+bcolors.BOLD+bcolors.OKBLUE+str(file_count)+bcolors.ENDC)
+    print("  • Log file location: "+bcolors.BOLD+bcolors.OKBLUE+os.path.expanduser("~/.dps/")+bcolors.ENDC)
+    line_count = int(0) # declare this
+    for file in os.listdir(os.path.expanduser("~/.dps/")):
+        line_count += len(open(os.path.expanduser("~/.dps/")+file).readlines())
+    print("  • Total entries: "+bcolors.BOLD+bcolors.OKBLUE+str(line_count)+bcolors.ENDC+"\n")
 def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format specifier from the user
     # Usage:
     # Use the following syntax, see case sensitivity:
@@ -228,17 +265,6 @@ def list_folder(path):
                 except:
                     pass
     return contents
-
-# stats for shell logging
-def dps_stats():
-    file_count = len(os.listdir(os.path.expanduser("~/.dps/")))
-    print(bcolors.BOLD+"\n :: DPS Logging Stats :: "+bcolors.ENDC)
-    print("  • Log file count: "+bcolors.BOLD+bcolors.OKBLUE+str(file_count)+bcolors.ENDC)
-    print("  • Log file location: "+bcolors.BOLD+bcolors.OKBLUE+os.path.expanduser("~/.dps/")+bcolors.ENDC)
-    line_count = int(0) # declare this
-    for file in os.listdir(os.path.expanduser("~/.dps/")):
-        line_count += len(open(os.path.expanduser("~/.dps/")+file).readlines())
-    print("  • Total entries: "+bcolors.BOLD+bcolors.OKBLUE+str(line_count)+bcolors.ENDC+"\n")
 
 # Our custom completer function:
 def completer(text, state):
