@@ -14,6 +14,7 @@ import ifaddr # NIC info
 import socket # for HOSTNAME
 import getpass # for logging the username
 import datetime # for logging the datetime
+from prompt_toolkit import prompt, ANSI # for input
 
 ADAPTERS = ifaddr.get_adapters() # get network device info
 NET_DEV = "" # store the network device
@@ -291,9 +292,10 @@ def shell():
             prompt_tail = "# "
         else:
             prompt_tail = "> " # added promt indicator for root
-        prompt = UID+"@"+HOSTNAME+":"+os.getcwd()+"(dps)"+prompt_tail
+        prompt_txt = f"{bcolors.FAIL}{bcolors.BOLD}{UID}@{HOSTNAME}{bcolors.ENDC}:{bcolors.OKBLUE}{bcolors.BOLD}{os.getcwd()}{bcolors.WARNING}(dps){bcolors.ENDC}{prompt_tail}"
+        #prompt_txt = UID+"@"+HOSTNAME+":"+os.getcwd()+"(dps)"+prompt_tail
         #last_string = input(UID+bcolors.BOLD+"@"+bcolors.ENDC+HOSTNAME+bcolors.BOLD+"["+bcolors.ENDC+os.getcwd()+bcolors.BOLD+"]"+">> "+bcolors.ENDC)
-        last_string = input(prompt)
+        last_string = prompt(ANSI(prompt_txt)) # fixes text-wrapping issue experenced with input()
         run_cmd(last_string)
     except KeyboardInterrupt:
         exit_gracefully()
