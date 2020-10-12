@@ -28,6 +28,7 @@ LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log
 OWD=os.getcwd() # historical purposes
 # Add all built-in commands here so they populate in the tab-autocompler:
 BUILTINS=['dps_stats','dps_uid_gen','dps_wifi_mon']
+PRMPT_CLR=0 # Prompt Color setting
 
 # Set up the log file directory:
 if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")): # create the directory if it does not exist
@@ -117,6 +118,7 @@ def help(cmd_name):
       • \033[1m\033[94mdps_stats\033[0m: all logging stats.
       • \033[1m\033[94mdps_uid_gen\033[0m: generate UIDs using "Firstname,Lastname" CSV file.
       • \033[1m\033[94mdps_wifi_mon\033[0m: Set Wi-Fi radio to RFMON.
+      • \033[1m\033[94mdps_config\033[0m: Set prompt and shell options.
       • \033[1m\033[94mexit/quit\033[0m: return to terminal OS shell.
 
      \033[1m:: Keyboard Shortcuts ::\033[0m
@@ -158,6 +160,9 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
     elif(cmd_delta=="dps_stats"):
         dps_stats()
         shell()
+    elif(cmd_delta.startswith("dps_config")):
+        args = re.sub("dps_config","",cmd_delta).split() # make an array
+        dps_config(args)
     elif(cmd_delta.startswith("help")):
         args = cmd_delta.split()
         if(len(args)>1):
@@ -206,6 +211,15 @@ def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
 ###===========================================
 ## DPS CUSTOM BUILT-IN SHELL CMD METHODS:
 ###===========================================
+def dps_config(args): # configure the shell
+    global PRMPT_CLR # this is the prompt color setting
+    print (f" \n-- {bcolors.BOLD}DPS Configuration{bcolors.ENDC} -- \n")
+    if args[0] == "prompt" and args[1] != "":
+        PRMPT_CLR = int(args[1])
+    else:
+        print("Usage: dps_config prompt [0-9] for new prompt.")
+    shell()
+
 def dps_wifi_mon(dev): # set an AC device into monitor mode using iw
     print("Set device "+dev+" into RFMON monitor mode.")
 # stats for shell logging
@@ -277,8 +291,13 @@ def shell():
             prompt_tail = "# "
         else:
             prompt_tail = "> " # added promt indicator for root
-        prompt_txt = f"{bcolors.FAIL}{bcolors.BOLD}{UID}@{HOSTNAME}{bcolors.ENDC}:{bcolors.OKBLUE}{bcolors.BOLD}{os.getcwd()}{bcolors.WARNING}(dps){bcolors.ENDC}{prompt_tail}"
-        #prompt_txt = f"{bcolors.BOLD}{UID}{bcolors.ENDC}{bcolors.WHT}@{bcolors.ENDC}{bcolors.LGHTGRY}{HOSTNAME}{bcolors.ENDC}{bcolors.BOLD}{bcolors.WHT}:{bcolors.ENDC}{bcolors.LGHTGRY}{os.getcwd()}{bcolors.BOLD}{bcolors.WHT}(dps){prompt_tail}{bcolors.ENDC}"
+        if PRMPT_CLR == 0:
+            prompt_txt = f"{bcolors.FAIL}{bcolors.BOLD}{UID}@{HOSTNAME}{bcolors.ENDC}:{bcolors.OKBLUE}{bcolors.BOLD}{os.getcwd()}{bcolors.WARNING}(dps){bcolors.ENDC}{prompt_tail}"
+        elif PRMPT_CLR == 1:
+            prompt_txt = f"{bcolors.BOLD}{UID}{bcolors.ENDC}{bcolors.WHT}@{bcolors.ENDC}{bcolors.LGHTGRY}{HOSTNAME}{bcolors.ENDC}{bcolors.BOLD}{bcolors.WHT}:{bcolors.ENDC}{bcolors.LGHTGRY}{os.getcwd()}{bcolors.BOLD}{bcolors.WHT}(dps){prompt_tail}{bcolors.ENDC}"
+        else:
+            prompt_txt = f"{bcolors.FAIL}{bcolors.BOLD}{UID}@{HOSTNAME}{bcolors.ENDC}:{bcolors.OKBLUE}{bcolors.BOLD}{os.getcwd()}{bcolors.WARNING}(dps){bcolors.ENDC}{prompt_tail}"
+
         #prompt_txt = UID+"@"+HOSTNAME+":"+os.getcwd()+"(dps)"+prompt_tail
         #last_string = input(UID+bcolors.BOLD+"@"+bcolors.ENDC+HOSTNAME+bcolors.BOLD+"["+bcolors.ENDC+os.getcwd()+bcolors.BOLD+"]"+">> "+bcolors.ENDC)
         tab_complete=WordCompleter(list_folder())
