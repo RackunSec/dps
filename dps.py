@@ -15,6 +15,7 @@ import socket # for HOSTNAME
 import getpass # for logging the username
 import datetime # for logging the datetime
 from prompt_toolkit import prompt, ANSI # for input
+from prompt_toolkit.completion import WordCompleter # completer function (feed a list)
 
 ADAPTERS = ifaddr.get_adapters() # get network device info
 NET_DEV = "" # store the network device
@@ -51,6 +52,9 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
     END = '\e[0m'
+    GRYBG = '\033[100m'
+    LGHTGRY='\033[37m'
+    ORNG = '\e033[220m'
 
     #readline.parse_and_bind('set editing-mode vi')
     #readline.parse_and_bind('set horizontal-scroll-mode On') # will scroll horizontally, because wrapping is not working :/
@@ -237,52 +241,33 @@ def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format spec
         print(bcolors.FAIL+"[!]"+bcolors.ENDC+" Could not open file: "+csv_file+" for reading.")
     shell() # return to shell
 
-def list_folder(path):
+def list_folder():
     PATHS=os.getenv('PATH').split(":")
-    """
-    Lists folder contents
-    """
-    # starts with "/"
-    if path.startswith(os.path.sep):
-        # absolute path
-        basedir = os.path.dirname(path)
-        contents = os.listdir(basedir)
-        # add back the parent
-        contents = [os.path.join(basedir, d) for d in contents]
-    else:
-        # absolute (home) path:
-        if path.startswith("~/"):
-            contents = os.listdir(os.path.expanduser("~/"))
-        else:
-            # This could be a command so try paths:
-            contents=os.listdir(os.curdir) # current directory
-            for item in contents: # if here, just return it
-                if re.match(path,item):
-                    return contents
-            for path_entry in PATHS:
-                try: # just learnt my first try/catch in Python - woohoo! :D
-                    contents+=os.listdir(path_entry)
-                    contents+=BUILTINS
-                except:
-                    pass
+    contents = os.listdir(os.getcwd()).append(BUILTINS) # declare array (and define with current dir contents)
+    # TODO add logic to remove duplicate arrays
+    for path in PATHS:
+        try:
+            contents+=os.listdir(path)
+        except:
+            continue
     return contents
 
 # Our custom completer function:
-def completer(text, state):
+#def completer(text, state):
     """
     Our custom completer function
     """
-    if text == "~/":
-        text = os.path.expanduser("~/")
-    options = [x for x in list_folder(text) if x.startswith(text)]
-    return options[state]
+#    if text == "~/":
+#        text = os.path.expanduser("~/")
+#    options = [x for x in list_folder(text) if x.startswith(text)]
+#    return options[state]
 
 # REQUIRED:
 #readline.set_completer()
-readline.set_completer(completer)
-readline.parse_and_bind('tab: complete')
+#readline.set_completer(completer)
+#readline.parse_and_bind('tab: complete')
 #readline.set_completer_delims('~ \t\n`!@#$%^&*()-=+[{]}\\|;:\'",<>?')
-readline.set_completer_delims(' \t\n')
+#readline.set_completer_delims(' \t\n')
 
 def shell():
     try:
@@ -293,9 +278,11 @@ def shell():
         else:
             prompt_tail = "> " # added promt indicator for root
         prompt_txt = f"{bcolors.FAIL}{bcolors.BOLD}{UID}@{HOSTNAME}{bcolors.ENDC}:{bcolors.OKBLUE}{bcolors.BOLD}{os.getcwd()}{bcolors.WARNING}(dps){bcolors.ENDC}{prompt_tail}"
+        #prompt_txt = f"{bcolors.BOLD}{UID}{bcolors.ENDC}{bcolors.WHT}@{bcolors.ENDC}{bcolors.LGHTGRY}{HOSTNAME}{bcolors.ENDC}{bcolors.BOLD}{bcolors.WHT}:{bcolors.ENDC}{bcolors.LGHTGRY}{os.getcwd()}{bcolors.BOLD}{bcolors.WHT}(dps){prompt_tail}{bcolors.ENDC}"
         #prompt_txt = UID+"@"+HOSTNAME+":"+os.getcwd()+"(dps)"+prompt_tail
         #last_string = input(UID+bcolors.BOLD+"@"+bcolors.ENDC+HOSTNAME+bcolors.BOLD+"["+bcolors.ENDC+os.getcwd()+bcolors.BOLD+"]"+">> "+bcolors.ENDC)
-        last_string = prompt(ANSI(prompt_txt)) # fixes text-wrapping issue experenced with input()
+        tab_complete=WordCompleter(list_folder())
+        last_string = prompt(ANSI(prompt_txt),completer=tab_complete) # fixes text-wrapping issue experenced with input()
         run_cmd(last_string)
     except KeyboardInterrupt:
         exit_gracefully()
