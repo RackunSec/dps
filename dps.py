@@ -291,7 +291,8 @@ def shell():
             prompt_tail = "# "
         else:
             prompt_tail = "> " # added promt indicator for root
-        prompt = UID+"@"+HOSTNAME+":"+os.getcwd()+"(dps)"+prompt_tail
+        prompt = f"{bcolors.FAIL}{bcolors.BOLD}{UID}@{HOSTNAME}{bcolors.ENDC}:{bcolors.OKBLUE}{bcolors.BOLD}{os.getcwd()}{bcolors.WARNING}(dps){bcolors.ENDC}{prompt_tail}"
+        #prompt = UID+"@"+HOSTNAME+":"+os.getcwd()+"(dps)"+prompt_tail
         #last_string = input(UID+bcolors.BOLD+"@"+bcolors.ENDC+HOSTNAME+bcolors.BOLD+"["+bcolors.ENDC+os.getcwd()+bcolors.BOLD+"]"+">> "+bcolors.ENDC)
         last_string = input(prompt)
         run_cmd(last_string)
