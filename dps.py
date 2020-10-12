@@ -243,7 +243,7 @@ def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format spec
 
 def list_folder():
     PATHS=os.getenv('PATH').split(":")
-    contents = os.listdir(os.getcwd()).append(BUILTINS) # declare array (and define with current dir contents)
+    contents = os.listdir(os.getcwd())#.append(BUILTINS) # declare array (and define with current dir contents)
     # TODO add logic to remove duplicate arrays
     for path in PATHS:
         try:
