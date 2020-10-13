@@ -29,7 +29,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_' # TODO not needed?
-VERSION = "v0.10.14-4" # update this each time we push to the repo
+VERSION = "v0.10.14-7" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -99,57 +99,57 @@ def log_cmd(cmd): # logging a command to the log file:
 def help(cmd_name):
     if cmd_name != "":
         if cmd_name == "dps_uid_gen":
-                print("""
-    -- \033[1mDPS UID Generator Usage\033[0m --
+                print(f"""
+    -- {bcolors.WHT}{bcolors.BOLD}DPS UID Generator Usage{bcolors.ENDC} --
 
-      \033[1m\033[94mdps_uid_gen \033[0m(format specifier) (csv file)
+      {bcolors.BOLD}{bcolors.OKBLUE}dps_uid_gen {bcolors.ENDC}(format specifier) (csv file)
 
-      :: \033[1mFormat Specifiers\033[0m ::
-      • \033[1m\033[94m%F\033[0m: First Name.
-      • \033[1m\033[94m%f\033[0m: First Initial.
-      • \033[1m\033[94m%L\033[0m: Last Name.
-      • \033[1m\033[94m%l\033[0m: Last Initial.
+      :: {bcolors.BOLD}Format Specifiers{bcolors.ENDC} ::
+      • {bcolors.BOLD}{bcolors.OKBLUE}%F{bcolors.ENDC}: First Name.
+      • {bcolors.BOLD}{bcolors.OKBLUE}%f{bcolors.ENDC}: First Initial.
+      • {bcolors.BOLD}{bcolors.OKBLUE}%L{bcolors.ENDC}: Last Name.
+      • {bcolors.BOLD}{bcolors.OKBLUE}%l{bcolors.ENDC}: Last Initial.
 
       You can add anything else you wish, such as,
        e.g: %f.%L123@client.org
        result: j.doe123@client.org
                     """)
         elif cmd_name == "dps_wifi_mon":
-            print("""
-    -- \033[1mDPS Wi-Fi Monitor Mode\033[0m --
+            print(f"""
+    -- {bcolors.BOLD}DPS Wi-Fi Monitor Mode{bcolors.ENDC} --
 
-      \033[1m\033[94mdps_wifi_mon \033[0m(wi-fi device)
+      {bcolors.BOLD}{bcolors.OKBLUE}dps_wifi_mon {bcolors.ENDC}(wi-fi device)
 
-      :: \033[1mRequirements\033[0m ::
-      • \033[1m\033[94miw\033[0m
-      • \033[1m\033[94mairmon-ng\033[0m
-      • \033[1m\033[94mifconfig\033[0m
+      :: {bcolors.BOLD}Requirements{bcolors.ENDC} ::
+      • {bcolors.BOLD}{bcolors.OKBLUE}iw{bcolors.ENDC}
+      • {bcolors.BOLD}{bcolors.OKBLUE}airmon-ng{bcolors.ENDC}
+      • {bcolors.BOLD}{bcolors.OKBLUE}ifconfig{bcolors.ENDC}
             """)
         elif cmd_name == "dps_config":
-            print("""
-        -- \033[1mDPS Configuration Settings\033[0m --
+            print(f"""
+        -- {bcolors.BOLD}DPS Configuration Settings{bcolors.ENDC} --
 
-          \033[1m\033[94mdps_config \033[0mprompt (integer (0-9))
+          {bcolors.BOLD}{bcolors.OKBLUE}dps_config {bcolors.ENDC}prompt (integer (0-9))
             """)
     else:
-        print("""
-     -- \033[1mDemon Pentest Shell\033[0m --
+        print(f"""
+     -- {bcolors.BOLD}Demon Pentest Shell{bcolors.ENDC} --
 
-     \033[1m:: Built-In Commands ::\033[0m
-      • \033[1m\033[94mhelp\033[0m: this cruft.
-      • \033[1m\033[94mdps_stats\033[0m: all logging stats.
-      • \033[1m\033[94mdps_uid_gen\033[0m: generate UIDs using "Firstname,Lastname" CSV file.
-      • \033[1m\033[94mdps_wifi_mon\033[0m: Set Wi-Fi radio to RFMON.
-      • \033[1m\033[94mdps_config\033[0m: Set prompt and shell options.
-      • \033[1m\033[94mexit/quit\033[0m: return to terminal OS shell.
+     {bcolors.BOLD}:: Built-In Commands ::{bcolors.ENDC}
+      • {bcolors.BOLD}{bcolors.OKBLUE}help{bcolors.ENDC}: this cruft.
+      • {bcolors.BOLD}{bcolors.OKBLUE}dps_stats{bcolors.ENDC}: all logging stats.
+      • {bcolors.BOLD}{bcolors.OKBLUE}dps_uid_gen{bcolors.ENDC}: generate UIDs using "Firstname,Lastname" CSV file.
+      • {bcolors.BOLD}{bcolors.OKBLUE}dps_wifi_mon{bcolors.ENDC}: Set Wi-Fi radio to RFMON.
+      • {bcolors.BOLD}{bcolors.OKBLUE}dps_config{bcolors.ENDC}: Set prompt and shell options.
+      • {bcolors.BOLD}{bcolors.OKBLUE}exit/quit{bcolors.ENDC}: return to terminal OS shell.
 
-     \033[1m:: Keyboard Shortcuts ::\033[0m
-      • \033[1m\033[94mCTRL+R\033[0m: Search command history.
-      • \033[1m\033[94mCTRL+A\033[0m: Move cursor to beginning of line (similar to "HOME" key).
-      • \033[1m\033[94mCTRL+P\033[0m: Place the previously ran command into the command line.
-      • \033[1m\033[94mCTRL+B\033[0m: Move one character before cursor.
-      • \033[1m\033[94mALT+F\033[0m:  Move one character forward.
-      • \033[1m\033[94mCTRL+C/D\033[0m: Exit the shell gracefully.
+     {bcolors.BOLD}:: Keyboard Shortcuts ::{bcolors.ENDC}
+      • {bcolors.BOLD}{bcolors.OKBLUE}CTRL+R{bcolors.ENDC}: Search command history.
+      • {bcolors.BOLD}{bcolors.OKBLUE}CTRL+A{bcolors.ENDC}: Move cursor to beginning of line (similar to "HOME" key).
+      • {bcolors.BOLD}{bcolors.OKBLUE}CTRL+P{bcolors.ENDC}: Place the previously ran command into the command line.
+      • {bcolors.BOLD}{bcolors.OKBLUE}CTRL+B{bcolors.ENDC}: Move one character before cursor.
+      • {bcolors.BOLD}{bcolors.OKBLUE}ALT+F{bcolors.ENDC}:  Move one character forward.
+      • {bcolors.BOLD}{bcolors.OKBLUE}CTRL+C/D{bcolors.ENDC}: Exit the shell gracefully.
         """)
 
 ###===========================================
@@ -232,7 +232,7 @@ def dps_update_config(args):
     if len(args) > 1:
         if args[0] == "prompt": # set it in the config file:
             #try:
-            print(f"{bcolors.OKBLUE}[*]{bcolors.ENDC} Adding "+str(args[1])+" as PRMPT_STYL in "+CONFIG_FILENAME)
+            print(f"{bcolors.OKBLUE}[+]{bcolors.ENDC} Adding "+str(args[1])+" as PRMPT_STYL in "+CONFIG_FILENAME)
             CONFIG.set('Style','PRMPT_STYL',args[1]) # TODO int() ?
             with open(CONFIG_FILENAME, 'w') as config_file:
                 CONFIG.write(config_file)
@@ -335,8 +335,8 @@ class DPSCompleter(Completer):
                     options = ("0","1","2")
                     for opt in options:
                         yield Completion(opt,-len(word_before_cursor))
-
-            elif len(cmd_line): # at least 1 value
+                    return
+            if len(cmd_line): # at least 1 value
                 current_str = cmd_line[len(cmd_line)-1]
                 if cmd_line[0] == "dps_config":
                     options = ["prompt"]
@@ -360,30 +360,59 @@ class DPS:
         self.path = os.getcwd()
         self.message = [
             ('class:username', UID),
-            ('class:at',       '@'),
-            ('class:host',     HOSTNAME),
-            ('class:colon',    ':'),
-            ('class:path',     self.path),
-            ('class:pound',    prompt_tail),
+            ('class:at','@'),
+            ('class:host',HOSTNAME),
+            ('class:colon',':'),
+            ('class:path',self.path+"/"),
+            ('class:dps',' (dps)'),
+            ('class:pound',prompt_tail),
         ]
 
     def __init__(self):
         self.path = os.getcwd()
-        self.style = Style.from_dict({
-            # User input (default text).
-            '':          '#ff0066',
+        if PRMPT_STYL == 2:
+            self.style = Style.from_dict({
+                # User input (default text).
+                '':          '#ff0066',
 
-            # Prompt.
-            'username': '#884444',
-            'at':       '#00aa00',
-            'colon':    '#0000aa',
-            'pound':    '#00aa00',
-            'host':     '#00ffff bg:#444400',
-            'path':     'ansicyan underline',
-        })
+                # Prompt.
+                'username': '#884444',
+                'at':       '#996633',
+                'colon':    '#996633',
+                'pound':    '#996633',
+                'host':     '#00ffff bg:#444400',
+                'path':     'ansicyan underline',
+                'dps':      '#ffffff'
+            })
+        #####
+        ### BLACK AND WHITE
+        elif PRMPT_STYL == 1: # COFFEE
+                self.style = Style.from_dict({
+                    # User input (default text).
+                    '':          '#fff',
+                    # Prompt.
+                    'username': 'italic #acacac',
+                    'at':       'italic #aaaaaa',
+                    'colon':    'italic #aaaaaa',
+                    'pound':    '#aaaaaa',
+                    'host':     'italic #c2c2c2',
+                    'path':     'italic #ff321f',
+                    'dps':      '#acacac'
+                })
+        else:
+            self.style = Style.from_dict({
+                # User input (default text).
+                '':          '#ff0066',
+
+                # Prompt.
+                'username': '#884444',
+                'at':       '#00aa00',
+                'colon':    '#0000aa',
+                'pound':    '#00aa00',
+                'host':     '#00ffff bg:#444400',
+                'path':     'ansicyan underline',
+            })
         self.set_message()
-
-        # ANSI(f"{bcolors.FAIL}{bcolors.BOLD}{UID}@{HOSTNAME}{bcolors.ENDC}:{bcolors.OKBLUE}{bcolors.BOLD}{os.getcwd()}{bcolors.WARNING}(dps){bcolors.ENDC}{prompt_tail}")
         self.prompt_session = PromptSession(
             self.message,style=self.style,
             completer=DPSCompleter(self),
