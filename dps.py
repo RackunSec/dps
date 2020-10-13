@@ -318,7 +318,7 @@ def shell():
         if PRMPT_STYL == 0: # Matt's Prompt:
             prompt_txt = f"{bcolors.FAIL}{bcolors.BOLD}{UID}@{HOSTNAME}{bcolors.ENDC}:{bcolors.OKBLUE}{bcolors.BOLD}{os.getcwd()}{bcolors.WARNING}(dps){bcolors.ENDC}{prompt_tail}"
         elif PRMPT_STYL == 1: # Doug's prompt:
-            prompt_txt = f"{bcolors.BOLD}{UID}{bcolors.ENDC}{bcolors.WHT}@{bcolors.ENDC}{bcolors.LGHTGRY}{HOSTNAME}{bcolors.ENDC}{bcolors.BOLD}{bcolors.WHT}:{bcolors.ENDC}{bcolors.LGHTGRY}{os.getcwd()}{bcolors.BOLD}{bcolors.WHT}(dps){prompt_tail}{bcolors.ENDC}"
+            prompt_txt = f"{bcolors.BOLD}{bcolors.WHT}{UID}{bcolors.ENDC}{bcolors.WHT}@{bcolors.ENDC}{bcolors.LGHTGRY}{HOSTNAME}{bcolors.ENDC}{bcolors.BOLD}{bcolors.WHT}:{bcolors.ENDC}{bcolors.LGHTGRY}{os.getcwd()}{bcolors.BOLD}{bcolors.WHT}(dps){prompt_tail}{bcolors.ENDC}"
         else: # Default prompt:
             prompt_txt = f"{bcolors.FAIL}{bcolors.BOLD}{UID}@{HOSTNAME}{bcolors.ENDC}:{bcolors.OKBLUE}{bcolors.BOLD}{os.getcwd()}{bcolors.WARNING}(dps){bcolors.ENDC}{prompt_tail}"
 
