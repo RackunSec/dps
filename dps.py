@@ -74,7 +74,7 @@ else:
     CONFIG.read(CONFIG_FILENAME) # read the file
     CONFIG.sections() # get all sections of the config
     if 'Style' in CONFIG:
-        print(f"CONFIG['Style']['PRMPT_STYL']: "+CONFIG['Style']['PRMPT_STYL'])
+        # print(f"CONFIG['Style']['PRMPT_STYL']: "+CONFIG['Style']['PRMPT_STYL']) # DEBUG
         PRMPT_STYL = int(CONFIG['Style']['PRMPT_STYL']) # grab the value of the style
     else:
         print(f"{bcolors.FAIL}[!]{bcolors.ENDC} Error in config file")
