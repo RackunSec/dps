@@ -3,7 +3,7 @@
 # logs as CSV with time,hostname,network:ip,who,command.
 # requires Python 3+
 #
-# 2020 - Douglas Berdeaux
+# 2020 - Douglas Berdeaux, Matthew Creel
 
 import configparser # dps.conf from ~/.dps/
 import os # for the commands, of course. These will be passed ot the shell.
@@ -17,6 +17,9 @@ import datetime # for logging the datetime
 from prompt_toolkit import prompt, ANSI # for input
 from prompt_toolkit.completion import WordCompleter # completer function (feed a list)
 from prompt_toolkit import PromptSession
+from prompt_toolkit.completion import Completer, Completion, PathCompleter
+from prompt_toolkit.styles import Style # Style the prompt
+import shlex # Splitting by spaces into a list
 
 ###===========================================
 ## GLOBAL VALUES:
@@ -26,7 +29,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_' # TODO not needed?
-VERSION = "v0.10.14-3" # update this each time we push to the repo
+VERSION = "v0.10.14-4" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -35,6 +38,7 @@ OWD=os.getcwd() # historical purposes
 # Add all built-in commands here so they populate in the tab-autocompler:
 BUILTINS=['dps_stats','dps_uid_gen','dps_wifi_mon','dps_config']
 PRMPT_STYL=0 # Prompt style setting
+prompt_tail = "# " if UID == "root" else "> " # diff root prompt
 # colored output (does not work with the prompt - causes issues with line wrapping)
 class bcolors:
     HEADER = '\033[95m'
@@ -147,7 +151,6 @@ def help(cmd_name):
       • \033[1m\033[94mALT+F\033[0m:  Move one character forward.
       • \033[1m\033[94mCTRL+C/D\033[0m: Exit the shell gracefully.
         """)
-    shell() # return to our shell() function to capture more input.
 
 ###===========================================
 ## COMMAND HOOKS:
@@ -180,7 +183,6 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
             help("dps_uid_gen")
     elif(cmd_delta=="dps_stats"):
         dps_stats()
-        shell()
     elif(cmd_delta.startswith("dps_config")):
         args = re.sub("dps_config","",cmd_delta).split() # make an array
         if len(args) > 1:
@@ -212,7 +214,6 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
             BOWD=OWD # backup the OWD
             OWD=os.getcwd()
             os.chdir(BOWD)
-            shell()
         else:
             OWD=os.getcwd() # store the directory that we are in for "-" purposes/historical
         if os.path.isdir(dir): # does it even exist?
@@ -221,7 +222,6 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
             print("PATH: "+bcolors.FAIL+'"'+dir+'"'+bcolors.ENDC+" does not exist.")
     else:
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
-    shell() # or else return to shell
 
 ###===========================================
 ## DPS CUSTOM BUILT-IN SHELL CMD METHODS:
@@ -238,7 +238,6 @@ def dps_update_config(args):
                 CONFIG.write(config_file)
             #except:
                 #print(f"{bcolors.FAIL}[!] ERROR setting value in ini file.{bcolors.ENDC}")
-
 def dps_config(args): # configure the shell
     global PRMPT_STYL # this is the prompt color setting
     if args[0] == "prompt" and args[1] != "":
@@ -247,7 +246,7 @@ def dps_config(args): # configure the shell
         dps_update_config(args)
     else:
         print("Usage: dps_config prompt [0-9] for new prompt.")
-    shell()
+
 def dps_wifi_mon(dev): # set an AC device into monitor mode using iw
     print("Set device "+dev+" into RFMON monitor mode.")
 # stats for shell logging
@@ -275,7 +274,6 @@ def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format spec
                 print(formatted)
     except:
         print(bcolors.FAIL+"[!]"+bcolors.ENDC+" Could not open file: "+csv_file+" for reading.")
-    shell() # return to shell
 
 ###===========================================
 ## GENERAL METHODS FOR HANDLING THINGS:
@@ -286,52 +284,131 @@ def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
         if ans == "y":
             print("[+] Quitting Demon Penetst Shell. File logged: "+LOG_FILENAME)
             sys.exit(1)
-        else:
-            shell()
 
-def list_folder():
+def list_folder(path):
     PATHS=os.getenv('PATH').split(":")
-    contents = os.listdir(os.getcwd())#.append(BUILTINS) # declare array (and define with current dir contents)
-    # TODO add logic to remove duplicate arrays
-    for path in PATHS:
-        try:
-            contents+=os.listdir(path)
-        except:
-            continue
-    return contents
+    """
+    Lists folder contents
+    """
+    # starts with "/"
+    if path.startswith(os.path.sep):
+        # absolute path
+        basedir = os.path.dirname(path)
+        contents = os.listdir(basedir)
+        # add back the parent
+        contents = [os.path.join(basedir, d) for d in contents]
+    else:
+        # absolute (home) path:
+        if path.startswith("~/"):
+            contents = os.listdir(os.path.expanduser("~/"))
+        elif path.startswith("./"):
+            contents = os.listdir(os.getcwd())
+        else:
+            # This could be a command so try paths:
+            contents=os.listdir(os.curdir) # current directory
+            for item in contents: # if here, just return it
+                if re.match(path,item):
+                    return contents
+            for path_entry in PATHS:
+                try: # just learnt my first try/catch in Python - woohoo! :D
+                    contents+=os.listdir(path_entry)
+                    contents+=BUILTINS
+                except:
+                    pass
+    return list(set(contents))
 
 # Our custom completer function:
-#def completer(text, state):
-    """
-    Our custom completer function
-    """
-session = PromptSession() # session is global
-def shell():
-    global session
-    try:
-        # Build out the prompt fo rthe user:
-        PATHS=os.getenv('PATH').split(":")
-        if UID == "root":
-            prompt_tail = "# "
-        else:
-            prompt_tail = "> " # added promt indicator for root
-        if PRMPT_STYL == 0: # Matt's Prompt:
-            prompt_txt = f"{bcolors.FAIL}{bcolors.BOLD}{UID}@{HOSTNAME}{bcolors.ENDC}:{bcolors.OKBLUE}{bcolors.BOLD}{os.getcwd()}{bcolors.WARNING}(dps){bcolors.ENDC}{prompt_tail}"
-        elif PRMPT_STYL == 1: # Doug's prompt:
-            prompt_txt = f"{bcolors.BOLD}{bcolors.WHT}{UID}{bcolors.ENDC}{bcolors.WHT}@{bcolors.ENDC}{bcolors.LGHTGRY}{HOSTNAME}{bcolors.ENDC}{bcolors.BOLD}{bcolors.WHT}:{bcolors.ENDC}{bcolors.LGHTGRY}{os.getcwd()}{bcolors.BOLD}{bcolors.WHT}(dps){prompt_tail}{bcolors.ENDC}"
-        else: # Default prompt:
-            prompt_txt = f"{bcolors.FAIL}{bcolors.BOLD}{UID}@{HOSTNAME}{bcolors.ENDC}:{bcolors.OKBLUE}{bcolors.BOLD}{os.getcwd()}{bcolors.WARNING}(dps){bcolors.ENDC}{prompt_tail}"
+class DPSCompleter(Completer):
+    def __init__(self, cli_menu):
+        self.path_completer = PathCompleter()
 
-        tab_complete=WordCompleter(list_folder())
-        last_string = session.prompt(ANSI(prompt_txt),completer=tab_complete) # fixes text-wrapping issue experenced with input()
+    def get_completions(self, document, complete_event):
+        word_before_cursor = document.get_word_before_cursor()
+        try:
+            cmd_line = list(map(lambda s: s.lower(), shlex.split(document.current_line)))
+        except ValueError:
+            pass
+        else:
+
+            if len(cmd_line)==2:
+                if cmd_line[0] == "dps_config" and cmd_line[1] == "prompt":
+                    options = ("0","1","2")
+                    for opt in options:
+                        yield Completion(opt,-len(word_before_cursor))
+
+            elif len(cmd_line): # at least 1 value
+                current_str = cmd_line[len(cmd_line)-1]
+                if cmd_line[0] == "dps_config":
+                    options = ["prompt"]
+                    yield Completion("prompt",-len(word_before_cursor))
+
+                else:
+                    if current_str == "~/":
+                        options = list_folder(os.path.expanduser("~/"))
+                    elif current_str == "./": # TODO
+                        options = list_folder(os.getcwd())
+                    else:
+                        options = sorted(list_folder(current_str))
+                    for opt in options:
+                        if opt.startswith(current_str):
+                            yield Completion(opt, -len(current_str))
+                    return
+
+
+class DPS:
+    def set_message(self):
+        self.path = os.getcwd()
+        self.message = [
+            ('class:username', UID),
+            ('class:at',       '@'),
+            ('class:host',     HOSTNAME),
+            ('class:colon',    ':'),
+            ('class:path',     self.path),
+            ('class:pound',    prompt_tail),
+        ]
+
+    def __init__(self):
+        self.path = os.getcwd()
+        self.style = Style.from_dict({
+            # User input (default text).
+            '':          '#ff0066',
+
+            # Prompt.
+            'username': '#884444',
+            'at':       '#00aa00',
+            'colon':    '#0000aa',
+            'pound':    '#00aa00',
+            'host':     '#00ffff bg:#444400',
+            'path':     'ansicyan underline',
+        })
+        self.set_message()
+
+        # ANSI(f"{bcolors.FAIL}{bcolors.BOLD}{UID}@{HOSTNAME}{bcolors.ENDC}:{bcolors.OKBLUE}{bcolors.BOLD}{os.getcwd()}{bcolors.WARNING}(dps){bcolors.ENDC}{prompt_tail}")
+        self.prompt_session = PromptSession(
+            self.message,style=self.style,
+            completer=DPSCompleter(self),
+            complete_in_thread=True,
+            complete_while_typing=False
+        )
+
+    def update_prompt(self):
+        self.set_message()
+        self.prompt_session.message = self.message
+
+def shell(dps):
+    try:
+        last_string = dps.prompt_session.prompt()
         run_cmd(last_string)
+        dps.update_prompt()
     except KeyboardInterrupt:
         exit_gracefully()
     except EOFError:
         exit_gracefully()
 
-###===========================================
-## START THE SHELL:
-###===========================================
-print(bcolors.BOLD+"\n *** Welcome to the Demon Pentest Shell ("+VERSION+")\n *** Type \"exit\" to return to standard shell.\n"+bcolors.ENDC)
-shell() # start the app
+
+# standard boilerplate
+if __name__ == "__main__":
+    print(bcolors.BOLD+"\n *** Welcome to the Demon Pentest Shell ("+VERSION+")\n *** Type \"exit\" to return to standard shell.\n"+bcolors.ENDC)
+    dps = DPS() # Prompt-toolkit class instance
+    while True:
+        shell(dps) #start the app
