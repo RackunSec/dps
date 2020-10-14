@@ -29,7 +29,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_' # TODO not needed?
-VERSION = "v0.10.14-7" # update this each time we push to the repo
+VERSION = "v0.10.14-12" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -151,6 +151,9 @@ def help(cmd_name):
       • {bcolors.BOLD}{bcolors.OKBLUE}ALT+F{bcolors.ENDC}:  Move one character forward.
       • {bcolors.BOLD}{bcolors.OKBLUE}CTRL+C/D{bcolors.ENDC}: Exit the shell gracefully.
         """)
+def error(msg,cmd):
+    print(f"{bcolors.FAIL}[?] ¬_¬ wut? -- "+msg+f"{bcolors.ENDC}")
+    help(cmd) # show the Help dialog from the listings above
 
 ###===========================================
 ## COMMAND HOOKS:
@@ -163,14 +166,12 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
     # Handle built-in commands:
     if (cmd_delta == "exit" or cmd_delta == "quit"):
         exit_gracefully()
-        #sys.exit()
-        #return 0
     elif(cmd_delta.startswith("dps_wifi_mon")):
         args = cmd_delta.split()
         if len(args)>1:
             dps_wifi_mon(args[1]) # should be the device
         else:
-            help("dps_wifi_mon")
+            error("Not enough arguments.","dps_wifi_mon")
     elif(re.match("^\s?sudo",cmd_delta)): # for sudo, we will need the command's full path:
         sudo_regexp = re.compile("sudo ([^ ]+)")
         cmd_delta=re.sub(sudo_regexp,'sudo $(which \\1)',cmd_delta)
@@ -180,7 +181,7 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
         if len(args)==3:
             dps_uid_gen(args[1],args[2]) # should be "format specifier, filename"
         else:
-            help("dps_uid_gen")
+            error("Not enough arguments.","dps_uid_gen")
     elif(cmd_delta=="dps_stats"):
         dps_stats()
     elif(cmd_delta.startswith("dps_config")):
@@ -188,6 +189,7 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
         if len(args) > 1:
             dps_config(args)
         else:
+            error("Not enough arguments.")
             help("dps_config")
     elif(cmd_delta.startswith("help")):
         args = cmd_delta.split()
@@ -280,7 +282,7 @@ def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format spec
 ###===========================================
 def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
         #ans = input(bcolors.FAIL+"\n[!] CTRL+C DETECTED\n[?] Do you wish to quit the Demon Pentest Shell (y/n)? "+bcolors.ENDC)
-        ans = input(bcolors.FAIL+"\n[?]"+bcolors.ENDC+" Do you wish to quit the Demon Pentest Shell (y/n)? ")
+        ans = input(f"{bcolors.FAIL}\n[?] Do you wish to quit the Demon Pentest Shell (y/n)? {bcolors.ENDC}")
         if ans == "y":
             print("[+] Quitting Demon Penetst Shell. File logged: "+LOG_FILENAME)
             sys.exit(1)
@@ -357,6 +359,7 @@ class DPSCompleter(Completer):
 
 class DPS:
     def set_message(self):
+        # This defines the prompt content:
         self.path = os.getcwd()
         self.message = [
             ('class:username', UID),
@@ -364,13 +367,19 @@ class DPS:
             ('class:host',HOSTNAME),
             ('class:colon',':'),
             ('class:path',self.path+"/"),
-            ('class:dps',' (dps)'),
+            ('class:dps','(dps)'),
             ('class:pound',prompt_tail),
         ]
 
     def __init__(self):
         self.path = os.getcwd()
-        if PRMPT_STYL == 2:
+        ###===========================================
+        ## BUILD THEMES HERE, TEST COLORS THOROUGHLY (256bit):
+        ###===========================================
+
+        #####
+        ### THIS THEME WILL BE DEFAULT WITH DPS.INI:
+        if PRMPT_STYL == 0:
             self.style = Style.from_dict({
                 # User input (default text).
                 '':          '#ff0066',
@@ -385,8 +394,8 @@ class DPS:
                 'dps':      '#ffffff'
             })
         #####
-        ### BLACK AND WHITE
-        elif PRMPT_STYL == 1: # COFFEE
+        ### GREY, ORANGE AND WHITE THEME:
+        elif PRMPT_STYL == 1:
                 self.style = Style.from_dict({
                     # User input (default text).
                     '':          '#fff',
@@ -400,6 +409,8 @@ class DPS:
                     'dps':      '#acacac'
                 })
         else:
+            #####
+            ### DEFAULT THEME:
             self.style = Style.from_dict({
                 # User input (default text).
                 '':          '#ff0066',
