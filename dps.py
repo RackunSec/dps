@@ -29,7 +29,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_' # TODO not needed?
-VERSION = "v0.10.17-3" # update this each time we push to the repo
+VERSION = "v0.10.17-5" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -100,15 +100,15 @@ def help(cmd_name):
     if cmd_name != "":
         if cmd_name == "dps_uid_gen":
                 print(f"""
-    -- {bcolors.WHT}{bcolors.BOLD}DPS UID Generator Usage{bcolors.ENDC} --
+    -- {bcolors.BOLD}DPS UID Generator Usage{bcolors.ENDC} --
 
       {bcolors.BOLD}{bcolors.OKBLUE}dps_uid_gen {bcolors.ENDC}(format specifier) (csv file)
 
       :: {bcolors.BOLD}Format Specifiers{bcolors.ENDC} ::
-      • {bcolors.BOLD}{bcolors.OKBLUE}%F{bcolors.ENDC}: First Name.
-      • {bcolors.BOLD}{bcolors.OKBLUE}%f{bcolors.ENDC}: First Initial.
-      • {bcolors.BOLD}{bcolors.OKBLUE}%L{bcolors.ENDC}: Last Name.
-      • {bcolors.BOLD}{bcolors.OKBLUE}%l{bcolors.ENDC}: Last Initial.
+       • {bcolors.BOLD}%F{bcolors.ENDC}: First Name.
+       • {bcolors.BOLD}%f{bcolors.ENDC}: First Initial.
+       • {bcolors.BOLD}%L{bcolors.ENDC}: Last Name.
+       • {bcolors.BOLD}%l{bcolors.ENDC}: Last Initial.
 
       You can add anything else you wish, such as,
        e.g: %f.%L123@client.org
@@ -116,10 +116,13 @@ def help(cmd_name):
                     """)
         elif cmd_name == "foreach":
             print(f"""
-    -- {bcolors.BOLD}foreach() Examples{bcolors.ENDC} --
+    -- {bcolors.BOLD}DPS foreach(){bcolors.ENDC} --
 
-    {bcolors.BOLD}foreach({bcolors.ENDC}/path/to/file.txt{bcolors.BOLD}){bcolors.ENDC} as line: echo $line
-    {bcolors.BOLD}foreach({bcolors.ENDC}m..n{bcolors.BOLD}){bcolors.ENDC} as int: nmap 192.168.1.$int
+      {bcolors.BOLD}{bcolors.OKBLUE}foreach() {bcolors.ENDC} Loop function.
+
+    :: {bcolors.BOLD} Syntax Examples{bcolors.ENDC} ::
+     • {bcolors.BOLD}foreach({bcolors.ENDC}/path/to/file.txt{bcolors.BOLD}){bcolors.ENDC} as line: echo $line
+     • {bcolors.BOLD}foreach({bcolors.ENDC}m..n{bcolors.BOLD}){bcolors.ENDC} as int: nmap 192.168.1.$int
             """)
         elif cmd_name == "dps_wifi_mon":
             print(f"""
@@ -128,35 +131,38 @@ def help(cmd_name):
       {bcolors.BOLD}{bcolors.OKBLUE}dps_wifi_mon {bcolors.ENDC}(wi-fi device)
 
       :: {bcolors.BOLD}Requirements{bcolors.ENDC} ::
-      • {bcolors.BOLD}{bcolors.OKBLUE}iw{bcolors.ENDC}
-      • {bcolors.BOLD}{bcolors.OKBLUE}airmon-ng{bcolors.ENDC}
-      • {bcolors.BOLD}{bcolors.OKBLUE}ifconfig{bcolors.ENDC}
+       • {bcolors.BOLD}iw{bcolors.ENDC}
+       • {bcolors.BOLD}airmon-ng{bcolors.ENDC}
+       • {bcolors.BOLD}ifconfig{bcolors.ENDC}
             """)
         elif cmd_name == "dps_config":
             print(f"""
         -- {bcolors.BOLD}DPS Configuration Settings{bcolors.ENDC} --
 
-          {bcolors.BOLD}{bcolors.OKBLUE}dps_config {bcolors.ENDC}prompt (integer (0-9))
+          {bcolors.BOLD}dps_config {bcolors.ENDC}prompt (integer (0-9))
             """)
     else:
         print(f"""
      -- {bcolors.BOLD}Demon Pentest Shell{bcolors.ENDC} --
 
      {bcolors.BOLD}:: Built-In Commands ::{bcolors.ENDC}
-      • {bcolors.BOLD}{bcolors.OKBLUE}help{bcolors.ENDC}: this cruft.
-      • {bcolors.BOLD}{bcolors.OKBLUE}dps_stats{bcolors.ENDC}: all logging stats.
-      • {bcolors.BOLD}{bcolors.OKBLUE}dps_uid_gen{bcolors.ENDC}: generate UIDs using "Firstname,Lastname" CSV file.
-      • {bcolors.BOLD}{bcolors.OKBLUE}dps_wifi_mon{bcolors.ENDC}: Set Wi-Fi radio to RFMON.
-      • {bcolors.BOLD}{bcolors.OKBLUE}dps_config{bcolors.ENDC}: Set prompt and shell options.
-      • {bcolors.BOLD}{bcolors.OKBLUE}exit/quit{bcolors.ENDC}: return to terminal OS shell.
+      • {bcolors.BOLD}help{bcolors.ENDC}: this cruft.
+      • {bcolors.BOLD}dps_stats{bcolors.ENDC}: all logging stats.
+      • {bcolors.BOLD}dps_uid_gen{bcolors.ENDC}: generate UIDs using "Firstname,Lastname" CSV file.
+      • {bcolors.BOLD}dps_wifi_mon{bcolors.ENDC}: Set Wi-Fi radio to RFMON.
+      • {bcolors.BOLD}dps_config{bcolors.ENDC}: Set prompt and shell options.
+      • {bcolors.BOLD}exit/quit{bcolors.ENDC}: return to terminal OS shell.
+
+     {bcolors.BOLD}:: Programming Logic ::{bcolors.ENDC}
+      • {bcolors.BOLD}foreach(){bcolors.ENDC}: perform for loop on file contents or integer range.
 
      {bcolors.BOLD}:: Keyboard Shortcuts ::{bcolors.ENDC}
-      • {bcolors.BOLD}{bcolors.OKBLUE}CTRL+R{bcolors.ENDC}: Search command history.
-      • {bcolors.BOLD}{bcolors.OKBLUE}CTRL+A{bcolors.ENDC}: Move cursor to beginning of line (similar to "HOME" key).
-      • {bcolors.BOLD}{bcolors.OKBLUE}CTRL+P{bcolors.ENDC}: Place the previously ran command into the command line.
-      • {bcolors.BOLD}{bcolors.OKBLUE}CTRL+B{bcolors.ENDC}: Move one character before cursor.
-      • {bcolors.BOLD}{bcolors.OKBLUE}ALT+F{bcolors.ENDC}:  Move one character forward.
-      • {bcolors.BOLD}{bcolors.OKBLUE}CTRL+C/D{bcolors.ENDC}: Exit the shell gracefully.
+      • {bcolors.BOLD}CTRL+R{bcolors.ENDC}: Search command history.
+      • {bcolors.BOLD}CTRL+A{bcolors.ENDC}: Move cursor to beginning of line (similar to "HOME" key).
+      • {bcolors.BOLD}CTRL+P{bcolors.ENDC}: Place the previously ran command into the command line.
+      • {bcolors.BOLD}CTRL+B{bcolors.ENDC}: Move one character before cursor.
+      • {bcolors.BOLD}ALT+F{bcolors.ENDC}:  Move one character forward.
+      • {bcolors.BOLD}CTRL+C/D{bcolors.ENDC}: Exit the shell gracefully.
         """)
 def error(msg,cmd):
     print(f"{bcolors.BOLD}{bcolors.FAIL}[?]{bcolors.ENDC}{bcolors.FAIL} ¬_¬ wut? -- "+msg+f"{bcolors.ENDC}")
