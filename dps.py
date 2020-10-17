@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-# shell wrapper for superior logging
-# logs as CSV with time,hostname,network:ip,who,command.
+# The Demon (DEMON LINUX) Penetration Testing Shell
+# Custom shell for superior logging during a penetration test.
+# logs as CSV with time,hostname,network:ip,who,command in the ~/.dps/ directory
 # requires Python 3+
 #
 # 2020 - Douglas Berdeaux, Matthew Creel
+# (dps)
 
 import configparser # dps.conf from ~/.dps/
 import os # for the commands, of course. These will be passed ot the shell.
@@ -29,7 +31,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_' # TODO not needed?
-VERSION = "v0.10.17-5" # update this each time we push to the repo
+VERSION = "v0.10.17-5b" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
