@@ -372,7 +372,9 @@ def list_folder(path):
                     pass
     return list(set(contents))
 
-# Our custom completer function:
+###=======================================
+## OUR CUSTOM COMPLETER:
+###=======================================
 class DPSCompleter(Completer):
     def __init__(self, cli_menu):
         self.path_completer = PathCompleter()
@@ -408,21 +410,28 @@ class DPSCompleter(Completer):
                         if opt.startswith(current_str):
                             yield Completion(opt, -len(current_str))
                     return
-
-
+###=======================================
+## OUR CUSTOM SHELL DEFINITION:
+###=======================================
 class DPS:
     def set_message(self):
         # This defines the prompt content:
         self.path = os.getcwd()
-        self.message = [
-            ('class:username', UID),
-            ('class:at','@'),
-            ('class:host',HOSTNAME),
-            ('class:colon',':'),
-            ('class:path',self.path+"/"),
-            ('class:dps','(dps)'),
-            ('class:pound',prompt_tail),
-        ]
+        if PRMPT_STYL == 2:
+            self.message = [
+                ('class:dps','(dps)'),
+                ('class:pound',prompt_tail),
+            ]
+        else:
+            self.message = [
+                ('class:username', UID),
+                ('class:at','@'),
+                ('class:host',HOSTNAME),
+                ('class:colon',':'),
+                ('class:path',self.path+"/"),
+                ('class:dps','(dps)'),
+                ('class:pound',prompt_tail),
+            ]
 
     def __init__(self):
         self.path = os.getcwd()
@@ -433,19 +442,18 @@ class DPS:
         #####
         ### THIS THEME WILL BE DEFAULT WITH DPS.INI:
         if PRMPT_STYL == 0:
-            self.style = Style.from_dict({
-                # User input (default text).
-                '':          '#ff0066',
-
-                # Prompt.
-                'username': '#884444',
-                'at':       '#996633',
-                'colon':    '#996633',
-                'pound':    '#996633',
-                'host':     '#00ffff bg:#444400',
-                'path':     'ansicyan underline',
-                'dps':      '#ffffff'
-            })
+                self.style = Style.from_dict({
+                    # User input (default text).
+                    '':          '#fff',
+                    # Prompt.
+                    'username': 'italic #acacac',
+                    'at':       'italic #aaaaaa',
+                    'colon':    'italic #aaaaaa',
+                    'pound':    '#aaaaaa',
+                    'host':     'italic #c2c2c2',
+                    'path':     'italic #ff321f',
+                    'dps':      '#acacac'
+                })
         #####
         ### GREY, ORANGE AND WHITE THEME:
         elif PRMPT_STYL == 1:
@@ -461,6 +469,16 @@ class DPS:
                     'path':     'italic #ff321f',
                     'dps':      '#acacac'
                 })
+        elif PRMPT_STYL == 2:
+            #####
+            ### MINIMAL THEME:
+            self.style = Style.from_dict({
+                # User input (default text).
+                '':          '#fff',
+                # Prompt.
+                'pound':    '#fff',
+                'dps':      '#ff0066'
+            })
         else:
             #####
             ### DEFAULT THEME:
