@@ -29,7 +29,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_' # TODO not needed?
-VERSION = "v0.10.14-12" # update this each time we push to the repo
+VERSION = "v0.10.17-1" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -114,6 +114,13 @@ def help(cmd_name):
        e.g: %f.%L123@client.org
        result: j.doe123@client.org
                     """)
+        elif cmd_name == "foreach":
+            print(f"""
+    -- {bcolors.BOLD}foreach() Examples{bcolors.ENDC} --
+
+    {bcolors.BOLD}foreach({bcolors.ENDC}/path/to/file.txt{bcolors.BOLD}){bcolors.ENDC} as line: echo $line
+    {bcolors.BOLD}foreach({bcolors.ENDC}m..n{bcolors.BOLD}){bcolors.ENDC} as int: nmap 192.168.1.$int
+            """)
         elif cmd_name == "dps_wifi_mon":
             print(f"""
     -- {bcolors.BOLD}DPS Wi-Fi Monitor Mode{bcolors.ENDC} --
@@ -152,8 +159,9 @@ def help(cmd_name):
       • {bcolors.BOLD}{bcolors.OKBLUE}CTRL+C/D{bcolors.ENDC}: Exit the shell gracefully.
         """)
 def error(msg,cmd):
-    print(f"{bcolors.FAIL}[?] ¬_¬ wut? -- "+msg+f"{bcolors.ENDC}")
-    help(cmd) # show the Help dialog from the listings above
+    print(f"{bcolors.BOLD}{bcolors.FAIL}[?]{bcolors.ENDC}{bcolors.FAIL} ¬_¬ wut? -- "+msg+f"{bcolors.ENDC}")
+    if cmd != "":
+        help(cmd) # show the Help dialog from the listings above
 
 ###===========================================
 ## COMMAND HOOKS:
@@ -166,6 +174,9 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
     # Handle built-in commands:
     if (cmd_delta == "exit" or cmd_delta == "quit"):
         exit_gracefully()
+    ### Programming logic:
+    elif(cmd_delta.startswith("foreach")): # foreach (file.txt) as line: echo line
+        foreach(cmd_delta) # See "Built-In Programming Logic" section below for definition of method.
     elif(cmd_delta.startswith("dps_wifi_mon")):
         args = cmd_delta.split()
         if len(args)>1:
@@ -189,8 +200,7 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
         if len(args) > 1:
             dps_config(args)
         else:
-            error("Not enough arguments.")
-            help("dps_config")
+            error("Not enough arguments.","dps_config")
     elif(cmd_delta.startswith("help")):
         args = cmd_delta.split()
         if(len(args)>1):
@@ -202,6 +212,8 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
     elif(re.match("^ls",cmd_delta)):
         cmd_delta = re.sub("^ls","ls --color=auto",cmd)
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
+    elif(cmd_delta == "clear"):
+        print("\033c", end="") # we clear our own terminal :)
     elif(re.match("^cd",cmd_delta)):
         # TODO: make this a single re.sub() call:
         dir = re.sub('^cd\s+','',cmd_delta) # take off the path
@@ -221,9 +233,50 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
         if os.path.isdir(dir): # does it even exist?
             os.chdir(dir) # goto path
         else:
-            print("PATH: "+bcolors.FAIL+'"'+dir+'"'+bcolors.ENDC+" does not exist.")
+            error("Path: '"+dir+"' does not exist.","")
     else:
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
+
+###===========================================
+## Built-In Programming Logic:
+###===========================================
+def foreach(cmd_delta): # FOREACH
+    cmd_args = re.sub("^foreach(\s+)?","",cmd_delta)
+    if cmd_args == "":
+        help("foreach")
+    else:
+        object = re.sub(".*\(([^\)]+)\).*","\\1",cmd_args)
+        if object != "":
+            # now get the variable:
+            var = re.sub(".*as\s+([^:]+).*","\\1",cmd_args)
+            if var == "":
+                error("Programming logic syntax error. Please check the documentation.","")
+            else:
+                if re.search("[0-9]+\.\.[0-9]+",object):
+                    # we have integers:
+                    int_start = int(re.sub("^([0-9]+)\..*","\\1",object))
+                    int_end = int(re.sub(".*\.\.([0-9]+)$","\\1",object))+1
+                    int_range = range(int_start,int_end)
+                    # pull out what to do with the entry:
+                    do = re.sub("^[^:]+:","",cmd_delta)
+                    for i in int_range: # 0..9
+                        do_re = re.compile("\$"+var)
+                        do_cmd = re.sub(do_re,str(i),do)
+                        #print(f"[pl] cmd: "+do_cmd+" var: "+var)
+                        subprocess.call(["/bin/bash","--init-file","/root/.bashrc","-c",do_cmd])
+                elif os.path.exists(object): # this is a file
+                    # pull out what to do with the entry:
+                    do = re.sub("^[^:]+:","",cmd_delta)
+                    with open(object) as object_file:
+                        for entry in object_file:
+                            # replace entry with $var in do:
+                            do_re = re.compile("\$"+var)
+                            do_cmd = re.sub(do_re,entry.strip(),do)
+                            subprocess.call(["/bin/bash","--init-file","/root/.bashrc","-c",do_cmd])
+                else:
+                    error("Could not access object: "+object,"")
+        else:
+            error("Programming logic syntax error. Please check the documentation.","")
 
 ###===========================================
 ## DPS CUSTOM BUILT-IN SHELL CMD METHODS:

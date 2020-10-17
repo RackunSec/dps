@@ -1,3 +1,6 @@
 cmd2
 ifaddr
-# everything sheould already be in the environment from Python3
+shlex
+prompt_toolkit
+configparser
+# everything should already be in the environment from Python3
