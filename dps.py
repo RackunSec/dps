@@ -31,32 +31,26 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_' # TODO not needed?
-VERSION = "v0.10.17-5b" # update this each time we push to the repo
+VERSION = "v0.10.17-7" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
 CONFIG = configparser.ConfigParser() # config object
 OWD=os.getcwd() # historical purposes
 # Add all built-in commands here so they populate in the tab-autocompler:
-BUILTINS=['dps_stats','dps_uid_gen','dps_wifi_mon','dps_config']
+BUILTINS=['dps_stats','dps_uid_gen','dps_wifi_mon','dps_config','foreach']
 PRMPT_STYL=0 # Prompt style setting
 prompt_tail = "# " if UID == "root" else "> " # diff root prompt
 # colored output (does not work with the prompt - causes issues with line wrapping)
 class bcolors:
-    HEADER = '\033[95m'
     WHT = '\033[97m'
     OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
     FAIL = '\033[91m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-    END = '\e[0m'
-    GRYBG = '\033[100m'
-    LGHTGRY='\033[37m'
-    ORNG = '\e033[220m'
-
+    YELL = '\033[33m'
+    ITAL = '\033[3m'
 ###===========================================
 ## PRELIMINARY FILE/DESCRIPTOR WORK:
 ###===========================================
@@ -102,70 +96,75 @@ def help(cmd_name):
     if cmd_name != "":
         if cmd_name == "dps_uid_gen":
                 print(f"""
-    -- {bcolors.BOLD}DPS UID Generator Usage{bcolors.ENDC} --
+ -- {bcolors.BOLD}DPS UID Generator Usage{bcolors.ENDC} --
 
-      {bcolors.BOLD}{bcolors.OKBLUE}dps_uid_gen {bcolors.ENDC}(format specifier) (csv file)
+  {bcolors.ITAL}{bcolors.YELL}dps_uid_gen {bcolors.ENDC}(format specifier) (csv file)
 
-      :: {bcolors.BOLD}Format Specifiers{bcolors.ENDC} ::
-       • {bcolors.BOLD}%F{bcolors.ENDC}: First Name.
-       • {bcolors.BOLD}%f{bcolors.ENDC}: First Initial.
-       • {bcolors.BOLD}%L{bcolors.ENDC}: Last Name.
-       • {bcolors.BOLD}%l{bcolors.ENDC}: Last Initial.
+  :: {bcolors.BOLD}Format Specifiers{bcolors.ENDC} ::
+   • {bcolors.BOLD}%F{bcolors.ENDC}: First Name.
+   • {bcolors.BOLD}%f{bcolors.ENDC}: First Initial.
+   • {bcolors.BOLD}%L{bcolors.ENDC}: Last Name.
+   • {bcolors.BOLD}%l{bcolors.ENDC}: Last Initial.
 
-      You can add anything else you wish, such as,
-       e.g: %f.%L123@client.org
-       result: j.doe123@client.org
-                    """)
+  :: {bcolors.BOLD}Notes:{bcolors.BOLD} ::
+  You can add anything else you wish, such as,
+   e.g: %f.%L123@client.org
+   result: j.doe123@client.org
+                """)
         elif cmd_name == "foreach":
-            print(f"""
-    -- {bcolors.BOLD}DPS foreach(){bcolors.ENDC} --
+                print(f"""
+ -- {bcolors.BOLD}DPS foreach(){bcolors.ENDC} --
 
-      {bcolors.BOLD}{bcolors.OKBLUE}foreach() {bcolors.ENDC} Loop function.
+  {bcolors.ITAL}{bcolors.YELL}foreach() {bcolors.ENDC}Loop function.
 
-    :: {bcolors.BOLD} Syntax Examples{bcolors.ENDC} ::
-     • {bcolors.BOLD}foreach({bcolors.ENDC}/path/to/file.txt{bcolors.BOLD}){bcolors.ENDC} as line: echo $line
-     • {bcolors.BOLD}foreach({bcolors.ENDC}m..n{bcolors.BOLD}){bcolors.ENDC} as int: nmap 192.168.1.$int
-            """)
+  :: {bcolors.BOLD} Syntax Examples{bcolors.ENDC} ::
+   • {bcolors.BOLD}foreach({bcolors.ENDC}/path/to/file.txt{bcolors.BOLD}){bcolors.ENDC} as line: echo $line
+   • {bcolors.BOLD}foreach({bcolors.ENDC}m..n{bcolors.BOLD}){bcolors.ENDC} as int: nmap 192.168.1.$int
+                """)
         elif cmd_name == "dps_wifi_mon":
             print(f"""
-    -- {bcolors.BOLD}DPS Wi-Fi Monitor Mode{bcolors.ENDC} --
+ -- {bcolors.BOLD}DPS Wi-Fi Monitor Mode{bcolors.ENDC} --
 
-      {bcolors.BOLD}{bcolors.OKBLUE}dps_wifi_mon {bcolors.ENDC}(wi-fi device)
+  {bcolors.ITAL}{bcolors.YELL}dps_wifi_mon {bcolors.ENDC}(wi-fi device)
 
-      :: {bcolors.BOLD}Requirements{bcolors.ENDC} ::
-       • {bcolors.BOLD}iw{bcolors.ENDC}
-       • {bcolors.BOLD}airmon-ng{bcolors.ENDC}
-       • {bcolors.BOLD}ifconfig{bcolors.ENDC}
+  :: {bcolors.BOLD}Requirements{bcolors.ENDC} ::
+   • {bcolors.BOLD}iw{bcolors.ENDC} - used to set up the Wi-Fi adapter.
+   • {bcolors.BOLD}airmon-ng{bcolors.ENDC} - Used to kill processes.
+   • {bcolors.BOLD}ifconfig{bcolors.ENDC} - used to turn on and off the adapter.
             """)
         elif cmd_name == "dps_config":
             print(f"""
-        -- {bcolors.BOLD}DPS Configuration Settings{bcolors.ENDC} --
+ -- {bcolors.BOLD}DPS Configuration Settings{bcolors.ENDC} --
 
-          {bcolors.BOLD}dps_config {bcolors.ENDC}prompt (integer (0-9))
+  {bcolors.ITAL}{bcolors.YELL}dps_config {bcolors.ENDC}(Options)
+
+  :: {bcolors.BOLD}Options{bcolors.ENDC} ::
+   • {bcolors.BOLD}prompt (0-9){bcolors.ENDC} - Set the prompt style.
+   • {bcolors.BOLD}--show{bcolors.ENDC} - Show all config options from the dps.ini file.
             """)
     else:
-        print(f"""
-     -- {bcolors.BOLD}Demon Pentest Shell{bcolors.ENDC} --
+            print(f"""
+ -- {bcolors.BOLD}Demon Pentest Shell{bcolors.ENDC} --
 
-     {bcolors.BOLD}:: Built-In Commands ::{bcolors.ENDC}
-      • {bcolors.BOLD}help{bcolors.ENDC}: this cruft.
-      • {bcolors.BOLD}dps_stats{bcolors.ENDC}: all logging stats.
-      • {bcolors.BOLD}dps_uid_gen{bcolors.ENDC}: generate UIDs using "Firstname,Lastname" CSV file.
-      • {bcolors.BOLD}dps_wifi_mon{bcolors.ENDC}: Set Wi-Fi radio to RFMON.
-      • {bcolors.BOLD}dps_config{bcolors.ENDC}: Set prompt and shell options.
-      • {bcolors.BOLD}exit/quit{bcolors.ENDC}: return to terminal OS shell.
+ {bcolors.BOLD}:: Built-In Commands ::{bcolors.ENDC}
+  • {bcolors.BOLD}help{bcolors.ENDC}: this cruft.
+  • {bcolors.BOLD}dps_stats{bcolors.ENDC}: all logging stats.
+  • {bcolors.BOLD}dps_uid_gen{bcolors.ENDC}: generate UIDs using "Firstname,Lastname" CSV file.
+  • {bcolors.BOLD}dps_wifi_mon{bcolors.ENDC}: Set Wi-Fi radio to RFMON.
+  • {bcolors.BOLD}dps_config{bcolors.ENDC}: Set prompt and shell options.
+  • {bcolors.BOLD}exit/quit{bcolors.ENDC}: return to terminal OS shell.
 
-     {bcolors.BOLD}:: Programming Logic ::{bcolors.ENDC}
-      • {bcolors.BOLD}foreach(){bcolors.ENDC}: perform for loop on file contents or integer range.
+ {bcolors.BOLD}:: Programming Logic ::{bcolors.ENDC}
+  • {bcolors.BOLD}foreach(){bcolors.ENDC}: perform for loop on file contents or integer range.
 
-     {bcolors.BOLD}:: Keyboard Shortcuts ::{bcolors.ENDC}
-      • {bcolors.BOLD}CTRL+R{bcolors.ENDC}: Search command history.
-      • {bcolors.BOLD}CTRL+A{bcolors.ENDC}: Move cursor to beginning of line (similar to "HOME" key).
-      • {bcolors.BOLD}CTRL+P{bcolors.ENDC}: Place the previously ran command into the command line.
-      • {bcolors.BOLD}CTRL+B{bcolors.ENDC}: Move one character before cursor.
-      • {bcolors.BOLD}ALT+F{bcolors.ENDC}:  Move one character forward.
-      • {bcolors.BOLD}CTRL+C/D{bcolors.ENDC}: Exit the shell gracefully.
-        """)
+ {bcolors.BOLD}:: Keyboard Shortcuts ::{bcolors.ENDC}
+  • {bcolors.BOLD}CTRL+R{bcolors.ENDC}: Search command history.
+  • {bcolors.BOLD}CTRL+A{bcolors.ENDC}: Move cursor to beginning of line (similar to "HOME" key).
+  • {bcolors.BOLD}CTRL+P{bcolors.ENDC}: Place the previously ran command into the command line.
+  • {bcolors.BOLD}CTRL+B{bcolors.ENDC}: Move one character before cursor.
+  • {bcolors.BOLD}ALT+F{bcolors.ENDC}:  Move one character forward.
+  • {bcolors.BOLD}CTRL+C/D{bcolors.ENDC}: Exit the shell gracefully.
+            """)
 def error(msg,cmd):
     print(f"{bcolors.BOLD}{bcolors.FAIL}[?]{bcolors.ENDC}{bcolors.FAIL} ¬_¬ wut? -- "+msg+f"{bcolors.ENDC}")
     if cmd != "":
@@ -216,7 +215,7 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
         else:
             help("")
     elif(cmd_delta=="version"):
-        print(bcolors.OKGREEN+VERSION+bcolors.ENDC)
+        print(f"{bcolors.ITAL}{bcolors.OKGREEN}Demon Pentest Shell - "+VERSION+"{bcolors.ENDC}")
     elif(re.match("^ls",cmd_delta)):
         cmd_delta = re.sub("^ls","ls --color=auto",cmd)
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
@@ -295,7 +294,7 @@ def dps_update_config(args):
     if len(args) > 1:
         if args[0] == "prompt": # set it in the config file:
             #try:
-            print(f"{bcolors.OKBLUE}[+]{bcolors.ENDC} Adding "+str(args[1])+" as PRMPT_STYL in "+CONFIG_FILENAME)
+            print(f"{bcolors.OKGREEN}[i]{bcolors.ENDC} Adding "+str(args[1])+" as PRMPT_STYL in "+CONFIG_FILENAME)
             CONFIG.set('Style','PRMPT_STYL',args[1]) # TODO int() ?
             with open(CONFIG_FILENAME, 'w') as config_file:
                 CONFIG.write(config_file)
@@ -342,10 +341,9 @@ def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format spec
 ## GENERAL METHODS FOR HANDLING THINGS:
 ###===========================================
 def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
-        #ans = input(bcolors.FAIL+"\n[!] CTRL+C DETECTED\n[?] Do you wish to quit the Demon Pentest Shell (y/n)? "+bcolors.ENDC)
-        ans = input(f"{bcolors.FAIL}\n[?] Do you wish to quit the Demon Pentest Shell (y/n)? {bcolors.ENDC}")
+        ans = input(f"{bcolors.FAIL}\n[?] Do you wish to quit the {bcolors.ITAL}Demon Pentest Shell{bcolors.ENDC}{bcolors.FAIL} (y/n)? {bcolors.ENDC}")
         if ans == "y":
-            print("[+] Quitting Demon Penetst Shell. File logged: "+LOG_FILENAME)
+            print("[i] Demon Pentest Shell session ended.\n[i] File logged: "+LOG_FILENAME)
             sys.exit(1)
 
 def list_folder(path):
@@ -425,10 +423,23 @@ class DPS:
     def set_message(self):
         # This defines the prompt content:
         self.path = os.getcwd()
-        if PRMPT_STYL == 2:
+        if PRMPT_STYL == 1: # MINIMAL SKULL
             self.message = [
-                ('class:dps','(dps)'),
-                ('class:pound',prompt_tail),
+                ('class:parens_open_outer','('),
+                ('class:parens_open','('),
+                ('class:dps','dps'),
+                ('class:parens_close',')'),
+                ('class:parens_close_outer',')'),
+                ('class:skull','☠️  '),
+            ]
+        elif PRMPT_STYL == 2: # MINIMAL HOT PINK
+            self.message = [
+                ('class:parens_open_outer','('),
+                ('class:parens_open','('),
+                ('class:dps','dps'),
+                ('class:parens_close',')'),
+                ('class:parens_close_outer',')'),
+                ('class:prompt',prompt_tail)
             ]
         else:
             self.message = [
@@ -463,29 +474,32 @@ class DPS:
                     'dps':      '#acacac'
                 })
         #####
-        ### GREY, ORANGE AND WHITE THEME:
+        ### MINIMAL SKULL THEME
         elif PRMPT_STYL == 1:
                 self.style = Style.from_dict({
                     # User input (default text).
-                    '':          '#fff',
+                    '':          'italic #af5f00',
                     # Prompt.
-                    'username': 'italic #acacac',
-                    'at':       'italic #aaaaaa',
-                    'colon':    'italic #aaaaaa',
-                    'pound':    '#aaaaaa',
-                    'host':     'italic #c2c2c2',
-                    'path':     'italic #ff321f',
-                    'dps':      '#acacac'
+                    'parens_open': '#af0000',
+                    'parens_open_outer': '#af5f00',
+                    'dps':       'italic #870000',
+                    'parens_close_outer':    '#af5f00',
+                    'parens_close':    '#af0000',
+                    'skull':    '#8e8e8e',
                 })
         elif PRMPT_STYL == 2:
             #####
-            ### MINIMAL THEME:
+            ### MINIMAL HOT PINK THEME:
             self.style = Style.from_dict({
                 # User input (default text).
-                '':          '#fff',
+                '':          'italic #ff0066',
                 # Prompt.
-                'pound':    '#fff',
-                'dps':      '#ff0066'
+                'parens_open': '#af0000',
+                'parens_open_outer': '#d700af',
+                'dps':       'italic #ff0066',
+                'parens_close_outer':    '#d700af',
+                'parens_close':    '#af0000',
+                'pound':    '#00aa00',
             })
         else:
             #####
