@@ -19,24 +19,32 @@ This project requires Python3 and the following Python modules,
 ![foreach() function screenshot](images/screenshots/dps_foreach.png)
 ### Shell Themes
 These are set with PRMPT_STYL in the `~/.dps/dps.ini` file or with the `dps_config prompt (0-9)` built-in command.
-![DPS theme 0](images/screenshots/dps_style_0.png)
-![DPS theme 2](images/screenshots/dps_style_2.png)
-![DPS theme 3](images/screenshots/dps_style_3.png)
+#### DPS Default Theme:
+`PRMPT_STYL` value of `0` or `DPS` using `dps_config`
+
+![DPS theme 0](images/screenshots/dps_0.png)
+#### Pirate Theme:
+`PRMPT_STYL` value of `1` or `PIRATE` using `dps_config`
+
+![DPS theme 2](images/screenshots/pirate_1.png)
+#### Boneyard Theme:
+`PRMPT_STYL` value of `2` or `BONEYARD` using `dps_config`
+
+![DPS theme 3](images/screenshots/boneyard_2.png)
+#### 1980s Theme:
+`PRMPT_STYL` value of `3` or `1980S` using `dps_config`
+
+![DPS theme 3](images/screenshots/1980s_3.png)
 
 ## Example Log Output
+Below is example log output for DPS. All logs are located in `~/.dps/` with the date used in the file name. Unlike other terminal s which store command history in as session-like manner, DPS will show the command history of all commands issued within a current day from all terminal sessions.
 ```
-root@demon2:~/Code/dps# cat ~/.log_dps_history.csv 
+root@demon2.9:/tmp/dps/(dps)# cat ~/.dps/2020-10-18_dps_log.csv                                         
 When,Host,Network,Who,Where,What
-2020-04-14 07:56:52.412353,demon2.4,ens33:192.168.159.132,root,/root/Code/dps,ls
-2020-04-14 07:56:53.177506,demon2.4,ens33:192.168.159.132,root,/root/Code/dps,cd
-2020-04-14 07:56:53.641559,demon2.4,ens33:192.168.159.132,root,/root,ls
-2020-04-14 07:56:56.756188,demon2.4,ens33:192.168.159.132,root,/root,cd Penetration Testing
-2020-04-14 07:56:58.374275,demon2.4,ens33:192.168.159.132,root,/root/Penetration Testing,ls
-2020-04-14 07:57:00.117010,demon2.4,ens33:192.168.159.132,root,/root/Penetration Testing,cd Clients
-2020-04-14 07:57:00.389277,demon2.4,ens33:192.168.159.132,root,/root/Penetration Testing/Clients,ls
-2020-04-14 07:57:18.294996,demon2.4,ens33:192.168.159.132,root,/root/Penetration Testing/Clients,ifconfig | grep inet
-2020-04-14 07:57:31.235330,demon2.4,ens33:192.168.159.132,root,/root/Penetration Testing/Clients,exit
-root@demon2:~/Code/dps#
+2020-10-18 11:32:32.253098,demon2.9,ens33:192.168.159.132,root,/tmp/dps,dps_config prompt 3
+2020-10-18 11:32:34.377993,demon2.9,ens33:192.168.159.132,root,/tmp/dps,exit
+2020-10-18 11:32:40.805349,demon2.9,ens33:192.168.159.132,root,/tmp/dps,ifconfig
+root@demon2.9:/tmp/dps/(dps)#                                                                           
 ```
 ## Shiny Features
 Because this is built with prompt_toolkit, the shell has a lot of great built-in features. 
@@ -54,6 +62,10 @@ The following are built-in commands,
 * dps_wifi_mon - set a Wi-Fi device into monitor mode
 * dps_stats - show log stats
 * dps_config - set configuration options, such as prompt style
+* clear - clear the terminal
+* cd - change current working directory
+* history - view your command history for your current session file (ALL HISTORY)
+
 ## Installation
 To install DPS, simply install the requirements using pip3 and copy the ```dps.py``` into your ```$PATH``` like ```/usr/local/bin```, etc:
 ```
