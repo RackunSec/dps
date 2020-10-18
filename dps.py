@@ -22,6 +22,8 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import Completer, Completion, PathCompleter
 from prompt_toolkit.styles import Style # Style the prompt
 import shlex # Splitting by spaces into a list
+from prompt_toolkit.history import InMemoryHistory
+from prompt_toolkit.buffer import *
 
 ###===========================================
 ## GLOBAL VALUES:
@@ -31,7 +33,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_' # TODO not needed?
-VERSION = "v0.10.17-9" # update this each time we push to the repo
+VERSION = "v0.10.18-0" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -50,6 +52,12 @@ class bcolors:
     BOLD = '\033[1m'
     YELL = '\033[33m'
     ITAL = '\033[3m'
+dps_themes = {
+    0 : 'DPS',
+    1 : 'PIRATE',
+    2 : 'BONEYARD',
+    3 : '1980S'
+    }
 ###===========================================
 ## PRELIMINARY FILE/DESCRIPTOR WORK:
 ###===========================================
@@ -203,7 +211,7 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
         dps_stats()
     elif(cmd_delta.startswith("dps_config")):
         args = re.sub("dps_config","",cmd_delta).split() # make an array
-        if len(args) > 1:
+        if len(args) > 0:
             dps_config(args)
         else:
             error("Not enough arguments.","dps_config")
@@ -309,6 +317,8 @@ def dps_config(args): # configure the shell
         PRMPT_STYL = int(args[1])
         # Now set it for session / preference in the dps.ini file:
         dps_update_config(args)
+    elif args[0] == "--show":
+        print(f"{bcolors.BOLD}[i]{bcolors.ENDC} Current DPS Prompt Theme: {bcolors.ITAL}{bcolors.YELL}"+dps_themes[PRMPT_STYL]+f"{bcolors.ENDC }")
     else:
         print("Usage: dps_config prompt [0-9] for new prompt.")
 
@@ -389,7 +399,6 @@ def list_folder(path):
 class DPSCompleter(Completer):
     def __init__(self, cli_menu):
         self.path_completer = PathCompleter()
-
     def get_completions(self, document, complete_event):
         word_before_cursor = document.get_word_before_cursor()
         try:
@@ -397,7 +406,6 @@ class DPSCompleter(Completer):
         except ValueError:
             pass
         else:
-
             if len(cmd_line)==2:
                 if cmd_line[0] == "dps_config" and cmd_line[1] == "prompt":
                     options = ("0","1","2","3")
@@ -408,7 +416,8 @@ class DPSCompleter(Completer):
                 current_str = cmd_line[len(cmd_line)-1]
                 if cmd_line[0] == "dps_config":
                     options = ["prompt","--show"]
-                    yield Completion("prompt",-len(word_before_cursor))
+                    for opt in options:
+                        yield Completion(opt,-len(word_before_cursor))
                 else:
                     if current_str == "~/":
                         options = list_folder(os.path.expanduser("~/"))
@@ -426,7 +435,8 @@ class DPSCompleter(Completer):
 class DPS:
     def set_message(self):
         # This defines the prompt content:
-        self.path = os.getcwd()
+        self.path = os.getcwd()+"/"
+        global UID
         if PRMPT_STYL == 1: # MINIMAL SKULL
             self.message = [
                 ('class:parens_open_outer','('),
@@ -436,22 +446,24 @@ class DPS:
                 ('class:parens_close_outer',')'),
                 ('class:skull','☠️  '),
             ]
-        elif PRMPT_STYL == 2: # MINIMAL HOT PINK
+        elif PRMPT_STYL == 2 or PRMPT_STYL == 3 or PRMPT_STYL == 4: # MINIMAL
             self.message = [
                 ('class:parens_open_outer','('),
                 ('class:parens_open','('),
                 ('class:dps','dps'),
+                ('class:colon',':'),
+                ('class:path',self.path),
                 ('class:parens_close',')'),
                 ('class:parens_close_outer',')'),
                 ('class:prompt',prompt_tail)
             ]
-        else:
+        elif PRMPT_STYL == 0: # DEFAULT SHELL
             self.message = [
                 ('class:username', UID),
                 ('class:at','@'),
                 ('class:host',HOSTNAME),
                 ('class:colon',':'),
-                ('class:path',self.path+"/"),
+                ('class:path',self.path),
                 ('class:dps','(dps)'),
                 ('class:pound',prompt_tail),
             ]
@@ -461,7 +473,6 @@ class DPS:
         ###===========================================
         ## BUILD THEMES HERE, TEST COLORS THOROUGHLY (256bit):
         ###===========================================
-
         #####
         ### THIS THEME WILL BE DEFAULT WITH DPS.INI:
         if PRMPT_STYL == 0:
@@ -493,16 +504,32 @@ class DPS:
                 })
         elif PRMPT_STYL == 2:
             #####
-            ### MINIMAL HOT PINK THEME:
+            ### BONEYARD:
+            self.style = Style.from_dict({
+                # User input (default text).
+                '':          'italic #ccc',
+                # Prompt.
+                'parens_open': 'bold #3e3e3e',
+                'parens_open_outer': 'bold #8a8a8a',
+                'dps':       'italic #555',
+                'parens_close_outer':    'bold #8a8a8a',
+                'parens_close':    'bold #3e3e3e',
+                'pound':    'bold #eee',
+            })
+        elif PRMPT_STYL == 3:
+            #####
+            ### 1980s THEME:
             self.style = Style.from_dict({
                 # User input (default text).
                 '':          'italic #ff0066',
                 # Prompt.
-                'parens_open': '#af0000',
+                'parens_open': '#d7ff00',
                 'parens_open_outer': '#d700af',
-                'dps':       'italic #ff0066',
+                'dps':       'italic bold #d7ff00',
+                'colon': 'italic bold #d700af',
+                'path': 'italic bold #afff00',
                 'parens_close_outer':    '#d700af',
-                'parens_close':    '#af0000',
+                'parens_close':    '#d7ff00',
                 'pound':    '#00aa00',
             })
         else:
@@ -527,7 +554,6 @@ class DPS:
             complete_in_thread=True,
             complete_while_typing=False
         )
-
     def update_prompt(self):
         self.set_message()
         self.prompt_session.message = self.message
@@ -541,7 +567,6 @@ def shell(dps):
         exit_gracefully()
     except EOFError:
         exit_gracefully()
-
 
 # standard boilerplate
 if __name__ == "__main__":
