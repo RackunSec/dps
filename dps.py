@@ -31,7 +31,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_' # TODO not needed?
-VERSION = "v0.10.17-7" # update this each time we push to the repo
+VERSION = "v0.10.17-8" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -227,20 +227,20 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
         dir = re.sub('\s+$','',dir) # remove trailing spaces
         if (re.match("^cd(\s+)?",dir)): # go home
             dir = os.path.expanduser("~")
-        if (dir==""):
+        elif (dir==""):
             dir=os.path.expanduser("~")
         # changin directories using "-" and history:
-        global OWD # our shell global needs referenced
-        if (dir=="-"):
+        elif (dir=="-"):
+            global OWD # our shell global needs referenced
             BOWD=OWD # backup the OWD
             OWD=os.getcwd()
             os.chdir(BOWD)
         else:
             OWD=os.getcwd() # store the directory that we are in for "-" purposes/historical
-        if os.path.isdir(dir): # does it even exist?
-            os.chdir(dir) # goto path
-        else:
-            error("Path: '"+dir+"' does not exist.","")
+            if os.path.isdir(dir): # does it even exist?
+                os.chdir(dir) # goto path
+            else:
+                error("Path: '"+dir+"' does not exist.","")
     else:
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
 
