@@ -31,7 +31,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_' # TODO not needed?
-VERSION = "v0.10.17-8a" # update this each time we push to the repo
+VERSION = "v0.10.17-8c" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -396,16 +396,15 @@ class DPSCompleter(Completer):
 
             if len(cmd_line)==2:
                 if cmd_line[0] == "dps_config" and cmd_line[1] == "prompt":
-                    options = ("0","1","2")
+                    options = ("0","1","2","3")
                     for opt in options:
                         yield Completion(opt,-len(word_before_cursor))
                     return
             if len(cmd_line): # at least 1 value
                 current_str = cmd_line[len(cmd_line)-1]
                 if cmd_line[0] == "dps_config":
-                    options = ["prompt"]
+                    options = ["prompt","--show"]
                     yield Completion("prompt",-len(word_before_cursor))
-
                 else:
                     if current_str == "~/":
                         options = list_folder(os.path.expanduser("~/"))
@@ -415,7 +414,7 @@ class DPSCompleter(Completer):
                         options = sorted(list_folder(current_str))
                     for opt in options:
                         if opt.startswith(current_str):
-                            yield Completion(opt, -len(current_str))
+                            yield Completion(opt, -len(current_str),style='italic')
                     return
 ###=======================================
 ## OUR CUSTOM SHELL DEFINITION:
