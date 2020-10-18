@@ -1,7 +1,7 @@
 # Demon Pentest Shell
 A simple shell wrapper for superior logging capabilities. All commands are logged to ```~/log_dps_history.csv``` with with ```When,Host,Network,Who,Where,What```.
 This project requires Python3 and the following Python modules,
-* readline # for TAB autocompletion of $PATH (not cmds)
+* prompt_toolkit # for TAB autocompletion of $PATH and built-in commands
 * os # for path object
 * sys # for exit
 * re # regular expressions
@@ -10,16 +10,13 @@ This project requires Python3 and the following Python modules,
 * getpass # for username
 * datetime # for dates and times
 * subprocess # executes cmds by passing them to `/bin/bash`
+* configparser # parses dps.ini file
 
 ## The Shell
-```
-root@DESKTOP-123710:/tmp/dps# ./dps.py 
-
- *** Welcome to the Demon Pentest Shell (vX.X.X-n)
- *** Type "exit" to return to standard shell.
-
-root@DESKTOP-123710[/tmp/dps]> 
-```
+### Autocomplete Feature
+![Screenshot of auto-complete text](images/screenshots/dps-autocomplete.PNG)
+### Built-In Programming Logic
+![foreach() function screenshot](images/screenshots/dps_foreach.png)
 ## Example Log Output
 ```
 root@demon2:~/Code/dps# cat ~/.log_dps_history.csv 
@@ -36,7 +33,7 @@ When,Host,Network,Who,Where,What
 root@demon2:~/Code/dps#
 ```
 ## Shiny Features
-Because this is built with readline, the shell has a lot of great built-in features. 
+Because this is built with prompt_toolkit, the shell has a lot of great built-in features. 
 * Use pipes for stdout, stderr just like you would in a native shell
 ### Keyboard Shortcuts
 The following keyboard shortcuts are available,
@@ -45,6 +42,12 @@ The following keyboard shortcuts are available,
 * CTRL+C - exit the shell gracefully
 * CTRL+R - search history
 * Up and Down arrows - flip through command history
+### Built-In Commands
+The following are built-in commands,
+* dps_uid_gen - generate a list of UIDs from a CSV file
+* dps_wifi_mon - set a Wi-Fi device into monitor mode
+* dps_stats - show log stats
+* dps_config - set configuration options, such as prompt style
 ## Installation
 To install DPS, simply install the requirements using pip3 and copy the ```dps.py``` into your ```$PATH``` like ```/usr/local/bin```, etc:
 ```
