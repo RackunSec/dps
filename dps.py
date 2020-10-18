@@ -31,7 +31,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_' # TODO not needed?
-VERSION = "v0.10.17-8" # update this each time we push to the repo
+VERSION = "v0.10.17-8a" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -44,7 +44,6 @@ prompt_tail = "# " if UID == "root" else "> " # diff root prompt
 # colored output (does not work with the prompt - causes issues with line wrapping)
 class bcolors:
     WHT = '\033[97m'
-    OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'
     FAIL = '\033[91m'
     ENDC = '\033[0m'
@@ -315,12 +314,14 @@ def dps_wifi_mon(dev): # set an AC device into monitor mode using iw
 def dps_stats():
     file_count = len(os.listdir(os.path.expanduser("~/.dps/")))
     print(bcolors.BOLD+"\n :: DPS Logging Stats :: "+bcolors.ENDC)
-    print("  • Log file count: "+bcolors.BOLD+bcolors.OKBLUE+str(file_count)+bcolors.ENDC)
-    print("  • Log file location: "+bcolors.BOLD+bcolors.OKBLUE+os.path.expanduser("~/.dps/")+bcolors.ENDC)
+    print(f"  • Log file count: {bcolors.ITAL}{bcolors.YELL}"+str(file_count)+bcolors.ENDC)
+    print(f"  • Log file location: {bcolors.ITAL}{bcolors.YELL}"+os.path.expanduser("~/.dps/")+bcolors.ENDC)
     line_count = int(0) # declare this
     for file in os.listdir(os.path.expanduser("~/.dps/")):
         line_count += len(open(os.path.expanduser("~/.dps/")+file).readlines())
-    print("  • Total entries: "+bcolors.BOLD+bcolors.OKBLUE+str(line_count)+bcolors.ENDC+"\n")
+    print(f"  • Total entries: {bcolors.ITAL}{bcolors.YELL}"+str(line_count)+bcolors.ENDC+"\n")
+
+# USER ID FROM CSV GENERATOR:
 def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format specifier from the user
     try:
         with open(csv_file) as nfh: # names file handle
