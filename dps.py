@@ -31,7 +31,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_' # TODO not needed?
-VERSION = "v0.10.17-8c" # update this each time we push to the repo
+VERSION = "v0.10.17-9" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -255,9 +255,14 @@ def foreach(cmd_delta): # FOREACH
         if object != "":
             # now get the variable:
             var = re.sub(".*as\s+([^:]+).*","\\1",cmd_args)
+            cmd_do = re.sub("[^:]+:","",cmd_args)
             if var == "":
                 error("Programming logic syntax error. Please check the documentation.","")
+            elif var not in cmd_do:
+                # the wrong varname was used in the do{} portion:
+                error("Programming logic syntax error. Did you mean to use: $"+var+"?","")
             else:
+                print(f"var: "+var+" cmd_args: "+cmd_args)
                 if re.search("[0-9]+\.\.[0-9]+",object):
                     # we have integers:
                     int_start = int(re.sub("^([0-9]+)\..*","\\1",object))
