@@ -17,6 +17,12 @@ This project requires Python3 and the following Python modules,
 ![Screenshot of auto-complete text](images/screenshots/dps-autocomplete.PNG)
 ### Built-In Programming Logic
 ![foreach() function screenshot](images/screenshots/dps_foreach.png)
+### Shell Themes
+These are set with PRMPT_STYL in the `~/.dps/dps.ini` file or with the `dps_config prompt (0-9)` built-in command.
+![DPS theme 0](images/screenshots/dps_style_0.png)
+![DPS theme 2](images/screenshots/dps_style_2.png)
+![DPS theme 3](images/screenshots/dps_style_3.png)
+
 ## Example Log Output
 ```
 root@demon2:~/Code/dps# cat ~/.log_dps_history.csv 
