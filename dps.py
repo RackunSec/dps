@@ -262,7 +262,6 @@ def foreach(cmd_delta): # FOREACH
                 # the wrong varname was used in the do{} portion:
                 error("Programming logic syntax error. Did you mean to use: $"+var+"?","")
             else:
-                print(f"var: "+var+" cmd_args: "+cmd_args)
                 if re.search("[0-9]+\.\.[0-9]+",object):
                     # we have integers:
                     int_start = int(re.sub("^([0-9]+)\..*","\\1",object))
