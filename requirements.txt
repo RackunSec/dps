@@ -1,6 +1,6 @@
 cmd2
 ifaddr
-shlex
+ushlex
 prompt_toolkit
 configparser
 # everything should already be in the environment from Python3
