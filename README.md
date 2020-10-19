@@ -30,7 +30,7 @@ These are set with PRMPT_STYL in the `~/.dps/dps.ini` file or with the `dps_conf
 #### Boneyard Theme:
 `PRMPT_STYL` value of `2` or `BONEYARD` using `dps_config`
 
-![DPS theme 3](images/screenshots/boneyard_2.png)
+![DPS theme 3](images/screenshots/boneyard_new_2.png)
 #### 1980s Theme:
 `PRMPT_STYL` value of `3` or `1980S` using `dps_config`
 
