@@ -22,8 +22,6 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import Completer, Completion, PathCompleter
 from prompt_toolkit.styles import Style # Style the prompt
 import shlex # Splitting by spaces into a list
-from prompt_toolkit.history import InMemoryHistory
-from prompt_toolkit.buffer import *
 
 ###===========================================
 ## GLOBAL VALUES:
@@ -33,7 +31,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_' # TODO not needed?
-VERSION = "v0.10.18-0" # update this each time we push to the repo
+VERSION = "v0.10.19-1" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -507,14 +505,14 @@ class DPS:
             ### BONEYARD:
             self.style = Style.from_dict({
                 # User input (default text).
-                '':          'italic #ccc',
-                # Prompt.
-                'parens_open': 'bold #3e3e3e',
-                'parens_open_outer': 'bold #8a8a8a',
+                '':          'italic #ffffd7',
+                'parens_open': 'bold #aaa',
+                'parens_open_outer': 'bold #ffffd7',
                 'dps':       'italic #555',
-                'parens_close_outer':    'bold #8a8a8a',
-                'parens_close':    'bold #3e3e3e',
-                'pound':    'bold #eee',
+                'parens_close_outer':    'bold #ffffd7',
+                'parens_close':    'bold #aaa',
+                'pound':    'bold #aaa',
+		'path': 'italic #ffffd7'
             })
         elif PRMPT_STYL == 3:
             #####
