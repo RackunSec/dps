@@ -31,7 +31,7 @@ NET_DEV = "" # store the network device
 HOSTNAME = socket.gethostname() # hostname for logging
 UID = getpass.getuser() # Get the username
 REDIRECTION_PIPE = '_' # TODO not needed?
-VERSION = "v0.10.19-1" # update this each time we push to the repo
+VERSION = "v0.10.19-3" # update this each time we push to the repo
 LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
 LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
 CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -219,34 +219,48 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
             help(args[1])
         else:
             help("")
+    ###---------
+    ## VERSION @override:
+    ###---------
     elif(cmd_delta=="version"):
         print(f"{bcolors.ITAL}{bcolors.OKGREEN}Demon Pentest Shell - "+VERSION+"{bcolors.ENDC}")
+    ###---------
+    ## LS @override:
+    ###---------
     elif(re.match("^ls",cmd_delta)):
         cmd_delta = re.sub("^ls","ls --color=auto",cmd)
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
+    ###---------
+    ## CLEAR @override:
+    ###---------
     elif(cmd_delta == "clear"):
         print("\033c", end="") # we clear our own terminal :)
+    ###---------
+    ## CD @override:
+    ###---------
     elif(re.match("^cd",cmd_delta)):
-        # TODO: make this a single re.sub() call:
+        global OWD # our shell global needs referenced
+        BOWD=OWD # backup the OWD
+        OWD=os.getcwd() # update the current working directory
         dir = re.sub('^cd\s+','',cmd_delta) # take off the path
         dir = re.sub('\s+$','',dir) # remove trailing spaces
-        if (re.match("^cd(\s+)?",dir)): # go home
+        if (re.match("^cd$",dir)): # go home
             dir = os.path.expanduser("~")
         elif (dir==""):
             dir=os.path.expanduser("~")
-        # changin directories using "-" and history:
+        # changing directories using "-" and history:
         elif (dir=="-"):
-            global OWD # our shell global needs referenced
-            BOWD=OWD # backup the OWD
             OWD=os.getcwd()
             os.chdir(BOWD)
+            return # done
         else:
             OWD=os.getcwd() # store the directory that we are in for "-" purposes/historical
             if os.path.isdir(dir): # does it even exist?
                 os.chdir(dir) # goto path
             else:
                 error("Path: '"+dir+"' does not exist.","")
-    else:
+        os.chdir(dir) # chnage directory
+    else: # Any OTHER command:
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
 
 ###===========================================
