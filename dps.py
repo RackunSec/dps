@@ -70,8 +70,12 @@ if not os.path.exists(CONFIG_FILENAME):
     # Add the file
     with open(CONFIG_FILENAME,'a') as config_file:
         ### ADD ALL CONFIG STUFF HERE:
+        ## ADD STYLE:
         config_file.write("[Style]\n")
         config_file.write("PRMPT_STYL = 0\n")
+        ## ADD PATHS:
+        config_file.write("[Paths]\n")
+        config_file.write("MYPATHS = /usr/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin\n")
         print(f"{bcolors.FAIL}[!] Configuration file generated, please restart shell.{bcolors.ENDC}")
         sys.exit(1)
 else:
@@ -82,9 +86,14 @@ else:
         # print(f"CONFIG['Style']['PRMPT_STYL']: "+CONFIG['Style']['PRMPT_STYL']) # DEBUG
         PRMPT_STYL = int(CONFIG['Style']['PRMPT_STYL']) # grab the value of the style
     else:
-        print(f"{bcolors.FAIL}[!]{bcolors.ENDC} Error in config file")
+        print(f"{bcolors.FAIL}[!]{bcolors.ENDC} Error in config file: Add [Style] section to "+CONFIG_FILENAME)
         sys.exit() # die
-    # TODO else: # add it
+    if 'Paths' in CONFIG:
+        PATHS = CONFIG['Paths']['MYPATHS'].split(":") # ARRAY
+    else:
+        print(f"{bcolors.FAIL}[!]{bcolors.ENDC} Error in config file: Add [Paths] section to "+CONFIG_FILENAME)
+        sys.exit() # die
+
 # Get the adapter and IP address:
 for adapter in ADAPTERS: # loop through adapters
     if re.match("^e..[0-9]+",adapter.nice_name):
@@ -236,30 +245,28 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
     elif(cmd_delta == "clear"):
         print("\033c", end="") # we clear our own terminal :)
     ###---------
-    ## CD @override:
+    ## CD @Override:
     ###---------
-    elif(re.match("^cd",cmd_delta)):
-        global OWD # our shell global needs referenced
-        BOWD=OWD # backup the OWD
-        OWD=os.getcwd() # update the current working directory
-        dir = re.sub('^cd\s+','',cmd_delta) # take off the path
-        dir = re.sub('\s+$','',dir) # remove trailing spaces
-        if (re.match("^cd$",dir)): # go home
-            dir = os.path.expanduser("~")
-        elif (dir==""):
-            dir=os.path.expanduser("~")
-        # changing directories using "-" and history:
-        elif (dir=="-"):
-            OWD=os.getcwd()
-            os.chdir(BOWD)
-            return # done
+    elif(cmd_delta.startswith("cd")):
+        global OWD # declare that we want to use this.
+        if len(cmd_delta.split())>1:
+            where_to = cmd_delta.split()[1]
         else:
-            OWD=os.getcwd() # store the directory that we are in for "-" purposes/historical
-            if os.path.isdir(dir): # does it even exist?
-                os.chdir(dir) # goto path
-            else:
-                error("Path: '"+dir+"' does not exist.","")
-        os.chdir(dir) # chnage directory
+            os.chdir(os.path.expanduser("~/"))
+            return
+        if where_to == "-":
+            BOWD = OWD # back it up
+            OWD = os.getcwd()
+            os.chdir(BOWD)
+            return
+        else:
+            OWD = os.getcwd()
+        # Finally, we change directory:
+        if os.path.exists(where_to):
+            os.chdir(where_to)
+            return
+        else:
+            error("Path does not exist: "+where_to,"")
     else: # Any OTHER command:
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
 
@@ -373,38 +380,6 @@ def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
             print("[i] Demon Pentest Shell session ended.\n[i] File logged: "+LOG_FILENAME)
             sys.exit(1)
 
-def list_folder(path):
-    PATHS=os.getenv('PATH').split(":")
-    """
-    Lists folder contents
-    """
-    # starts with "/"
-    if path.startswith(os.path.sep):
-        # absolute path
-        basedir = os.path.dirname(path)
-        contents = os.listdir(basedir)
-        # add back the parent
-        contents = [os.path.join(basedir, d) for d in contents]
-    else:
-        # absolute (home) path:
-        if path.startswith("~/"):
-            contents = os.listdir(os.path.expanduser("~/"))
-        elif path.startswith("./"):
-            contents = os.listdir(os.getcwd())
-        else:
-            # This could be a command so try paths:
-            contents=os.listdir(os.curdir) # current directory
-            for item in contents: # if here, just return it
-                if re.match(path,item):
-                    return contents
-            for path_entry in PATHS:
-                try: # just learnt my first try/catch in Python - woohoo! :D
-                    contents+=os.listdir(path_entry)
-                    contents+=BUILTINS
-                except:
-                    pass
-    return list(set(contents))
-
 ###=======================================
 ## OUR CUSTOM COMPLETER:
 ###=======================================
@@ -413,11 +388,13 @@ class DPSCompleter(Completer):
         self.path_completer = PathCompleter()
     def get_completions(self, document, complete_event):
         word_before_cursor = document.get_word_before_cursor()
+        #print(f"document.current_line:{document.current_line}") # DEBUG
         try:
-            cmd_line = list(map(lambda s: s.lower(), shlex.split(document.current_line)))
+            #cmd_line = list(map(lambda s: s.lower(), shlex.split(document.current_line))) # ta ta, this does not obey the rules!
+            cmd_line = document.current_line.split() # make an array
         except ValueError:
             pass
-        else:
+        else: # code runs ONLY if no exceptions occurred.
             if len(cmd_line)==2:
                 if cmd_line[0] == "dps_config" and cmd_line[1] == "prompt":
                     options = ("0","1","2","3")
@@ -431,16 +408,47 @@ class DPSCompleter(Completer):
                     for opt in options:
                         yield Completion(opt,-len(word_before_cursor))
                 else:
-                    if current_str == "~/":
-                        options = list_folder(os.path.expanduser("~/"))
-                    elif current_str == "./": # TODO
-                        options = list_folder(os.getcwd())
+                    # cd command? :
+                    if cmd_line[0].startswith("cd"):
+                        # Get the path off of the document.current_line object:
+                        path_to = re.sub("(.*)/[^/]+$","\\1/",cmd_line[1])
+                        object = cmd_line[1].split("/")[-1] # last element of course.
+                        #print(f"path_to: {path_to}") # DEBUG
+                        #print(f"object: {object}") # DEBUG
+                        if(path_to.startswith("~/")):
+                            dir = os.path.expanduser(path_to)
+                        else:
+                            dir = path_to
+                        options = os.listdir(dir)
+                        for opt in options:
+                            if opt.startswith(object):
+                                if path_to.startswith("~/"):
+                                    path_to = os.path.expanduser(path_to)
+                                if os.path.isdir(path_to+opt):
+                                    auto_path = path_to+opt+"/"
+                                else:
+                                    auto_path = path_to+opt
+                                yield Completion(auto_path, -len(current_str),style='italic')
+                        return
+                    # Run from cwd? :
+                    elif cmd_line[0].startswith("./"):
+                        cmd = re.sub("./","",cmd_line[0])
+                        options = os.listdir(os.getcwd())
+                        for opt in options:
+                            if opt.startswith(cmd): # that after the ./
+                                yield Completion("./"+opt, -len(current_str),style='italic')
+                        return
+                    # Run from PATH:
                     else:
-                        options = sorted(list_folder(current_str))
-                    for opt in options:
-                        if opt.startswith(current_str):
-                            yield Completion(opt, -len(current_str),style='italic')
-                    return
+                        global PATHS
+                        options = []
+                        for path in PATHS:
+                            options+=os.listdir(path)
+                        for opt in options:
+                            if opt.startswith(current_str):
+                                yield Completion(opt, -len(current_str),style='italic')
+                        return
+
 ###=======================================
 ## OUR CUSTOM SHELL DEFINITION:
 ###=======================================
