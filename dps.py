@@ -425,23 +425,40 @@ class DPSCompleter(Completer):
                     # TAB Autocompleting arguments? :
                     if len(cmd_line) > 1:
                         # Get the path off of the document.current_line object:
+                        current_str = cmd_line[len(cmd_line)-1]
                         path_to = re.sub("(.*)/[^/]+$","\\1/",cmd_line[1])
-                        object = cmd_line[1].split("/")[-1] # last element of course.
+                        object = cmd_line[1].split("/")[-1] # last element, of course.
+                        #print(f"current_str:{current_str}") # DEBUG
                         #print(f"path_to: {path_to}") # DEBUG
                         #print(f"object: {object}") # DEBUG
-                        if(path_to.startswith("~/")):
+                        if path_to.startswith("~/"):
                             dir = os.path.expanduser(path_to)
-                        else:
+                        elif path_to.startswith("/"): # full path:
                             dir = path_to
+                        else:
+                            dir = os.getcwd()
+                        # now that we have defined "dir" let's get the contents:
                         options = os.listdir(dir)
                         for opt in options:
+                            #print(f"opt:{opt}") # DEBUG
+                            #print(f"object:{object}") # DEBUG
+                            #print(f"path_to:{path_to}") # DEBUG
+                            """
+                                object:re
+                                path_to:re
+                                opt:requirements.txt
+                            """
+                            auto_path = "" # use this as starting point.
                             if opt.startswith(object):
-                                if path_to.startswith("~/"):
-                                    path_to = os.path.expanduser(path_to)
-                                if os.path.isdir(path_to+opt):
-                                    auto_path = path_to+opt+"/"
+                                if path_to.startswith("~/"): # expand it if we have ~ shortcut.
+                                    path_to = os.path.expanduser(path_to) # path_to now expanded.
+                                if os.path.isdir(path_to+opt): # if it's a dir, append a fwd shlash.
+                                    auto_path = path_to+opt+"/" # fwd slash appended.
                                 else:
-                                    auto_path = path_to+opt
+                                    if path_to.startswith("./") or path_to.startswith("/") or path_to.startswith("~/"):
+                                        auto_path = path_to+opt # add the entire path
+                                    else:
+                                        auto_path = opt
                                 yield Completion(auto_path, -len(current_str),style='italic')
                         return
                     # Run from cwd? :
@@ -452,8 +469,6 @@ class DPSCompleter(Completer):
                             if opt.startswith(cmd): # that after the ./
                                 yield Completion("./"+opt, -len(current_str),style='italic')
                         return
-                    #elif len(cmd_line) > 1: # we are TAB autocompleting an argument:
-
                     # Run from PATH:
                     else:
                         global PATHS
