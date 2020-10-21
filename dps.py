@@ -95,9 +95,17 @@ else:
         sys.exit() # die
 
 # Get the adapter and IP address:
-for adapter in ADAPTERS: # loop through adapters
-    if re.match("^e..[0-9]+",adapter.nice_name):
-        NET_DEV = adapter.nice_name+":"+adapter.ips[0].ip
+def get_net_info(NET_DEV):
+    for adapter in ADAPTERS: # loop through adapters
+        if re.match("^e..[0-9]+",adapter.nice_name):
+            try:
+                NET_DEV = adapter.nice_name+":"+adapter.ips[0].ip
+            except:
+                error("No network address is ready. PLease get a network address before continuing for logging purposes.")
+                help("dps_config") # show help for config.
+                NET_DEV = "0.0.0.0" # no address?
+get_net_info(NET_DEV)
+
 def log_cmd(cmd): # logging a command to the log file:
     with open(LOG_FILENAME,'a') as log_file:
         log_file.write(str(datetime.datetime.now())+","+HOSTNAME+","+str(NET_DEV)+","+UID+","+os.getcwd()+","+cmd+"\n")
@@ -155,6 +163,7 @@ def help(cmd_name):
   :: {bcolors.BOLD}Options{bcolors.ENDC} ::
    • {bcolors.BOLD}prompt (0-9){bcolors.ENDC} - Set the prompt style.
    • {bcolors.BOLD}--show{bcolors.ENDC} - Show all config options from the dps.ini file.
+   • {bcolors.BOLD}--update-net{bcolors.ENDC} - Get an IP address.
             """)
     else:
             print(f"""
@@ -338,6 +347,11 @@ def dps_config(args): # configure the shell
         dps_update_config(args)
     elif args[0] == "--show":
         print(f"{bcolors.BOLD}[i]{bcolors.ENDC} Current DPS Prompt Theme: {bcolors.ITAL}{bcolors.YELL}"+dps_themes[PRMPT_STYL]+f"{bcolors.ENDC }")
+    elif args[0] == "--update-net":
+        print(f"{bcolors.BOLD}{bcolors.OKGREEN}[i] Obtaining IP address via dhclient... {bcolors.ENDC}")
+        subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", "dhclient -v"])
+        get_net_info(NET_DEV)
+        return
     else:
         print("Usage: dps_config prompt [0-9] for new prompt.")
 
@@ -404,12 +418,12 @@ class DPSCompleter(Completer):
             if len(cmd_line): # at least 1 value
                 current_str = cmd_line[len(cmd_line)-1]
                 if cmd_line[0] == "dps_config":
-                    options = ["prompt","--show"]
+                    options = ["prompt","--show","--update-net"]
                     for opt in options:
                         yield Completion(opt,-len(word_before_cursor))
                 else:
-                    # cd command? :
-                    if cmd_line[0].startswith("cd"):
+                    # TAB Autocompleting arguments? :
+                    if len(cmd_line) > 1:
                         # Get the path off of the document.current_line object:
                         path_to = re.sub("(.*)/[^/]+$","\\1/",cmd_line[1])
                         object = cmd_line[1].split("/")[-1] # last element of course.
@@ -438,10 +452,12 @@ class DPSCompleter(Completer):
                             if opt.startswith(cmd): # that after the ./
                                 yield Completion("./"+opt, -len(current_str),style='italic')
                         return
+                    #elif len(cmd_line) > 1: # we are TAB autocompleting an argument:
+
                     # Run from PATH:
                     else:
                         global PATHS
-                        options = []
+                        options = BUILTINS # make sure we get these
                         for path in PATHS:
                             options+=os.listdir(path)
                         for opt in options:
