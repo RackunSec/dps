@@ -219,12 +219,13 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
 
     # interpolate any variables:
     if re.match(".*\{[^\}]+\}.*",cmd_delta):
-        variable_8008LESS = re.sub("^[^\{]+{([^\}]+)}.*$","\\1",cmd_delta) # TODO interpolate multiple times! (use a while loop) (wait, can you do global replace?)
-        var_re = re.compile("{"+variable_8008LESS+"}")
-        if session.VARIABLES.get(variable_8008LESS): # it exists
-            cmd_delta = re.sub(var_re,session.VARIABLES[variable_8008LESS],cmd_delta)
+        # I chose a very unique variablename here on purposes to not collide.
+        var123_0x031337 = re.sub(r"^[^\{]+{([^\}]+)}.*$","\\1",cmd_delta) # TODO interpolate multiple times! (use a while loop) (wait, can you do global replace?)
+        var_re = re.compile("{"+var123_0x031337+"}")
+        if session.VARIABLES.get(var123_0x031337): # it exists
+            cmd_delta = re.sub(var_re,session.VARIABLES[var123_0x031337],cmd_delta)
         else:
-            error(f"Variable declared not yet defined: {variable_8008LESS}","def")
+            error(f"Variable declared not yet defined: {var123_0x031337}","def")
             return
     log_cmd(cmd_delta) # first, log the command.
     # Handle built-in commands:
@@ -366,15 +367,13 @@ def foreach(cmd_delta): # FOREACH
 ## DPS CUSTOM BUILT-IN SHELL CMD METHODS:
 ###===========================================
 def dps_update_config(args):
-    global CONFIG # declare the global
-    global CONFIG_FILENAME # config file name from global
     if len(args) > 1:
         if args[0] == "prompt": # set it in the config file:
             #try:
-            print(f"{prompt_ui.bcolors['OKGREEN']}[i]{prompt_ui.bcolors['ENDC']} Adding "+str(args[1])+" as PRMPT_STYL in "+CONFIG_FILENAME)
-            CONFIG.set('Style','PRMPT_STYL',args[1]) # TODO int() ?
-            with open(CONFIG_FILENAME, 'w') as config_file:
-                CONFIG.write(config_file)
+            print(f"{prompt_ui.bcolors['OKGREEN']}[i]{prompt_ui.bcolors['ENDC']} Adding "+str(args[1])+" as PRMPT_STYL in "+session.CONFIG_FILENAME)
+            session.CONFIG.set('Style','PRMPT_STYL',args[1]) # TODO int() ?
+            with open(session.CONFIG_FILENAME, 'w') as config_file:
+                session.CONFIG.write(config_file)
             #except:
                 #print(f"{prompt_ui.bcolors['FAIL']}[!] ERROR setting value in ini file.{prompt_ui.bcolors['ENDC']}")
 def dps_config(args): # configure the shell
