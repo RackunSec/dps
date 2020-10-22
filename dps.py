@@ -30,7 +30,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v0.10.22-a" # update this each time we push to the repo
+        self.VERSION = "v0.10.22-dd" # update this each time we push to the repo
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -42,6 +42,40 @@ class Session:
         self.PRMPT_STYL=0 # Prompt style setting
         self.prompt_tail = "# " if self.UID == "root" else "> " # diff root prompt
 
+    def init_config(self): # initialize the configuration:
+        if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")): # create the directory if it does not exist
+            os.mkdir(os.path.join(os.path.expanduser("~"),".dps")) # mkdir
+        # Set up the log file itself:
+        if not os.path.exists(self.LOG_FILENAME):
+            with open(self.LOG_FILENAME,'a') as log_file:
+                log_file.write("When,Host,Network,Who,Where,What\n")
+        # Set up the config file/pull values:
+        if not os.path.exists(self.CONFIG_FILENAME):
+            # Add the file
+            with open(self.CONFIG_FILENAME,'a') as config_file:
+                ### ADD ALL CONFIG STUFF HERE:
+                ## ADD STYLE:
+                config_file.write("[Style]\n")
+                config_file.write("PRMPT_STYL = 0\n")
+                ## ADD PATHS:
+                config_file.write("[Paths]\n")
+                config_file.write("MYPATHS = /usr/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin\n")
+                print(f"{prompt_ui.bcolors['FAIL']}[!] Configuration file generated, please restart shell.{prompt_ui.bcolors['ENDC']}")
+                sys.exit(1)
+        else:
+            # Config file exists, grab the values using configparser:
+            self.CONFIG.read(self.CONFIG_FILENAME) # read the file
+            self.CONFIG.sections() # get all sections of the config
+            if 'Style' in self.CONFIG:
+                session.PRMPT_STYL = int(self.CONFIG['Style']['PRMPT_STYL']) # grab the value of the style
+            else:
+                print(f"{prompt_ui.bcolors['FAIL']}[!]{prompt_ui.bcolors['ENDC']} Error in config file: Add [Style] section to "+self.CONFIG_FILENAME)
+                sys.exit() # die
+            if 'Paths' in self.CONFIG:
+                self.PATHS = self.CONFIG['Paths']['MYPATHS'].split(":") # ARRAY
+            else:
+                print(f"{prompt_ui.bcolors['FAIL']}[!]{prompt_ui.bcolors['ENDC']} Error in config file: Add [Paths] section to "+self.CONFIG_FILENAME)
+                sys.exit() # die
 ### UI STUFF:
 class Prompt_UI:
     bcolors = {
@@ -58,46 +92,14 @@ class Prompt_UI:
         2 : 'BONEYARD',
         3 : '1980S'
     }
-
-session = Session() # Object with Session data and user config
 prompt_ui = Prompt_UI() # Object with UI data
+session = Session() # Object with Session data and user config
+session.init_config() # initialize the configuration.
 
 ###===========================================
 ## PRELIMINARY FILE/DESCRIPTOR WORK:
 ###===========================================
-if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")): # create the directory if it does not exist
-    os.mkdir(os.path.join(os.path.expanduser("~"),".dps")) # mkdir
-# Set up the log file itself:
-if not os.path.exists(session.LOG_FILENAME):
-    with open(session.LOG_FILENAME,'a') as log_file:
-        log_file.write("When,Host,Network,Who,Where,What\n")
-# Set up the config file/pull values:
-if not os.path.exists(session.CONFIG_FILENAME):
-    # Add the file
-    with open(CONFIG_FILENAME,'a') as config_file:
-        ### ADD ALL CONFIG STUFF HERE:
-        ## ADD STYLE:
-        config_file.write("[Style]\n")
-        config_file.write("PRMPT_STYL = 0\n")
-        ## ADD PATHS:
-        config_file.write("[Paths]\n")
-        config_file.write("MYPATHS = /usr/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin\n")
-        print(f"{prompt_ui.bcolors['FAIL']}[!] Configuration file generated, please restart shell.{prompt_ui.bcolors['ENDC']}")
-        sys.exit(1)
-else:
-    # Config file exists, grab the values using configparser:
-    session.CONFIG.read(session.CONFIG_FILENAME) # read the file
-    session.CONFIG.sections() # get all sections of the config
-    if 'Style' in session.CONFIG:
-        session.PRMPT_STYL = int(session.CONFIG['Style']['PRMPT_STYL']) # grab the value of the style
-    else:
-        print(f"{prompt_ui.bcolors['FAIL']}[!]{prompt_ui.bcolors['ENDC']} Error in config file: Add [Style] section to "+session.CONFIG_FILENAME)
-        sys.exit() # die
-    if 'Paths' in session.CONFIG:
-        session.PATHS = session.CONFIG['Paths']['MYPATHS'].split(":") # ARRAY
-    else:
-        print(f"{prompt_ui.bcolors['FAIL']}[!]{prompt_ui.bcolors['ENDC']} Error in config file: Add [Paths] section to "+session.CONFIG_FILENAME)
-        sys.exit() # die
+
 
 def error(msg,cmd):
     print(f"{prompt_ui.bcolors['BOLD']}{prompt_ui.bcolors['FAIL']}[?]{prompt_ui.bcolors['ENDC']}{prompt_ui.bcolors['FAIL']} ¬_¬ wut? -- "+msg+f"{prompt_ui.bcolors['ENDC']}")
