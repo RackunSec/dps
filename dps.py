@@ -38,15 +38,9 @@ class Session:
         self.OWD=os.getcwd() # historical purposes
         # Add all built-in commands here so they populate in the tab-autocompler:
         self.BUILTINS=['dps_stats','dps_uid_gen','dps_wifi_mon','dps_config','foreach']
-        self.variables = {} # all user-defined variables.
+        self.VARIABLES = {} # all user-defined variables.
         self.PRMPT_STYL=0 # Prompt style setting
         self.prompt_tail = "# " if self.UID == "root" else "> " # diff root prompt
-
-    # define a user variable with "def this:that"
-    def set_var(self,var,val):
-        self.variables[var] = val
-    def get_var(self,var):
-        return self.variables[var]
 
 ### UI STUFF:
 class Prompt_UI:
@@ -149,6 +143,14 @@ def help(cmd_name):
    e.g: %f.%L123@client.org
    result: j.doe123@client.org
                 """)
+        elif cmd_name == "def":
+            print(f"""
+ -- {prompt_ui.bcolors['BOLD']}Defining Variables{prompt_ui.bcolors['ENDC']} --
+
+   :: {prompt_ui.bcolors['BOLD']}Syntax{prompt_ui.bcolors['ENDC']} ::
+    • {prompt_ui.bcolors['BOLD']}def (var name): (value){prompt_ui.bcolors['ENDC']}
+            """
+            )
         elif cmd_name == "foreach":
                 print(f"""
  -- {prompt_ui.bcolors['BOLD']}DPS foreach(){prompt_ui.bcolors['ENDC']} --
@@ -212,29 +214,51 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
     cmd_delta = cmd # the delta will be mangled user input as we see later:
     cmd_delta = re.sub("~",os.path.expanduser("~"),cmd_delta)
     cmd_delta = re.sub("^\s+","",cmd_delta) # remove any prepended spaces
+
+    # interpolate any variables:
+    if re.match(".*\{[^\}]+\}.*",cmd_delta):
+        variable_8008LESS = re.sub("^[^\{]+{([^\}]+)}.*$","\\1",cmd_delta) # TODO interpolate multiple times! (use a while loop) (wait, can you do global replace?)
+        var_re = re.compile("{"+variable_8008LESS+"}")
+        if session.VARIABLES.get(variable_8008LESS): # it exists
+            cmd_delta = re.sub(var_re,session.VARIABLES[variable_8008LESS],cmd_delta)
+        else:
+            error(f"Variable declared not yet defined: {variable_8008LESS}","def")
+            return
     log_cmd(cmd_delta) # first, log the command.
     # Handle built-in commands:
-    if (cmd_delta == "exit" or cmd_delta == "quit"):
+    if cmd_delta == "exit" or cmd_delta == "quit":
         exit_gracefully()
     ### Programming logic:
-    elif(cmd_delta.startswith("foreach")): # foreach (file.txt) as line: echo line
+    elif cmd_delta.startswith("foreach"): # foreach (file.txt) as line: echo line
         foreach(cmd_delta) # See "Built-In Programming Logic" section below for definition of method.
-    elif(cmd_delta.startswith("dps_wifi_mon")):
+    elif cmd_delta.startswith("dps_wifi_mon"):
         args = cmd_delta.split()
         if len(args)>1:
             dps_wifi_mon(args[1]) # should be the device
         else:
             error("Not enough arguments.","dps_wifi_mon")
-    elif(re.match("^\s?sudo",cmd_delta)): # for sudo, we will need the command's full path:
+            return
+    elif cmd_delta.startswith("def "): # def var: val
+        args = re.sub("^def\s+","",cmd_delta) # grab the arguments
+        var = re.sub(":.*","",args)
+        val = re.sub("[^:]+:(\s+)?","",args)
+        if var != "" and val != "":
+            print(f"[i] Assigning {val} to {var}") # DEBUG
+            session.VARIABLES[var]=val # set it.
+        else:
+            error("Incorrect syntax for defining a value.","def")
+            return
+    elif re.match("^\s?sudo",cmd_delta): # for sudo, we will need the command's full path:
         sudo_regexp = re.compile("sudo ([^ ]+)")
         cmd_delta=re.sub(sudo_regexp,'sudo $(which \\1)',cmd_delta)
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
-    elif(cmd_delta.startswith("dps_uid_gen")):
+    elif cmd_delta.startswith("dps_uid_gen"):
         args = cmd_delta.split()
         if len(args)==3:
             dps_uid_gen(args[1],args[2]) # should be "format specifier, filename"
         else:
             error("Not enough arguments.","dps_uid_gen")
+            return
     elif(cmd_delta=="dps_stats"):
         dps_stats()
     elif(cmd_delta.startswith("dps_config")):
