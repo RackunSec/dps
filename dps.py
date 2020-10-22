@@ -6,7 +6,7 @@
 #
 # 2020 - Douglas Berdeaux, Matthew Creel
 # (dps)
-
+### IMPORT LIBRARIES:
 import configparser # dps.conf from ~/.dps/
 import os # for the commands, of course. These will be passed ot the shell.
 import subprocess # for piping commands
@@ -21,52 +21,64 @@ from prompt_toolkit.completion import WordCompleter # completer function (feed a
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import Completer, Completion, PathCompleter
 from prompt_toolkit.styles import Style # Style the prompt
-import shlex # Splitting by spaces into a list
 
-###===========================================
-## GLOBAL VALUES:
-###===========================================
-ADAPTERS = ifaddr.get_adapters() # get network device info
-NET_DEV = "" # store the network device
-HOSTNAME = socket.gethostname() # hostname for logging
-UID = getpass.getuser() # Get the username
-REDIRECTION_PIPE = '_' # TODO not needed?
-VERSION = "v0.10.19-3" # update this each time we push to the repo
-LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
-LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+LOG_DAY+"_dps_log.csv" # the log file is based on the date
-CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
-CONFIG = configparser.ConfigParser() # config object
-OWD=os.getcwd() # historical purposes
-# Add all built-in commands here so they populate in the tab-autocompler:
-BUILTINS=['dps_stats','dps_uid_gen','dps_wifi_mon','dps_config','foreach']
-PRMPT_STYL=0 # Prompt style setting
-prompt_tail = "# " if UID == "root" else "> " # diff root prompt
-# colored output (does not work with the prompt - causes issues with line wrapping)
-class bcolors:
-    WHT = '\033[97m'
-    OKGREEN = '\033[92m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    YELL = '\033[33m'
-    ITAL = '\033[3m'
-dps_themes = {
-    0 : 'DPS',
-    1 : 'PIRATE',
-    2 : 'BONEYARD',
-    3 : '1980S'
+### SESSION AND USER INFO:
+class Session:
+    def __init__(self):
+        self.ADAPTERS = ifaddr.get_adapters() # get network device info
+        self.NET_DEV = "" # store the network device
+        self.HOSTNAME = socket.gethostname() # hostname for logging
+        self.UID = getpass.getuser() # Get the username
+        self.REDIRECTION_PIPE = '_' # TODO not needed?
+        self.VERSION = "v0.10.22-a" # update this each time we push to the repo
+        self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
+        self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
+        self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
+        self.CONFIG = configparser.ConfigParser() # config object
+        self.OWD=os.getcwd() # historical purposes
+        # Add all built-in commands here so they populate in the tab-autocompler:
+        self.BUILTINS=['dps_stats','dps_uid_gen','dps_wifi_mon','dps_config','foreach']
+        self.variables = {} # all user-defined variables.
+        self.PRMPT_STYL=0 # Prompt style setting
+        self.prompt_tail = "# " if self.UID == "root" else "> " # diff root prompt
+
+    # define a user variable with "def this:that"
+    def set_var(self,var,val):
+        self.variables[var] = val
+    def get_var(self,var):
+        return self.variables[var]
+
+### UI STUFF:
+class Prompt_UI:
+    bcolors = {
+        'OKGREEN' : '\033[92m',
+        'FAIL' : '\033[91m',
+        'ENDC' : '\033[0m',
+        'BOLD' : '\033[1m',
+        'YELL' : '\033[33m',
+        'ITAL' : '\033[3m'
     }
+    dps_themes = {
+        0 : 'DPS',
+        1 : 'PIRATE',
+        2 : 'BONEYARD',
+        3 : '1980S'
+    }
+
+session = Session() # Object with Session data and user config
+prompt_ui = Prompt_UI() # Object with UI data
+
 ###===========================================
 ## PRELIMINARY FILE/DESCRIPTOR WORK:
 ###===========================================
 if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")): # create the directory if it does not exist
     os.mkdir(os.path.join(os.path.expanduser("~"),".dps")) # mkdir
 # Set up the log file itself:
-if not os.path.exists(LOG_FILENAME):
-    with open(LOG_FILENAME,'a') as log_file:
+if not os.path.exists(session.LOG_FILENAME):
+    with open(session.LOG_FILENAME,'a') as log_file:
         log_file.write("When,Host,Network,Who,Where,What\n")
 # Set up the config file/pull values:
-if not os.path.exists(CONFIG_FILENAME):
+if not os.path.exists(session.CONFIG_FILENAME):
     # Add the file
     with open(CONFIG_FILENAME,'a') as config_file:
         ### ADD ALL CONFIG STUFF HERE:
@@ -76,39 +88,43 @@ if not os.path.exists(CONFIG_FILENAME):
         ## ADD PATHS:
         config_file.write("[Paths]\n")
         config_file.write("MYPATHS = /usr/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin\n")
-        print(f"{bcolors.FAIL}[!] Configuration file generated, please restart shell.{bcolors.ENDC}")
+        print(f"{prompt_ui.bcolors['FAIL']}[!] Configuration file generated, please restart shell.{prompt_ui.bcolors['ENDC']}")
         sys.exit(1)
 else:
     # Config file exists, grab the values using configparser:
-    CONFIG.read(CONFIG_FILENAME) # read the file
-    CONFIG.sections() # get all sections of the config
-    if 'Style' in CONFIG:
-        # print(f"CONFIG['Style']['PRMPT_STYL']: "+CONFIG['Style']['PRMPT_STYL']) # DEBUG
-        PRMPT_STYL = int(CONFIG['Style']['PRMPT_STYL']) # grab the value of the style
+    session.CONFIG.read(session.CONFIG_FILENAME) # read the file
+    session.CONFIG.sections() # get all sections of the config
+    if 'Style' in session.CONFIG:
+        session.PRMPT_STYL = int(session.CONFIG['Style']['PRMPT_STYL']) # grab the value of the style
     else:
-        print(f"{bcolors.FAIL}[!]{bcolors.ENDC} Error in config file: Add [Style] section to "+CONFIG_FILENAME)
+        print(f"{prompt_ui.bcolors['FAIL']}[!]{prompt_ui.bcolors['ENDC']} Error in config file: Add [Style] section to "+session.CONFIG_FILENAME)
         sys.exit() # die
-    if 'Paths' in CONFIG:
-        PATHS = CONFIG['Paths']['MYPATHS'].split(":") # ARRAY
+    if 'Paths' in session.CONFIG:
+        session.PATHS = session.CONFIG['Paths']['MYPATHS'].split(":") # ARRAY
     else:
-        print(f"{bcolors.FAIL}[!]{bcolors.ENDC} Error in config file: Add [Paths] section to "+CONFIG_FILENAME)
+        print(f"{prompt_ui.bcolors['FAIL']}[!]{prompt_ui.bcolors['ENDC']} Error in config file: Add [Paths] section to "+session.CONFIG_FILENAME)
         sys.exit() # die
+
+def error(msg,cmd):
+    print(f"{prompt_ui.bcolors['BOLD']}{prompt_ui.bcolors['FAIL']}[?]{prompt_ui.bcolors['ENDC']}{prompt_ui.bcolors['FAIL']} ¬_¬ wut? -- "+msg+f"{prompt_ui.bcolors['ENDC']}")
+    if cmd != "":
+        help(cmd) # show the Help dialog from the listings above
 
 # Get the adapter and IP address:
-def get_net_info(NET_DEV):
-    for adapter in ADAPTERS: # loop through adapters
+def get_net_info():
+    for adapter in session.ADAPTERS: # loop through adapters
         if re.match("^e..[0-9]+",adapter.nice_name):
             try:
-                NET_DEV = adapter.nice_name+":"+adapter.ips[0].ip
+                session.NET_DEV = adapter.nice_name+":"+adapter.ips[0].ip
             except:
-                error("No network address is ready. PLease get a network address before continuing for logging purposes.")
+                error("No network address is ready. Please get a network address before continuing for logging purposes.","")
                 help("dps_config") # show help for config.
-                NET_DEV = "0.0.0.0" # no address?
-get_net_info(NET_DEV)
+                session.NET_DEV = "0.0.0.0" # no address?
+get_net_info()
 
 def log_cmd(cmd): # logging a command to the log file:
-    with open(LOG_FILENAME,'a') as log_file:
-        log_file.write(str(datetime.datetime.now())+","+HOSTNAME+","+str(NET_DEV)+","+UID+","+os.getcwd()+","+cmd+"\n")
+    with open(session.LOG_FILENAME,'a') as log_file:
+        log_file.write(str(datetime.datetime.now())+","+session.HOSTNAME+","+str(session.NET_DEV)+","+session.UID+","+os.getcwd()+","+cmd+"\n")
     return 0
 
 ###===========================================
@@ -118,80 +134,76 @@ def help(cmd_name):
     if cmd_name != "":
         if cmd_name == "dps_uid_gen":
                 print(f"""
- -- {bcolors.BOLD}DPS UID Generator Usage{bcolors.ENDC} --
+ -- {prompt_ui.bcolors['BOLD']}DPS UID Generator Usage{prompt_ui.bcolors['ENDC']} --
 
-  {bcolors.ITAL}{bcolors.YELL}dps_uid_gen {bcolors.ENDC}(format specifier) (csv file)
+  {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}dps_uid_gen {prompt_ui.bcolors['ENDC']}(format specifier) (csv file)
 
-  :: {bcolors.BOLD}Format Specifiers{bcolors.ENDC} ::
-   • {bcolors.BOLD}%F{bcolors.ENDC}: First Name.
-   • {bcolors.BOLD}%f{bcolors.ENDC}: First Initial.
-   • {bcolors.BOLD}%L{bcolors.ENDC}: Last Name.
-   • {bcolors.BOLD}%l{bcolors.ENDC}: Last Initial.
+  :: {prompt_ui.bcolors['BOLD']}Format Specifiers{prompt_ui.bcolors['ENDC']} ::
+   • {prompt_ui.bcolors['BOLD']}%F{prompt_ui.bcolors['ENDC']}: First Name.
+   • {prompt_ui.bcolors['BOLD']}%f{prompt_ui.bcolors['ENDC']}: First Initial.
+   • {prompt_ui.bcolors['BOLD']}%L{prompt_ui.bcolors['ENDC']}: Last Name.
+   • {prompt_ui.bcolors['BOLD']}%l{prompt_ui.bcolors['ENDC']}: Last Initial.
 
-  :: {bcolors.BOLD}Notes:{bcolors.BOLD} ::
+  :: {prompt_ui.bcolors['BOLD']}Notes:{prompt_ui.bcolors['BOLD']} ::
   You can add anything else you wish, such as,
    e.g: %f.%L123@client.org
    result: j.doe123@client.org
                 """)
         elif cmd_name == "foreach":
                 print(f"""
- -- {bcolors.BOLD}DPS foreach(){bcolors.ENDC} --
+ -- {prompt_ui.bcolors['BOLD']}DPS foreach(){prompt_ui.bcolors['ENDC']} --
 
-  {bcolors.ITAL}{bcolors.YELL}foreach() {bcolors.ENDC}Loop function.
+  {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}foreach() {prompt_ui.bcolors['ENDC']}Loop function.
 
-  :: {bcolors.BOLD} Syntax Examples{bcolors.ENDC} ::
-   • {bcolors.BOLD}foreach({bcolors.ENDC}/path/to/file.txt{bcolors.BOLD}){bcolors.ENDC} as line: echo $line
-   • {bcolors.BOLD}foreach({bcolors.ENDC}m..n{bcolors.BOLD}){bcolors.ENDC} as int: nmap 192.168.1.$int
+  :: {prompt_ui.bcolors['BOLD']} Syntax Examples{prompt_ui.bcolors['ENDC']} ::
+   • {prompt_ui.bcolors['BOLD']}foreach({prompt_ui.bcolors['ENDC']}/path/to/file.txt{prompt_ui.bcolors['BOLD']}){prompt_ui.bcolors['ENDC']} as line: echo $line
+   • {prompt_ui.bcolors['BOLD']}foreach({prompt_ui.bcolors['ENDC']}m..n{prompt_ui.bcolors['BOLD']}){prompt_ui.bcolors['ENDC']} as int: nmap 192.168.1.$int
                 """)
         elif cmd_name == "dps_wifi_mon":
             print(f"""
- -- {bcolors.BOLD}DPS Wi-Fi Monitor Mode{bcolors.ENDC} --
+ -- {prompt_ui.bcolors['BOLD']}DPS Wi-Fi Monitor Mode{prompt_ui.bcolors['ENDC']} --
 
-  {bcolors.ITAL}{bcolors.YELL}dps_wifi_mon {bcolors.ENDC}(wi-fi device)
+  {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}dps_wifi_mon {prompt_ui.bcolors['ENDC']}(wi-fi device)
 
-  :: {bcolors.BOLD}Requirements{bcolors.ENDC} ::
-   • {bcolors.BOLD}iw{bcolors.ENDC} - used to set up the Wi-Fi adapter.
-   • {bcolors.BOLD}airmon-ng{bcolors.ENDC} - Used to kill processes.
-   • {bcolors.BOLD}ifconfig{bcolors.ENDC} - used to turn on and off the adapter.
+  :: {prompt_ui.bcolors['BOLD']}Requirements{prompt_ui.bcolors['ENDC']} ::
+   • {prompt_ui.bcolors['BOLD']}iw{prompt_ui.bcolors['ENDC']} - used to set up the Wi-Fi adapter.
+   • {prompt_ui.bcolors['BOLD']}airmon-ng{prompt_ui.bcolors['ENDC']} - Used to kill processes.
+   • {prompt_ui.bcolors['BOLD']}ifconfig{prompt_ui.bcolors['ENDC']} - used to turn on and off the adapter.
             """)
         elif cmd_name == "dps_config":
             print(f"""
- -- {bcolors.BOLD}DPS Configuration Settings{bcolors.ENDC} --
+ -- {prompt_ui.bcolors['BOLD']}DPS Configuration Settings{prompt_ui.bcolors['ENDC']} --
 
-  {bcolors.ITAL}{bcolors.YELL}dps_config {bcolors.ENDC}(Options)
+  {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}dps_config {prompt_ui.bcolors['ENDC']}(Options)
 
-  :: {bcolors.BOLD}Options{bcolors.ENDC} ::
-   • {bcolors.BOLD}prompt (0-9){bcolors.ENDC} - Set the prompt style.
-   • {bcolors.BOLD}--show{bcolors.ENDC} - Show all config options from the dps.ini file.
-   • {bcolors.BOLD}--update-net{bcolors.ENDC} - Get an IP address.
+  :: {prompt_ui.bcolors['BOLD']}Options{prompt_ui.bcolors['ENDC']} ::
+   • {prompt_ui.bcolors['BOLD']}prompt (0-9){prompt_ui.bcolors['ENDC']} - Set the prompt style.
+   • {prompt_ui.bcolors['BOLD']}--show{prompt_ui.bcolors['ENDC']} - Show all config options from the dps.ini file.
+   • {prompt_ui.bcolors['BOLD']}--update-net{prompt_ui.bcolors['ENDC']} - Get an IP address.
             """)
     else:
             print(f"""
- -- {bcolors.BOLD}Demon Pentest Shell{bcolors.ENDC} --
+ -- {prompt_ui.bcolors['BOLD']}Demon Pentest Shell{prompt_ui.bcolors['ENDC']} --
 
- {bcolors.BOLD}:: Built-In Commands ::{bcolors.ENDC}
-  • {bcolors.BOLD}help{bcolors.ENDC}: this cruft.
-  • {bcolors.BOLD}dps_stats{bcolors.ENDC}: all logging stats.
-  • {bcolors.BOLD}dps_uid_gen{bcolors.ENDC}: generate UIDs using "Firstname,Lastname" CSV file.
-  • {bcolors.BOLD}dps_wifi_mon{bcolors.ENDC}: Set Wi-Fi radio to RFMON.
-  • {bcolors.BOLD}dps_config{bcolors.ENDC}: Set prompt and shell options.
-  • {bcolors.BOLD}exit/quit{bcolors.ENDC}: return to terminal OS shell.
+ {prompt_ui.bcolors['BOLD']}:: Built-In Commands ::{prompt_ui.bcolors['ENDC']}
+  • {prompt_ui.bcolors['BOLD']}help{prompt_ui.bcolors['ENDC']}: this cruft.
+  • {prompt_ui.bcolors['BOLD']}dps_stats{prompt_ui.bcolors['ENDC']}: all logging stats.
+  • {prompt_ui.bcolors['BOLD']}dps_uid_gen{prompt_ui.bcolors['ENDC']}: generate UIDs using "Firstname,Lastname" CSV file.
+  • {prompt_ui.bcolors['BOLD']}dps_wifi_mon{prompt_ui.bcolors['ENDC']}: Set Wi-Fi radio to RFMON.
+  • {prompt_ui.bcolors['BOLD']}dps_config{prompt_ui.bcolors['ENDC']}: Set prompt and shell options.
+  • {prompt_ui.bcolors['BOLD']}exit/quit{prompt_ui.bcolors['ENDC']}: return to terminal OS shell.
 
- {bcolors.BOLD}:: Programming Logic ::{bcolors.ENDC}
-  • {bcolors.BOLD}foreach(){bcolors.ENDC}: perform for loop on file contents or integer range.
+ {prompt_ui.bcolors['BOLD']}:: Programming Logic ::{prompt_ui.bcolors['ENDC']}
+  • {prompt_ui.bcolors['BOLD']}foreach(){prompt_ui.bcolors['ENDC']}: perform for loop on file contents or integer range.
 
- {bcolors.BOLD}:: Keyboard Shortcuts ::{bcolors.ENDC}
-  • {bcolors.BOLD}CTRL+R{bcolors.ENDC}: Search command history.
-  • {bcolors.BOLD}CTRL+A{bcolors.ENDC}: Move cursor to beginning of line (similar to "HOME" key).
-  • {bcolors.BOLD}CTRL+P{bcolors.ENDC}: Place the previously ran command into the command line.
-  • {bcolors.BOLD}CTRL+B{bcolors.ENDC}: Move one character before cursor.
-  • {bcolors.BOLD}ALT+F{bcolors.ENDC}:  Move one character forward.
-  • {bcolors.BOLD}CTRL+C/D{bcolors.ENDC}: Exit the shell gracefully.
+ {prompt_ui.bcolors['BOLD']}:: Keyboard Shortcuts ::{prompt_ui.bcolors['ENDC']}
+  • {prompt_ui.bcolors['BOLD']}CTRL+R{prompt_ui.bcolors['ENDC']}: Search command history.
+  • {prompt_ui.bcolors['BOLD']}CTRL+A{prompt_ui.bcolors['ENDC']}: Move cursor to beginning of line (similar to "HOME" key).
+  • {prompt_ui.bcolors['BOLD']}CTRL+P{prompt_ui.bcolors['ENDC']}: Place the previously ran command into the command line.
+  • {prompt_ui.bcolors['BOLD']}CTRL+B{prompt_ui.bcolors['ENDC']}: Move one character before cursor.
+  • {prompt_ui.bcolors['BOLD']}ALT+F{prompt_ui.bcolors['ENDC']}:  Move one character forward.
+  • {prompt_ui.bcolors['BOLD']}CTRL+C/D{prompt_ui.bcolors['ENDC']}: Exit the shell gracefully.
             """)
-def error(msg,cmd):
-    print(f"{bcolors.BOLD}{bcolors.FAIL}[?]{bcolors.ENDC}{bcolors.FAIL} ¬_¬ wut? -- "+msg+f"{bcolors.ENDC}")
-    if cmd != "":
-        help(cmd) # show the Help dialog from the listings above
 
 ###===========================================
 ## COMMAND HOOKS:
@@ -241,7 +253,7 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
     ## VERSION @override:
     ###---------
     elif(cmd_delta=="version"):
-        print(f"{bcolors.ITAL}{bcolors.OKGREEN}Demon Pentest Shell - "+VERSION+"{bcolors.ENDC}")
+        print(f"{prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['OKGREEN']}Demon Pentest Shell - "+session.VERSION+"{prompt_ui.bcolors['ENDC']}")
     ###---------
     ## LS @override:
     ###---------
@@ -333,24 +345,24 @@ def dps_update_config(args):
     if len(args) > 1:
         if args[0] == "prompt": # set it in the config file:
             #try:
-            print(f"{bcolors.OKGREEN}[i]{bcolors.ENDC} Adding "+str(args[1])+" as PRMPT_STYL in "+CONFIG_FILENAME)
+            print(f"{prompt_ui.bcolors['OKGREEN']}[i]{prompt_ui.bcolors['ENDC']} Adding "+str(args[1])+" as PRMPT_STYL in "+CONFIG_FILENAME)
             CONFIG.set('Style','PRMPT_STYL',args[1]) # TODO int() ?
             with open(CONFIG_FILENAME, 'w') as config_file:
                 CONFIG.write(config_file)
             #except:
-                #print(f"{bcolors.FAIL}[!] ERROR setting value in ini file.{bcolors.ENDC}")
+                #print(f"{prompt_ui.bcolors['FAIL']}[!] ERROR setting value in ini file.{prompt_ui.bcolors['ENDC']}")
 def dps_config(args): # configure the shell
-    global PRMPT_STYL # this is the prompt color setting
+    session.PRMPT_STYL # this is the prompt color setting
     if args[0] == "prompt" and args[1] != "":
-        PRMPT_STYL = int(args[1])
+        session.PRMPT_STYL = int(args[1])
         # Now set it for session / preference in the dps.ini file:
         dps_update_config(args)
     elif args[0] == "--show":
-        print(f"{bcolors.BOLD}[i]{bcolors.ENDC} Current DPS Prompt Theme: {bcolors.ITAL}{bcolors.YELL}"+dps_themes[PRMPT_STYL]+f"{bcolors.ENDC }")
+        print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Current DPS Prompt Theme: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+dps_themes[PRMPT_STYL]+f"{prompt_ui.bcolors['ENDC'] }")
     elif args[0] == "--update-net":
-        print(f"{bcolors.BOLD}{bcolors.OKGREEN}[i] Obtaining IP address via dhclient... {bcolors.ENDC}")
+        print(f"{prompt_ui.bcolors['BOLD']}{prompt_ui.bcolors['OKGREEN']}[i] Obtaining IP address via dhclient... {prompt_ui.bcolors['ENDC']}")
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", "dhclient -v"])
-        get_net_info(NET_DEV)
+        get_net_info(session.NET_DEV)
         return
     else:
         print("Usage: dps_config prompt [0-9] for new prompt.")
@@ -360,13 +372,13 @@ def dps_wifi_mon(dev): # set an AC device into monitor mode using iw
 # stats for shell logging
 def dps_stats():
     file_count = len(os.listdir(os.path.expanduser("~/.dps/")))
-    print(bcolors.BOLD+"\n :: DPS Logging Stats :: "+bcolors.ENDC)
-    print(f"  • Log file count: {bcolors.ITAL}{bcolors.YELL}"+str(file_count)+bcolors.ENDC)
-    print(f"  • Log file location: {bcolors.ITAL}{bcolors.YELL}"+os.path.expanduser("~/.dps/")+bcolors.ENDC)
+    print(prompt_ui.bcolors['BOLD']+"\n :: DPS Logging Stats :: "+prompt_ui.bcolors['ENDC'])
+    print(f"  • Log file count: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+str(file_count)+prompt_ui.bcolors['ENDC'])
+    print(f"  • Log file location: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+os.path.expanduser("~/.dps/")+prompt_ui.bcolors['ENDC'])
     line_count = int(0) # declare this
     for file in os.listdir(os.path.expanduser("~/.dps/")):
         line_count += len(open(os.path.expanduser("~/.dps/")+file).readlines())
-    print(f"  • Total entries: {bcolors.ITAL}{bcolors.YELL}"+str(line_count)+bcolors.ENDC+"\n")
+    print(f"  • Total entries: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+str(line_count)+prompt_ui.bcolors['ENDC']+"\n")
 
 # USER ID FROM CSV GENERATOR:
 def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format specifier from the user
@@ -383,15 +395,15 @@ def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format spec
                 formatted = re.sub("%L",name[1].rstrip(),formatted)
                 print(formatted)
     except:
-        print(bcolors.FAIL+"[!]"+bcolors.ENDC+" Could not open file: "+csv_file+" for reading.")
+        print(prompt_ui.bcolors['FAIL']+"[!]"+prompt_ui.bcolors['ENDC']+" Could not open file: "+csv_file+" for reading.")
 
 ###===========================================
 ## GENERAL METHODS FOR HANDLING THINGS:
 ###===========================================
 def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
-        ans = input(f"{bcolors.FAIL}\n[?] Do you wish to quit the {bcolors.ITAL}Demon Pentest Shell{bcolors.ENDC}{bcolors.FAIL} (y/n)? {bcolors.ENDC}")
+        ans = input(f"{prompt_ui.bcolors['FAIL']}\n[?] Do you wish to quit the {prompt_ui.bcolors['ITAL']}Demon Pentest Shell{prompt_ui.bcolors['ENDC']}{prompt_ui.bcolors['FAIL']} (y/n)? {prompt_ui.bcolors['ENDC']}")
         if ans == "y":
-            print("[i] Demon Pentest Shell session ended.\n[i] File logged: "+LOG_FILENAME)
+            print("[i] Demon Pentest Shell session ended.\n[i] File logged: "+session.LOG_FILENAME)
             sys.exit(1)
 
 ###=======================================
@@ -471,9 +483,8 @@ class DPSCompleter(Completer):
                         return
                     # Run from PATH:
                     else:
-                        global PATHS
-                        options = BUILTINS # make sure we get these
-                        for path in PATHS:
+                        options = session.BUILTINS # make sure we get these
+                        for path in session.PATHS:
                             options+=os.listdir(path)
                         for opt in options:
                             if opt.startswith(current_str):
@@ -487,8 +498,7 @@ class DPS:
     def set_message(self):
         # This defines the prompt content:
         self.path = os.getcwd()+"/"
-        global UID
-        if PRMPT_STYL == 1: # MINIMAL SKULL
+        if session.PRMPT_STYL == 1: # MINIMAL SKULL
             self.message = [
                 ('class:parens_open_outer','('),
                 ('class:parens_open','('),
@@ -497,7 +507,7 @@ class DPS:
                 ('class:parens_close_outer',')'),
                 ('class:skull','☠️  '),
             ]
-        elif PRMPT_STYL == 2 or PRMPT_STYL == 3 or PRMPT_STYL == 4: # MINIMAL
+        elif session.PRMPT_STYL == 2 or session.PRMPT_STYL == 3 or session.PRMPT_STYL == 4: # MINIMAL
             self.message = [
                 ('class:parens_open_outer','('),
                 ('class:parens_open','('),
@@ -506,17 +516,17 @@ class DPS:
                 ('class:path',self.path),
                 ('class:parens_close',')'),
                 ('class:parens_close_outer',')'),
-                ('class:prompt',prompt_tail)
+                ('class:prompt',session.prompt_tail)
             ]
-        elif PRMPT_STYL == 0: # DEFAULT SHELL
+        elif session.PRMPT_STYL == 0: # DEFAULT SHELL
             self.message = [
-                ('class:username', UID),
+                ('class:username', session.UID),
                 ('class:at','@'),
-                ('class:host',HOSTNAME),
+                ('class:host',session.HOSTNAME),
                 ('class:colon',':'),
                 ('class:path',self.path),
                 ('class:dps','(dps)'),
-                ('class:pound',prompt_tail),
+                ('class:pound',session.prompt_tail),
             ]
 
     def __init__(self):
@@ -526,7 +536,7 @@ class DPS:
         ###===========================================
         #####
         ### THIS THEME WILL BE DEFAULT WITH DPS.INI:
-        if PRMPT_STYL == 0:
+        if session.PRMPT_STYL == 0:
                 self.style = Style.from_dict({
                     # User input (default text).
                     '':          '#fff',
@@ -541,7 +551,7 @@ class DPS:
                 })
         #####
         ### MINIMAL SKULL THEME
-        elif PRMPT_STYL == 1:
+        elif session.PRMPT_STYL == 1:
                 self.style = Style.from_dict({
                     # User input (default text).
                     '':          'italic #af5f00',
@@ -553,7 +563,7 @@ class DPS:
                     'parens_close':    '#af0000',
                     'skull':    '#8e8e8e',
                 })
-        elif PRMPT_STYL == 2:
+        elif session.PRMPT_STYL == 2:
             #####
             ### BONEYARD:
             self.style = Style.from_dict({
@@ -567,7 +577,7 @@ class DPS:
                 'pound':    'bold #aaa',
 		'path': 'italic #ffffd7'
             })
-        elif PRMPT_STYL == 3:
+        elif session.PRMPT_STYL == 3:
             #####
             ### 1980s THEME:
             self.style = Style.from_dict({
@@ -621,7 +631,7 @@ def shell(dps):
 
 # standard boilerplate
 if __name__ == "__main__":
-    print(bcolors.BOLD+"\n *** Welcome to the Demon Pentest Shell ("+VERSION+")\n *** Type \"exit\" to return to standard shell.\n"+bcolors.ENDC)
+    print(prompt_ui.bcolors['BOLD']+"\n *** Welcome to the Demon Pentest Shell ("+session.VERSION+")\n *** Type \"exit\" to return to standard shell.\n"+prompt_ui.bcolors['ENDC'])
     dps = DPS() # Prompt-toolkit class instance
     while True:
         shell(dps) #start the app
