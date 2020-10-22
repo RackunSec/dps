@@ -30,7 +30,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v0.10.22-dd" # update this each time we push to the repo
+        self.VERSION = "v0.10.22-ef" # update this each time we push to the repo
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -246,7 +246,7 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
         var = re.sub(":.*","",args)
         val = re.sub("[^:]+:(\s+)?","",args)
         if var != "" and val != "":
-            print(f"[i] Assigning {val} to {var}") # DEBUG
+            print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Assigning {prompt_ui.bcolors['BOLD']}{prompt_ui.bcolors['ITAL']}{val}{prompt_ui.bcolors['ENDC']} to {prompt_ui.bcolors['BOLD']}{prompt_ui.bcolors['ITAL']}{var}{prompt_ui.bcolors['ENDC']}") # DEBUG
             session.VARIABLES[var]=val # set it.
         else:
             error("Incorrect syntax for defining a value.","def")
@@ -428,7 +428,7 @@ def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format spec
 def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
         ans = input(f"{prompt_ui.bcolors['FAIL']}\n[?] Do you wish to quit the {prompt_ui.bcolors['ITAL']}Demon Pentest Shell{prompt_ui.bcolors['ENDC']}{prompt_ui.bcolors['FAIL']} (y/n)? {prompt_ui.bcolors['ENDC']}")
         if ans == "y":
-            print("[i] Demon Pentest Shell session ended.\n[i] File logged: "+session.LOG_FILENAME)
+            print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Demon Pentest Shell session ended.\n{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} File logged: "+session.LOG_FILENAME)
             sys.exit(1)
 
 ###=======================================
@@ -439,9 +439,8 @@ class DPSCompleter(Completer):
         self.path_completer = PathCompleter()
     def get_completions(self, document, complete_event):
         word_before_cursor = document.get_word_before_cursor()
-        #print(f"document.current_line:{document.current_line}") # DEBUG
+        #print(f"word_before_cursor:{word_before_cursor}") # DEBUG
         try:
-            #cmd_line = list(map(lambda s: s.lower(), shlex.split(document.current_line))) # ta ta, this does not obey the rules!
             cmd_line = document.current_line.split() # make an array
         except ValueError:
             pass
@@ -452,6 +451,12 @@ class DPSCompleter(Completer):
                     for opt in options:
                         yield Completion(opt,-len(word_before_cursor))
                     return
+            if document.get_word_before_cursor() == "": # trying to cat a file in the cwd perhaps?
+                options = os.listdir(os.getcwd())
+                for opt in options:
+                    yield Completion(opt, 0,style='italic')
+                return
+
             if len(cmd_line): # at least 1 value
                 current_str = cmd_line[len(cmd_line)-1]
                 if cmd_line[0] == "dps_config":
@@ -459,6 +464,7 @@ class DPSCompleter(Completer):
                     for opt in options:
                         yield Completion(opt,-len(word_before_cursor))
                 else:
+                    #print(f"cmd_line:{cmd_line}") # DEBUG
                     # TAB Autocompleting arguments? :
                     if len(cmd_line) > 1:
                         # Get the path off of the document.current_line object:
@@ -474,8 +480,9 @@ class DPSCompleter(Completer):
                             dir = path_to
                         else:
                             dir = os.getcwd()
+                        #print(f"path_to:{path_to}") # DEBUG
                         # now that we have defined "dir" let's get the contents:
-                        options = os.listdir(dir)
+                        options = list(set(os.listdir(dir))) # this will only sshow unique values.
                         for opt in options:
                             #print(f"opt:{opt}") # DEBUG
                             #print(f"object:{object}") # DEBUG
