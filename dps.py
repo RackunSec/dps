@@ -30,7 +30,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v0.10.22-ef" # update this each time we push to the repo
+        self.VERSION = "v0.10.22-f" # update this each time we push to the repo
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -442,6 +442,7 @@ class DPSCompleter(Completer):
         #print(f"word_before_cursor:{word_before_cursor}") # DEBUG
         try:
             cmd_line = document.current_line.split() # make an array
+            #print(f"cmd_line:{cmd_line}") # DEBUG
         except ValueError:
             pass
         else: # code runs ONLY if no exceptions occurred.
@@ -464,9 +465,32 @@ class DPSCompleter(Completer):
                     for opt in options:
                         yield Completion(opt,-len(word_before_cursor))
                 else:
-                    #print(f"cmd_line:{cmd_line}") # DEBUG
                     # TAB Autocompleting arguments? :
                     if len(cmd_line) > 1:
+                        if "/" in cmd_line[-1]: # directory traversal?
+                            if re.match("^[A-Za-z0-9\.]",cmd_line[-1]) and cmd_line[-1].endswith("/"): # e.g.: cd Documents/{TAB TAB}
+                                dir = os.getcwd()+"/"+cmd_line[-1]
+                                options = os.listdir(dir)
+                                for opt in options:
+                                    opt2 = dir+opt
+                                    if os.path.isdir(opt2):
+                                        opt2 += "/" # this is a directory
+                                    yield Completion(opt2, -len(current_str),style='italic')
+                                return
+                            elif re.match("^[A-Za-z0-9\.]",cmd_line[-1]) and (not cmd_line[-1].endswith("/")): # e.g.: cd Documents/Te{TAB TAB}
+                                tab_com = current_str.split("/")[-1]
+                                dir = os.getcwd()+"/"+re.sub("[^/]+$","",current_str)
+                                #dir = os.getcwd()+"/"
+                                #print(f"dir:{dir}") # DEBUG
+                                #print(f"current_str:{current_str}") # DEBUG
+                                #print(f"tab_com:{tab_com}") # DEBUG
+                                options = os.listdir(dir)
+                                for opt in options:
+                                    if opt.startswith(tab_com):
+                                        yield Completion(dir+opt, -len(current_str),style='italic')
+                                return
+
+
                         # Get the path off of the document.current_line object:
                         current_str = cmd_line[len(cmd_line)-1]
                         path_to = re.sub("(.*)/[^/]+$","\\1/",cmd_line[1])
