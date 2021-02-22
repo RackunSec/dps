@@ -13,6 +13,8 @@ This project requires Python3 and the following Python modules,
 * configparser # parses dps.ini file
 
 ## The Shell
+### INI file
+The ~/.dps/dps.ini file contains the user-svaed or defined settings and variables. See the dps.ini.example file.
 ### Autocomplete Feature
 ![Screenshot of auto-complete text](images/screenshots/dps-autocomplete.PNG)
 ### Built-In Programming Logic
