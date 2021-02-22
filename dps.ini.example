@@ -3,10 +3,8 @@ prmpt_styl = 2
 
 [Paths]
 mypaths = /usr/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin
+DPS_bin_path=/cyberpunk/shells/dps/
 
 [Aliases]
 grep = grep --color
 egrep = egrep --color
-
-[DPS_bin_path]
-/cyberpunk/shells/dps/
