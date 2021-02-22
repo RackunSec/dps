@@ -30,17 +30,18 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v0.10.22-f" # update this each time we push to the repo
+        self.VERSION = "v1.2.22-a" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
         self.CONFIG = configparser.ConfigParser() # config object
         self.OWD=os.getcwd() # historical purposes
         # Add all built-in commands here so they populate in the tab-autocompler:
-        self.BUILTINS=['dps_stats','dps_uid_gen','dps_wifi_mon','dps_config','foreach']
+        self.BUILTINS=['dps_stats','dps_uid_gen','dps_wifi_mon','dps_config','foreach','dps_alias']
         self.VARIABLES = {} # all user-defined variables.
         self.PRMPT_STYL=0 # Prompt style setting
         self.prompt_tail = "# " if self.UID == "root" else "> " # diff root prompt
+        self.ALIASES = {} # all user-defined aliases
 
     def init_config(self): # initialize the configuration:
         if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")): # create the directory if it does not exist
@@ -66,16 +67,22 @@ class Session:
             # Config file exists, grab the values using configparser:
             self.CONFIG.read(self.CONFIG_FILENAME) # read the file
             self.CONFIG.sections() # get all sections of the config
+            # Check for a prompt-style or die:
             if 'Style' in self.CONFIG:
                 session.PRMPT_STYL = int(self.CONFIG['Style']['PRMPT_STYL']) # grab the value of the style
             else:
                 print(f"{prompt_ui.bcolors['FAIL']}[!]{prompt_ui.bcolors['ENDC']} Error in config file: Add [Style] section to "+self.CONFIG_FILENAME)
                 sys.exit() # die
+            # check for paths:
             if 'Paths' in self.CONFIG:
                 self.PATHS = self.CONFIG['Paths']['MYPATHS'].split(":") # ARRAY
             else:
                 print(f"{prompt_ui.bcolors['FAIL']}[!]{prompt_ui.bcolors['ENDC']} Error in config file: Add [Paths] section to "+self.CONFIG_FILENAME)
                 sys.exit() # die
+            # check for aliases:
+            if 'Aliases' in self.CONFIG:
+                self.ALIASES = self.CONFIG['Aliases']
+
 ### UI STUFF:
 class Prompt_UI:
     bcolors = {
@@ -153,6 +160,14 @@ def help(cmd_name):
     • {prompt_ui.bcolors['BOLD']}def (var name): (value){prompt_ui.bcolors['ENDC']}
             """
             )
+        elif cmd_name == "dps_alias":
+            print(f"""
+ -- {prompt_ui.bcolors['BOLD']}List aliases defined in ~/.dps/dps.ini's [ALIASES] section{prompt_ui.bcolors['ENDC']} --
+
+   :: {prompt_ui.bcolors['BOLD']}Syntax{prompt_ui.bcolors['ENDC']} ::
+    • {prompt_ui.bcolors['BOLD']}dps_alias{prompt_ui.bcolors['ENDC']}
+            """
+            )
         elif cmd_name == "foreach":
                 print(f"""
  -- {prompt_ui.bcolors['BOLD']}DPS foreach(){prompt_ui.bcolors['ENDC']} --
@@ -192,6 +207,7 @@ def help(cmd_name):
  {prompt_ui.bcolors['BOLD']}:: Built-In Commands ::{prompt_ui.bcolors['ENDC']}
   • {prompt_ui.bcolors['BOLD']}help{prompt_ui.bcolors['ENDC']}: this cruft.
   • {prompt_ui.bcolors['BOLD']}dps_stats{prompt_ui.bcolors['ENDC']}: all logging stats.
+  • {prompt_ui.bcolors['BOLD']}dps_alias{prompt_ui.bcolors['ENDC']}: show all aliases defined in dps.ini's [ALIASES] section.
   • {prompt_ui.bcolors['BOLD']}dps_uid_gen{prompt_ui.bcolors['ENDC']}: generate UIDs using "Firstname,Lastname" CSV file.
   • {prompt_ui.bcolors['BOLD']}dps_wifi_mon{prompt_ui.bcolors['ENDC']}: Set Wi-Fi radio to RFMON.
   • {prompt_ui.bcolors['BOLD']}dps_config{prompt_ui.bcolors['ENDC']}: Set prompt and shell options.
@@ -213,6 +229,17 @@ def help(cmd_name):
 ## COMMAND HOOKS:
 ###===========================================
 def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit","quit","cd","sudo",etc:
+
+    # how many commands are there?
+    cmd_list = cmd.split("|")
+    #print("cmd count: "+str(len(cmd_list))) # DEBUG
+
+    cmd_root = re.sub("\s+.*","",cmd) # just the first word of the command (no args)
+    # check our user-defined aliases:
+    if len(session.ALIASES) > 0:
+        for alias in session.ALIASES:
+            cmd = re.sub(alias,session.ALIASES[alias],cmd) # all occurrences
+
     cmd_delta = cmd # the delta will be mangled user input as we see later:
     cmd_delta = re.sub("~",os.path.expanduser("~"),cmd_delta)
     cmd_delta = re.sub("^\s+","",cmd_delta) # remove any prepended spaces
@@ -227,10 +254,12 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
         else:
             error(f"Variable declared not yet defined: {var123_0x031337}","def")
             return
+
     log_cmd(cmd_delta) # first, log the command.
     # Handle built-in commands:
     if cmd_delta == "exit" or cmd_delta == "quit":
         exit_gracefully()
+
     ### Programming logic:
     elif cmd_delta.startswith("foreach"): # foreach (file.txt) as line: echo line
         foreach(cmd_delta) # See "Built-In Programming Logic" section below for definition of method.
@@ -264,6 +293,8 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
             return
     elif(cmd_delta=="dps_stats"):
         dps_stats()
+    elif(cmd_delta=="dps_alias"):
+        dps_alias()
     elif(cmd_delta.startswith("dps_config")):
         args = re.sub("dps_config","",cmd_delta).split() # make an array
         if len(args) > 0:
@@ -376,6 +407,12 @@ def dps_update_config(args):
                 session.CONFIG.write(config_file)
             #except:
                 #print(f"{prompt_ui.bcolors['FAIL']}[!] ERROR setting value in ini file.{prompt_ui.bcolors['ENDC']}")
+def dps_alias():
+    print(prompt_ui.bcolors['BOLD']+"\n :: DPS.ini Defined [ALIASES] :: "+prompt_ui.bcolors['ENDC'])
+    for alias in session.ALIASES:
+        print(f"  • Alias found for {prompt_ui.bcolors['OKGREEN']}{alias}{prompt_ui.bcolors['ENDC']} as '{prompt_ui.bcolors['OKGREEN']}{session.ALIASES[alias]}{prompt_ui.bcolors['ENDC']}'")
+    print("")
+    return
 def dps_config(args): # configure the shell
     session.PRMPT_STYL # this is the prompt color setting
     if args[0] == "prompt" and args[1] != "":
@@ -489,7 +526,15 @@ class DPSCompleter(Completer):
                                     if opt.startswith(tab_com):
                                         yield Completion(dir+opt, -len(current_str),style='italic')
                                 return
-
+                            elif re.match("^/",cmd_line[-1]):
+                                # get path:
+                                path_to = re.sub("[^/]+$","",cmd_line[-1])
+                                what_try = cmd_line[-1].split("/")[-1]
+                                options = os.listdir(path_to)
+                                for opt in options:
+                                    if opt.startswith(what_try):
+                                        yield Completion(path_to+opt, -len(current_str),style='italic')
+                                return
 
                         # Get the path off of the document.current_line object:
                         current_str = cmd_line[len(cmd_line)-1]
@@ -567,7 +612,9 @@ class DPS:
             self.message = [
                 ('class:parens_open_outer','('),
                 ('class:parens_open','('),
-                ('class:dps','dps'),
+                ('class:dps',session.UID),
+                ('class:at','@'),
+                ('class:dps',session.HOSTNAME),
                 ('class:colon',':'),
                 ('class:path',self.path),
                 ('class:parens_close',')'),
@@ -627,7 +674,8 @@ class DPS:
                 '':          'italic #ffffd7',
                 'parens_open': 'bold #aaa',
                 'parens_open_outer': 'bold #ffffd7',
-                'dps':       'italic #555',
+                'at':       'italic #555',
+                'dps':       'underline italic #888',
                 'parens_close_outer':    'bold #ffffd7',
                 'parens_close':    'bold #aaa',
                 'pound':    'bold #aaa',

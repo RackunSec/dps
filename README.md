@@ -47,7 +47,7 @@ When,Host,Network,Who,Where,What
 root@demon2.9:/tmp/dps/(dps)#                                                                           
 ```
 ## Shiny Features
-Because this is built with prompt_toolkit, the shell has a lot of great built-in features. 
+Because this is built with prompt_toolkit, the shell has a lot of great built-in features.
 * Use pipes for stdout, stderr just like you would in a native shell
 ### Keyboard Shortcuts
 The following keyboard shortcuts are available,
@@ -59,6 +59,7 @@ The following keyboard shortcuts are available,
 ### Built-In Commands
 The following are built-in commands,
 * dps_uid_gen - generate a list of UIDs from a CSV file
+* dps_alias - display all user-defined aliases in the dps.ini file
 * dps_wifi_mon - set a Wi-Fi device into monitor mode
 * dps_stats - show log stats
 * dps_config - set configuration options, such as prompt style
