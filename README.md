@@ -62,6 +62,7 @@ The following keyboard shortcuts are available,
 The following are built-in commands,
 * dps_uid_gen - generate a list of UIDs from a CSV file
 * dps_alias - display all user-defined aliases in the dps.ini file
+* dps_update - updates DPS using GitPython as defined by DPS_bin_path in dps.ini file
 * dps_wifi_mon - set a Wi-Fi device into monitor mode
 * dps_stats - show log stats
 * dps_config - set configuration options, such as prompt style
