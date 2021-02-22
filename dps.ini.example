@@ -1,0 +1,9 @@
+[Style]
+prmpt_styl = 2
+
+[Paths]
+mypaths = /usr/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin
+
+[Aliases]
+grep = grep --color
+egrep = egrep --color
