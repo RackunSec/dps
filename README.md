@@ -11,6 +11,7 @@ This project requires Python3 and the following Python modules,
 * datetime # for dates and times
 * subprocess # executes cmds by passing them to `/bin/bash`
 * configparser # parses dps.ini file
+* GitPython # updates the DPS using this very repository!
 
 ## The Shell
 ### INI file
