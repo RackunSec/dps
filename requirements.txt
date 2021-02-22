@@ -3,4 +3,5 @@ ifaddr
 ushlex
 prompt_toolkit
 configparser
+GitPython
 # everything should already be in the environment from Python3

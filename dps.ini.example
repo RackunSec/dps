@@ -7,3 +7,6 @@ mypaths = /usr/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin
 [Aliases]
 grep = grep --color
 egrep = egrep --color
+
+[DPS_bin_path]
+/cyberpunk/shells/dps/

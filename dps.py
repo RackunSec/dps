@@ -21,6 +21,7 @@ from prompt_toolkit.completion import WordCompleter # completer function (feed a
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import Completer, Completion, PathCompleter
 from prompt_toolkit.styles import Style # Style the prompt
+import git # for dps_update command
 
 ### SESSION AND USER INFO:
 class Session:
@@ -37,11 +38,12 @@ class Session:
         self.CONFIG = configparser.ConfigParser() # config object
         self.OWD=os.getcwd() # historical purposes
         # Add all built-in commands here so they populate in the tab-autocompler:
-        self.BUILTINS=['dps_stats','dps_uid_gen','dps_wifi_mon','dps_config','foreach','dps_alias']
+        self.BUILTINS=['dps_stats','dps_uid_gen','dps_wifi_mon','dps_config','foreach','dps_alias','dps_update']
         self.VARIABLES = {} # all user-defined variables.
         self.PRMPT_STYL=0 # Prompt style setting
         self.prompt_tail = "# " if self.UID == "root" else "> " # diff root prompt
         self.ALIASES = {} # all user-defined aliases
+        self.DPSBINPATH = "" # binary path for this (or installaed) dps.py executable
 
     def init_config(self): # initialize the configuration:
         if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")): # create the directory if it does not exist
@@ -68,17 +70,30 @@ class Session:
             self.CONFIG.read(self.CONFIG_FILENAME) # read the file
             self.CONFIG.sections() # get all sections of the config
             # Check for a prompt-style or die:
+
+            if 'Paths' in self.CONFIG:
+                self.PATHS = self.CONFIG['Paths']['MYPATHS'].split(":") # ARRAY
+                self.DPSBINPATH = self.CONFIG['Paths']['DPS_bin_path']
+                # check if valid
+                if os.path.isdir(self.DPSBINPATH):
+                    # check all paths and issue warning:
+                    for path in self.PATHS:
+                        if not os.path.isdir(path):
+                            print(f"{prompt_ui.bcolors['FAIL']}[!] FATAL: Path defined ({path}) in [Paths] section of dps.ini file does not exist! {prompt_ui.bcolors['ENDC']}")
+                            sys.exit(1)
+                else:
+                    print(f"{prompt_ui.bcolors['FAIL']}[!]{prompt_ui.bcolors['ENDC']} Error in config file: Ensure 'DPS_bin_path' value is a valid path in [Paths] of "+self.CONFIG_FILENAME)
+                    sys.exit() # die
+            else:
+                print(f"{prompt_ui.bcolors['FAIL']}[!]{prompt_ui.bcolors['ENDC']} Error in config file: Add [Paths] section to "+self.CONFIG_FILENAME)
+                sys.exit() # die
+
             if 'Style' in self.CONFIG:
                 session.PRMPT_STYL = int(self.CONFIG['Style']['PRMPT_STYL']) # grab the value of the style
             else:
                 print(f"{prompt_ui.bcolors['FAIL']}[!]{prompt_ui.bcolors['ENDC']} Error in config file: Add [Style] section to "+self.CONFIG_FILENAME)
                 sys.exit() # die
-            # check for paths:
-            if 'Paths' in self.CONFIG:
-                self.PATHS = self.CONFIG['Paths']['MYPATHS'].split(":") # ARRAY
-            else:
-                print(f"{prompt_ui.bcolors['FAIL']}[!]{prompt_ui.bcolors['ENDC']} Error in config file: Add [Paths] section to "+self.CONFIG_FILENAME)
-                sys.exit() # die
+
             # check for aliases:
             if 'Aliases' in self.CONFIG:
                 self.ALIASES = self.CONFIG['Aliases']
@@ -293,6 +308,8 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
             return
     elif(cmd_delta=="dps_stats"):
         dps_stats()
+    elif(cmd_delta=="dps_update"):
+        dps_update()
     elif(cmd_delta=="dps_alias"):
         dps_alias()
     elif(cmd_delta.startswith("dps_config")):
@@ -397,6 +414,16 @@ def foreach(cmd_delta): # FOREACH
 ###===========================================
 ## DPS CUSTOM BUILT-IN SHELL CMD METHODS:
 ###===========================================
+def dps_update():
+    # pull an updated version from GitHUB and rewrite the specified path in [Paths]['DPS_bin_path'] from the ini file:
+    try:
+        g = git.cmd.Git(session.DPSBINPATH)
+        g.stash('save')
+        g.pull(force=True)
+        print(f"\n{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} {prompt_ui.bcolors['OKGREEN']}Successfully pulled changes to local repository: {session.DPSBINPATH} {prompt_ui.bcolors['ENDC']}\n")
+    except:
+        print(f"{prompt_ui.bcolors['FAIL']} Something went wrong when trying to perform git operations. {prompt_ui.bcolors['ENDC']}")
+
 def dps_update_config(args):
     if len(args) > 1:
         if args[0] == "prompt": # set it in the config file:
