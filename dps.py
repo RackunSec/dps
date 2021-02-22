@@ -223,6 +223,7 @@ def help(cmd_name):
   • {prompt_ui.bcolors['BOLD']}help{prompt_ui.bcolors['ENDC']}: this cruft.
   • {prompt_ui.bcolors['BOLD']}dps_stats{prompt_ui.bcolors['ENDC']}: all logging stats.
   • {prompt_ui.bcolors['BOLD']}dps_alias{prompt_ui.bcolors['ENDC']}: show all aliases defined in dps.ini's [ALIASES] section.
+  • {prompt_ui.bcolors['BOLD']}dps_update{prompt_ui.bcolors['ENDC']}: update DPS (using GitPython) in DPS_bin_path as defined in dps.ini's [Paths] section.
   • {prompt_ui.bcolors['BOLD']}dps_uid_gen{prompt_ui.bcolors['ENDC']}: generate UIDs using "Firstname,Lastname" CSV file.
   • {prompt_ui.bcolors['BOLD']}dps_wifi_mon{prompt_ui.bcolors['ENDC']}: Set Wi-Fi radio to RFMON.
   • {prompt_ui.bcolors['BOLD']}dps_config{prompt_ui.bcolors['ENDC']}: Set prompt and shell options.
