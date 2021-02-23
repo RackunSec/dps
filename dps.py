@@ -675,15 +675,25 @@ class DPS:
                 uid = "#"
             else:
                 uid = session.UID
+            # break up the path:
+            path_array = self.path.split("/")
+
             self.message = [
                 ('class:text_uid'," "+uid+" "),
                 ('class:text_host',"▛ "+session.HOSTNAME+" "),
                 ('class:text_path_sep',"▛"),
-                ('class:text_path_colon',":"),
-                ('class:text_path',self.path),
-                ('class:text'," ▸ "),
+                ('class:text_path_colon'," ["),
             ]
-
+            self.message.append(('class:text_path_slash',"/"))
+            for path in path_array:
+                if path != "":
+                    self.message.append(("class:text_path",path)) # add the name
+                    self.message.append(("class:text_path_slash","/")) # add the slash
+            self.message.append(('class:text_path_colon',"]"))
+            self.message.append(('class:prompt_tail_sep',"▛"))
+            self.message.append(('class:prompt_tail'," ▸ "))
+            #print(self.message)
+            #sys.exit(1)
 
     def __init__(self):
         self.path = os.getcwd()
@@ -757,12 +767,14 @@ class DPS:
                 # User input (default text).
                 'text_host':     'fg:#FFFBDA bg:#B44949 italic bold',
                 'text_uid':     'fg:#B44949 bg:#FFFBDA italic bold',
-                'text_path':     'fg:#FFFBDA italic bold',
-                'text_path_sep':     'fg:#B44949 italic',
-                'text_path_colon':     'fg:#666 bold',
+                'text_path':     'fg:#B44949 bg:#2e2e2e italic bold underline',
+                'text_path_sep':     'fg:#B44949 bg:#2e2e2e',
+                'text_path_slash':     'fg:#FFFBDA bg:#2e2e2e italic',
+                'text_path_colon':     'fg:#888 bg:#2e2e2e bold',
                 'sep':     'fg:#FFFBDA bg:#B44949 ',
                 'tip':   'fg:black bg:#FFFBDA italic',
-                'tail':   'bg: fg:#B44949 '
+                'prompt_tail':   'bg: fg:#B44949 ',
+                'prompt_tail_sep':  'fg:#2e2e2e bg:'
             })
 
         else:
