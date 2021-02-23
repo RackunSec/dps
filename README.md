@@ -61,7 +61,7 @@ Because this is built with prompt_toolkit, the shell has a lot of great built-in
 The following keyboard shortcuts are available,
 * CTRL+A - move the cursor to the beginning of the line
 * CTRL+P - enter the previous command into the temrinal
-* CTRL+C - exit the shell gracefully
+* CTRL+C - exit the current subprocess gracefully
 * CTRL+R - search history
 * Up and Down arrows - flip through command history
 ### Built-In Commands
