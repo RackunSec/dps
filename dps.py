@@ -32,7 +32,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.2.23-ee" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.2.23-f" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -797,7 +797,8 @@ def shell(dps):
         run_cmd(last_string)
         dps.update_prompt()
     except KeyboardInterrupt:
-        exit_gracefully()
+        #exit_gracefully()
+        pass
     except EOFError:
         exit_gracefully()
 
