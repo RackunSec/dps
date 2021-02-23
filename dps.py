@@ -113,7 +113,8 @@ class Prompt_UI:
         0 : 'DPS',
         1 : 'PIRATE',
         2 : 'BONEYARD',
-        3 : '1980S'
+        3 : '1980S',
+        5 : 'Nouveau'
     }
 prompt_ui = Prompt_UI() # Object with UI data
 session = Session() # Object with Session data and user config
@@ -456,7 +457,7 @@ def dps_config(args): # configure the shell
         # Now set it for session / preference in the dps.ini file:
         dps_update_config(args)
     elif args[0] == "--show":
-        print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Current DPS Prompt Theme: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+dps_themes[PRMPT_STYL]+f"{prompt_ui.bcolors['ENDC'] }")
+        print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Current DPS Prompt Theme: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+prompt_ui.dps_themes[session.PRMPT_STYL]+f"{prompt_ui.bcolors['ENDC'] }")
     elif args[0] == "--update-net":
         print(f"{prompt_ui.bcolors['BOLD']}{prompt_ui.bcolors['OKGREEN']}[i] Obtaining IP address via dhclient... {prompt_ui.bcolors['ENDC']}")
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", "dhclient -v"])
