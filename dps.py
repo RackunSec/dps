@@ -21,6 +21,7 @@ from prompt_toolkit.completion import WordCompleter # completer function (feed a
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import Completer, Completion, PathCompleter
 from prompt_toolkit.styles import Style # Style the prompt
+from prompt_toolkit.output.color_depth import ColorDepth # colors for prompt
 import git # for dps_update command
 
 ### SESSION AND USER INFO:
@@ -31,7 +32,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.2.22-a" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.2.23-a" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -331,6 +332,13 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
     elif(cmd_delta=="version"):
         print(f"{prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['OKGREEN']}Demon Pentest Shell - "+session.VERSION+"{prompt_ui.bcolors['ENDC']}")
     ###---------
+    ### WARN Leaving DPS:
+    ###---------
+    elif(cmd_delta=="bash"):
+        print(f"{prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}[i] WARNING - Leaving DPS for Bash shell (CTRL+D to return to DPS){prompt_ui.bcolors['ENDC']}")
+        subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
+
+    ###---------
     ## LS @override:
     ###---------
     elif(re.match("^ls",cmd_delta)):
@@ -491,8 +499,8 @@ def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format spec
 ## GENERAL METHODS FOR HANDLING THINGS:
 ###===========================================
 def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
-        ans = input(f"{prompt_ui.bcolors['FAIL']}\n[?] Do you wish to quit the {prompt_ui.bcolors['ITAL']}Demon Pentest Shell{prompt_ui.bcolors['ENDC']}{prompt_ui.bcolors['FAIL']} (y/n)? {prompt_ui.bcolors['ENDC']}")
-        if ans == "y":
+        ans = input(f"{prompt_ui.bcolors['YELL']}\n[?] Do you wish to quit the {prompt_ui.bcolors['ITAL']}Demon Pentest Shell{prompt_ui.bcolors['ENDC']}{prompt_ui.bcolors['OKGREEN']} (y/N)? {prompt_ui.bcolors['ENDC']}")
+        if ans == "Y" or ans == "y":
             print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Demon Pentest Shell session ended.\n{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} File logged: "+session.LOG_FILENAME)
             sys.exit(1)
 
@@ -627,7 +635,19 @@ class DPS:
     def set_message(self):
         # This defines the prompt content:
         self.path = os.getcwd()+"/"
-        if session.PRMPT_STYL == 1: # MINIMAL SKULL
+
+
+        if session.PRMPT_STYL == 0: # DEFAULT SHELL
+            self.message = [
+                ('class:username', session.UID),
+                ('class:at','@'),
+                ('class:host',session.HOSTNAME),
+                ('class:colon',':'),
+                ('class:path',self.path),
+                ('class:dps','(dps)'),
+                ('class:pound',session.prompt_tail),
+            ]
+        elif session.PRMPT_STYL == 1: # MINIMAL SKULL
             self.message = [
                 ('class:parens_open_outer','('),
                 ('class:parens_open','('),
@@ -647,18 +667,20 @@ class DPS:
                 ('class:path',self.path),
                 ('class:parens_close',')'),
                 ('class:parens_close_outer',')'),
-                ('class:prompt',session.prompt_tail)
+                ('class:prompt',session.prompt_tail),
             ]
-        elif session.PRMPT_STYL == 0: # DEFAULT SHELL
+        elif session.PRMPT_STYL == 5: # MINIMAL
+            if session.UID == "root":
+                uid = "#"
+            else:
+                uid = session.UID
             self.message = [
-                ('class:username', session.UID),
-                ('class:at','@'),
-                ('class:host',session.HOSTNAME),
-                ('class:colon',':'),
-                ('class:path',self.path),
-                ('class:dps','(dps)'),
-                ('class:pound',session.prompt_tail),
+                ('class:text_uid'," "+uid+" "),
+                ('class:text_host',"▛ "+session.HOSTNAME+" "),
+                ('class:text_uid',"▛ :"+self.path+""),
+                ('class:text',"▛ "),
             ]
+
 
     def __init__(self):
         self.path = os.getcwd()
@@ -707,7 +729,7 @@ class DPS:
                 'parens_close_outer':    'bold #ffffd7',
                 'parens_close':    'bold #aaa',
                 'pound':    'bold #aaa',
-		'path': 'italic #ffffd7'
+		        'path': 'italic #ffffd7'
             })
         elif session.PRMPT_STYL == 3:
             #####
@@ -725,6 +747,19 @@ class DPS:
                 'parens_close':    '#d7ff00',
                 'pound':    '#00aa00',
             })
+        # Neovue:
+        elif session.PRMPT_STYL == 5:
+            #####
+            ### Neovue: THEME:
+            self.style = Style.from_dict({
+                # User input (default text).
+                'text_host':     'fg:#FFFBDA bg:#B44949 italic',
+                'text_uid':     'fg:#B44949 bg:#FFFBDA italic',
+                'sep':     'fg:#FFFBDA bg:#B44949 ',
+                'tip':   'fg:black bg:#FFFBDA italic',
+                'tail':   'bg: fg:#B44949 '
+            })
+
         else:
             #####
             ### DEFAULT THEME:
@@ -745,7 +780,8 @@ class DPS:
             self.message,style=self.style,
             completer=DPSCompleter(self),
             complete_in_thread=True,
-            complete_while_typing=False
+            complete_while_typing=False,
+            color_depth=ColorDepth.TRUE_COLOR
         )
     def update_prompt(self):
         self.set_message()
