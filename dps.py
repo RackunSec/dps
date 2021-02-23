@@ -32,7 +32,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.2.23-a" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.2.23-ee" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -678,8 +678,9 @@ class DPS:
             self.message = [
                 ('class:text_uid'," "+uid+" "),
                 ('class:text_host',"▛ "+session.HOSTNAME+" "),
-                ('class:text_uid',"▛ :"+self.path+""),
-                ('class:text',"▛ "),
+                ('class:text_path_sep',"▛"),
+                ('class:text_path',":"+self.path+""),
+                ('class:text'," ▸ "),
             ]
 
 
@@ -756,6 +757,8 @@ class DPS:
                 # User input (default text).
                 'text_host':     'fg:#FFFBDA bg:#B44949 italic',
                 'text_uid':     'fg:#B44949 bg:#FFFBDA italic',
+                'text_path':     'fg:#FFFBDA italic',
+                'text_path_sep':     'fg:#B44949 italic',
                 'sep':     'fg:#FFFBDA bg:#B44949 ',
                 'tip':   'fg:black bg:#FFFBDA italic',
                 'tail':   'bg: fg:#B44949 '
