@@ -4,8 +4,9 @@
 # logs as CSV with time,hostname,network:ip,who,command in the ~/.dps/ directory
 # requires Python 3+
 #
-# 2020 - Douglas Berdeaux, Matthew Creel
-# (dps)
+# 2021 - Douglas Berdeaux, Matthew Creel
+# (dps) dberdeaux@schneiderdowns.com
+#
 ### IMPORT LIBRARIES:
 import configparser # dps.conf from ~/.dps/
 import os # for the commands, of course. These will be passed ot the shell.
@@ -32,7 +33,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.2.23-f" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.2.23-g" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -240,7 +241,7 @@ def help(cmd_name):
   • {prompt_ui.bcolors['BOLD']}CTRL+P{prompt_ui.bcolors['ENDC']}: Place the previously ran command into the command line.
   • {prompt_ui.bcolors['BOLD']}CTRL+B{prompt_ui.bcolors['ENDC']}: Move one character before cursor.
   • {prompt_ui.bcolors['BOLD']}ALT+F{prompt_ui.bcolors['ENDC']}:  Move one character forward.
-  • {prompt_ui.bcolors['BOLD']}CTRL+C/D{prompt_ui.bcolors['ENDC']}: Exit the shell gracefully.
+  • {prompt_ui.bcolors['BOLD']}CTRL+C{prompt_ui.bcolors['ENDC']}: Kill current process.
             """)
 
 ###===========================================
@@ -500,23 +501,21 @@ def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format spec
 ## GENERAL METHODS FOR HANDLING THINGS:
 ###===========================================
 def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
-        ans = input(f"{prompt_ui.bcolors['YELL']}\n[?] Do you wish to quit the {prompt_ui.bcolors['ITAL']}Demon Pentest Shell{prompt_ui.bcolors['ENDC']}{prompt_ui.bcolors['OKGREEN']} (y/N)? {prompt_ui.bcolors['ENDC']}")
-        if ans == "Y" or ans == "y":
-            print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Demon Pentest Shell session ended.\n{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} File logged: "+session.LOG_FILENAME)
-            sys.exit(1)
+        #ans = input(f"{prompt_ui.bcolors['YELL']}\n[?] Do you wish to quit the {prompt_ui.bcolors['ITAL']}Demon Pentest Shell{prompt_ui.bcolors['ENDC']}{prompt_ui.bcolors['OKGREEN']} (y/N)? {prompt_ui.bcolors['ENDC']}")
+        #if ans == "Y" or ans == "y":
+            #print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Demon Pentest Shell session ended.\n{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} File logged: "+session.LOG_FILENAME)
+    sys.exit(1)
 
 ###=======================================
-## OUR CUSTOM COMPLETER:
+## OUR CUSTOM COMPLETER: (a nightmare)
 ###=======================================
 class DPSCompleter(Completer):
     def __init__(self, cli_menu):
         self.path_completer = PathCompleter()
     def get_completions(self, document, complete_event):
         word_before_cursor = document.get_word_before_cursor()
-        #print(f"word_before_cursor:{word_before_cursor}") # DEBUG
         try:
             cmd_line = document.current_line.split() # make an array
-            #print(f"cmd_line:{cmd_line}") # DEBUG
         except ValueError:
             pass
         else: # code runs ONLY if no exceptions occurred.
@@ -554,10 +553,6 @@ class DPSCompleter(Completer):
                             elif re.match("^[A-Za-z0-9\.]",cmd_line[-1]) and (not cmd_line[-1].endswith("/")): # e.g.: cd Documents/Te{TAB TAB}
                                 tab_com = current_str.split("/")[-1]
                                 dir = os.getcwd()+"/"+re.sub("[^/]+$","",current_str)
-                                #dir = os.getcwd()+"/"
-                                #print(f"dir:{dir}") # DEBUG
-                                #print(f"current_str:{current_str}") # DEBUG
-                                #print(f"tab_com:{tab_com}") # DEBUG
                                 options = os.listdir(dir)
                                 for opt in options:
                                     if opt.startswith(tab_com):
@@ -570,34 +565,28 @@ class DPSCompleter(Completer):
                                 options = os.listdir(path_to)
                                 for opt in options:
                                     if opt.startswith(what_try):
-                                        yield Completion(path_to+opt, -len(current_str),style='italic')
+                                        if(os.path.isdir(path_to+opt+"/")): # is a directory - append a slash to "keep going" with TAB:
+                                            yield Completion(path_to+opt+"/", -len(current_str),style='italic')
+                                        else: # not a directory:
+                                            yield Completion(path_to+opt, -len(current_str),style='italic')
                                 return
 
                         # Get the path off of the document.current_line object:
                         current_str = cmd_line[len(cmd_line)-1]
                         path_to = re.sub("(.*)/[^/]+$","\\1/",cmd_line[1])
-                        object = cmd_line[1].split("/")[-1] # last element, of course.
-                        #print(f"current_str:{current_str}") # DEBUG
-                        #print(f"path_to: {path_to}") # DEBUG
-                        #print(f"object: {object}") # DEBUG
+                        object = cmd_line[-1].split("/")[-1] # last element, of course.
+
                         if path_to.startswith("~/"):
                             dir = os.path.expanduser(path_to)
                         elif path_to.startswith("/"): # full path:
                             dir = path_to
                         else:
+                            print(f"\nobject:{object}\n")
                             dir = os.getcwd()
-                        #print(f"path_to:{path_to}") # DEBUG
+
                         # now that we have defined "dir" let's get the contents:
                         options = list(set(os.listdir(dir))) # this will only sshow unique values.
                         for opt in options:
-                            #print(f"opt:{opt}") # DEBUG
-                            #print(f"object:{object}") # DEBUG
-                            #print(f"path_to:{path_to}") # DEBUG
-                            """
-                                object:re
-                                path_to:re
-                                opt:requirements.txt
-                            """
                             auto_path = "" # use this as starting point.
                             if opt.startswith(object):
                                 if path_to.startswith("~/"): # expand it if we have ~ shortcut.
@@ -689,7 +678,7 @@ class DPS:
                 if path != "":
                     self.message.append(("class:text_path",path)) # add the name
                     self.message.append(("class:text_path_slash","/")) # add the slash
-            self.message.append(('class:text_path_colon',"]"))
+            self.message.append(('class:text_path_colon',"] "))
             self.message.append(('class:prompt_tail_sep',"▛"))
             self.message.append(('class:prompt_tail'," ▸ "))
             #print(self.message)
