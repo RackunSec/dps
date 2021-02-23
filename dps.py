@@ -679,7 +679,8 @@ class DPS:
                 ('class:text_uid'," "+uid+" "),
                 ('class:text_host',"▛ "+session.HOSTNAME+" "),
                 ('class:text_path_sep',"▛"),
-                ('class:text_path',":"+self.path+""),
+                ('class:text_path_colon',":"),
+                ('class:text_path',self.path),
                 ('class:text'," ▸ "),
             ]
 
@@ -749,16 +750,16 @@ class DPS:
                 'parens_close':    '#d7ff00',
                 'pound':    '#00aa00',
             })
-        # Neovue:
         elif session.PRMPT_STYL == 5:
             #####
-            ### Neovue: THEME:
+            ### Nouveau: THEME:
             self.style = Style.from_dict({
                 # User input (default text).
                 'text_host':     'fg:#FFFBDA bg:#B44949 italic bold',
                 'text_uid':     'fg:#B44949 bg:#FFFBDA italic bold',
                 'text_path':     'fg:#FFFBDA italic bold',
                 'text_path_sep':     'fg:#B44949 italic',
+                'text_path_colon':     'fg:#666 bold',
                 'sep':     'fg:#FFFBDA bg:#B44949 ',
                 'tip':   'fg:black bg:#FFFBDA italic',
                 'tail':   'bg: fg:#B44949 '
