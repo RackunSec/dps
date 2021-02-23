@@ -755,9 +755,9 @@ class DPS:
             ### Neovue: THEME:
             self.style = Style.from_dict({
                 # User input (default text).
-                'text_host':     'fg:#FFFBDA bg:#B44949 italic',
-                'text_uid':     'fg:#B44949 bg:#FFFBDA italic',
-                'text_path':     'fg:#FFFBDA italic',
+                'text_host':     'fg:#FFFBDA bg:#B44949 italic bold',
+                'text_uid':     'fg:#B44949 bg:#FFFBDA italic bold',
+                'text_path':     'fg:#FFFBDA italic bold',
                 'text_path_sep':     'fg:#B44949 italic',
                 'sep':     'fg:#FFFBDA bg:#B44949 ',
                 'tip':   'fg:black bg:#FFFBDA italic',
