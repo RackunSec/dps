@@ -42,7 +42,7 @@ These are set with PRMPT_STYL in the `~/.dps/dps.ini` file or with the `dps_conf
 #### Nouveau Theme:
 `PROMPT_STYLE` value of `5` or `Nouveau` using `dps_config`
 
-![DPS_theme_5](images/screenshots/nouveau-screenshot.png)
+![DPS_theme_5](images/screenshots/nouveau-screenshot-2.png)
 
 ## Example Log Output
 Below is example log output for DPS. All logs are located in `~/.dps/` with the date used in the file name. Unlike other terminal s which store command history in as session-like manner, DPS will show the command history of all commands issued within a current day from all terminal sessions.
