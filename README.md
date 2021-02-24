@@ -1,18 +1,6 @@
 # Demon Pentest Shell
-A simple shell wrapper for superior logging capabilities. All commands are logged to ```~/log_dps_history.csv``` with with ```When,Host,Network,Who,Where,What```.
-This project requires Python3 and the following Python modules,
-* **prompt_toolkit** - for TAB autocompletion of $PATH and built-in commands
-* **os** - for path object
-* **sys** - for exit
-* **re** - regular expressions
-* **ifaddr** - NIC info
-* **socket** - for hostname
-* **getpass** - for username
-* **subprocess** - executes cmds by passing them to `/bin/bash`
-* **configparser** - parses dps.ini file
-* **datetime** - for dates and times
-* **GitPython** - updates the DPS using this very repository!
-
+A simple shell wrapper for superior logging capabilities. All commands are logged to daily-labeled files within the ```~/.dps/logs/``` directory with the values of:
+***When, Host, Network, Who, Where, What*** The shell also has built-in configuration commands for customizations.
 # The Shell
 ## CONFIGURATION
 The ~/.dps/dps.ini file contains the user-svaed or defined settings and variables. See the dps.ini.example file.
@@ -54,17 +42,17 @@ When,Host,Network,Who,Where,What
 2020-10-18 11:32:40.805349,demon2.9,ens33:192.168.159.132,root,/tmp/dps,ifconfig
 root@demon2.9:/tmp/dps/(dps)#                                                                           
 ```
-### Shiny Features
+### SHINY FEATURES
 Because this is built with prompt_toolkit, the shell has a lot of great built-in features.
 * Use pipes for stdout, stderr just like you would in a native shell
-#### Keyboard Shortcuts
+#### KEYBOARD SHORTCUTS
 The following keyboard shortcuts are available,
 * CTRL+A - move the cursor to the beginning of the line
 * CTRL+P - enter the previous command into the temrinal
 * CTRL+C - exit the current subprocess gracefully
 * CTRL+R - search history
 * Up and Down arrows - flip through command history
-#### Built-In Commands
+#### BUILT-IN COMMANDS
 The following are built-in commands,
 * dps_uid_gen - generate a list of UIDs from a CSV file
 * dps_alias - display all user-defined aliases in the dps.ini file
@@ -76,7 +64,7 @@ The following are built-in commands,
 * cd - change current working directory
 * history - view your command history for your current session file (ALL HISTORY)
 
-## Installation
+## INSTALLATION
 To install DPS, simply install the requirements using pip3 and copy the ```dps.py``` into your ```$PATH``` like ```/usr/local/bin```, etc:
 ```
 root@kali:~# cd /tmp
@@ -86,3 +74,16 @@ root@kali:/tmp/dps# pip3 install -r requirements.txt
 root@kali:/tmp/dps# cp dps.py /usr/local/bin/
 root@kali:/tmp/dps# dps.py
 ```
+### DEPENDENCIES
+This project requires Python3 and the following Python modules,
+* **prompt_toolkit** - for TAB autocompletion of $PATH and built-in commands
+* **os** - for path object
+* **sys** - for exit
+* **re** - regular expressions
+* **ifaddr** - NIC info
+* **socket** - for hostname
+* **getpass** - for username
+* **subprocess** - executes cmds by passing them to `/bin/bash`
+* **configparser** - parses dps.ini file
+* **datetime** - for dates and times
+* **GitPython** - updates the DPS using this very repository!
