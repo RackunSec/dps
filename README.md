@@ -1,17 +1,17 @@
 # Demon Pentest Shell
 A simple shell wrapper for superior logging capabilities. All commands are logged to ```~/log_dps_history.csv``` with with ```When,Host,Network,Who,Where,What```.
 This project requires Python3 and the following Python modules,
-* prompt_toolkit # for TAB autocompletion of $PATH and built-in commands
-* *os* - for path object
-* *sys* - for exit
-* *re* - regular expressions
-* *ifaddr* - NIC info
-* *socket* - for hostname
-* *getpass* - for username
-* *datetime* - for dates and times
-* *subprocess* - executes cmds by passing them to `/bin/bash`
-* *configparser* - parses dps.ini file
-* *GitPython* - updates the DPS using this very repository!
+* **prompt_toolkit** - for TAB autocompletion of $PATH and built-in commands
+* **os** - for path object
+* **sys** - for exit
+* **re** - regular expressions
+* **ifaddr** - NIC info
+* **socket** - for hostname
+* **getpass** - for username
+* **subprocess** - executes cmds by passing them to `/bin/bash`
+* **configparser** - parses dps.ini file
+* **datetime** - for dates and times
+* **GitPython** - updates the DPS using this very repository!
 
 # The Shell
 ## CONFIGURATION
