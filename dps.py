@@ -33,10 +33,10 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.2.23-kk" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.2.24-alpha" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
-        self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
-        self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
+        self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/logs/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
+        self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/config/dps.ini" # config (init) file name
         self.CONFIG = configparser.ConfigParser() # config object
         self.OWD=os.getcwd() # historical purposes
         # Add all built-in commands here so they populate in the tab-autocompler:
@@ -50,6 +50,8 @@ class Session:
     def init_config(self): # initialize the configuration:
         if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")): # create the directory if it does not exist
             os.mkdir(os.path.join(os.path.expanduser("~"),".dps")) # mkdir
+            os.mkdir(os.path.join(os.path.expanduser("~"),".dps/config")) # mkdir
+            os.mkdir(os.path.join(os.path.expanduser("~"),".dps/logs")) # mkdir
         # Set up the log file itself:
         if not os.path.exists(self.LOG_FILENAME):
             with open(self.LOG_FILENAME,'a') as log_file:
@@ -63,11 +65,15 @@ class Session:
                 config_file.write("[Style]\n")
                 config_file.write("PRMPT_STYL = 5\n")
                 ## ADD PATHS:
-                config_file.write("[Paths]\n")
+                config_file.write("\n[Paths]\n")
                 config_file.write("MYPATHS = /usr/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin\n")
-                config_file.write("DPS_bin_path=/cyberpunk/shells/dps/")
-                print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']} Configuration file generated, please restart shell.{prompt_ui.bcolors['ENDC']}")
-                sys.exit(1)
+                config_file.write("DPS_bin_path=/cyberpunk/shells/dps/\n")
+                config_file.write("\n[Aliases]\n")
+                config_file.write("grep = grep --color\n")
+                config_file.write("egrep = egrep --color\n")
+                config_file.write("ls = ls --color=auto\n")
+            print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['OKGREEN']} Configuration file generated. Please restart shell.{prompt_ui.bcolors['ENDC']}")
+            sys.exit(0)
         else:
             # Config file exists, grab the values using configparser:
             self.CONFIG.read(self.CONFIG_FILENAME) # read the file
