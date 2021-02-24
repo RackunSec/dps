@@ -3,7 +3,7 @@ A simple shell wrapper for superior logging capabilities. All commands are logge
 ***When, Host, Network, Who, Where, What*** The shell also has built-in configuration commands for customizations.
 # The Shell
 ## CONFIGURATION
-The `~/.dps/config/dps.ini` file contains the user-defined settings and variables. See the ![dps.ini.example](dps.ini.example) example config file for syntax. This file and all directories used by DPS are automatically generated in the effective user's home directory within `~/.dps/`. 
+The `~/.dps/config/dps.ini` file contains the user-defined settings and variables. See the ![dps.ini.example](dps.ini.example) example config file for syntax. This file and all directories used by DPS are automatically generated in the effective user's home directory within `~/.dps/`.
 ### Autocomplete Feature
 ![Screenshot of auto-complete text](images/screenshots/dps-autocomplete.PNG)
 ### Built-In Programming Logic
@@ -47,22 +47,22 @@ Because this is built with prompt_toolkit, the shell has a lot of great built-in
 * Use pipes for stdout, stderr just like you would in a native shell
 #### KEYBOARD SHORTCUTS
 The following keyboard shortcuts are available,
-* CTRL+A - move the cursor to the beginning of the line
-* CTRL+P - enter the previous command into the temrinal
-* CTRL+C - exit the current subprocess gracefully
-* CTRL+R - search history
-* Up and Down arrows - flip through command history
+* **CTRL+A** - move the cursor to the beginning of the line
+* **CTRL+P** - enter the previous command into the temrinal
+* **CTRL+C** - exit the current subprocess gracefully
+* **CTRL+R** - search history
+* **Up and Down arrows** - flip through command history
 #### BUILT-IN COMMANDS
 The following are built-in commands,
-* dps_uid_gen - generate a list of UIDs from a CSV file
-* dps_alias - display all user-defined aliases in the dps.ini file
-* dps_update - updates DPS using GitPython as defined by DPS_bin_path in dps.ini file
-* dps_wifi_mon - set a Wi-Fi device into monitor mode
-* dps_stats - show log stats
-* dps_config - set configuration options, such as prompt style
-* clear - clear the terminal
-* cd - change current working directory
-* history - view your command history for your current session file (ALL HISTORY)
+* **dps_uid_gen** - generate a list of UIDs from a CSV file
+* **dps_alias** - display all user-defined aliases in the dps.ini file
+* **dps_update** - updates DPS using GitPython as defined by DPS_bin_path in dps.ini file
+* **dps_wifi_mon** - set a Wi-Fi device into monitor mode
+* **dps_stats** - show log stats
+* **dps_config** - set configuration options, such as prompt style
+* **clear** - clear the terminal
+* **cd** - change current working directory
+* **history** - view your command history for your current session file (ALL HISTORY)
 
 ## INSTALLATION
 To install DPS, simply install the requirements using pip3 and copy the ```dps.py``` into your ```$PATH``` like ```/usr/local/bin```, etc:
