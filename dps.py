@@ -33,7 +33,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.2.23-i" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.2.23-kk" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -66,7 +66,7 @@ class Session:
                 config_file.write("[Paths]\n")
                 config_file.write("MYPATHS = /usr/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin\n")
                 config_file.write("DPS_bin_path=/cyberpunk/shells/dps/")
-                print(f"{prompt_ui.bcolors['FAIL']}[!] Configuration file generated, please restart shell.{prompt_ui.bcolors['ENDC']}")
+                print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']} Configuration file generated, please restart shell.{prompt_ui.bcolors['ENDC']}")
                 sys.exit(1)
         else:
             # Config file exists, grab the values using configparser:
@@ -82,19 +82,19 @@ class Session:
                     # check all paths and issue warning:
                     for path in self.PATHS:
                         if not os.path.isdir(path):
-                            print(f"{prompt_ui.bcolors['FAIL']}[!] FATAL: Path defined ({path}) in [Paths] section of dps.ini file does not exist! {prompt_ui.bcolors['ENDC']}")
+                            print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']} FATAL: Path defined ({path}) in [Paths] section of dps.ini file does not exist! {prompt_ui.bcolors['ENDC']}")
                             sys.exit(1)
                 else:
-                    print(f"{prompt_ui.bcolors['FAIL']}[!]{prompt_ui.bcolors['ENDC']} Error in config file: Ensure 'DPS_bin_path' value is a valid path in [Paths] of "+self.CONFIG_FILENAME)
+                    print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']} Error in config file: Ensure 'DPS_bin_path' value is a valid path in [Paths] of "+self.CONFIG_FILENAME+f"{prompt_ui.bcolors['ENDC']}")
                     sys.exit() # die
             else:
-                print(f"{prompt_ui.bcolors['FAIL']}[!]{prompt_ui.bcolors['ENDC']} Error in config file: Add [Paths] section to "+self.CONFIG_FILENAME)
+                print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']} Error in config file: Add [Paths] section to "+self.CONFIG_FILENAME+f"{prompt_ui.bcolors['ENDC']}")
                 sys.exit() # die
 
             if 'Style' in self.CONFIG:
                 session.PRMPT_STYL = int(self.CONFIG['Style']['PRMPT_STYL']) # grab the value of the style
             else:
-                print(f"{prompt_ui.bcolors['FAIL']}[!]{prompt_ui.bcolors['ENDC']} Error in config file: Add [Style] section to "+self.CONFIG_FILENAME)
+                print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']}{prompt_ui.bcolors['ENDC']} Error in config file: Add [Style] section to "+self.CONFIG_FILENAME)
                 sys.exit() # die
 
             # check for aliases:
@@ -104,8 +104,8 @@ class Session:
 ### UI STUFF:
 class Prompt_UI:
     bcolors = {
-        'OKGREEN' : '\033[92m',
-        'FAIL' : '\033[91m',
+        'OKGREEN' : '\033[3m\033[92m',
+        'FAIL' : '\033[3m\033[91m',
         'ENDC' : '\033[0m',
         'BOLD' : '\033[1m',
         'YELL' : '\033[33m',
@@ -128,7 +128,7 @@ session.init_config() # initialize the configuration.
 
 
 def error(msg,cmd):
-    print(f"{prompt_ui.bcolors['BOLD']}{prompt_ui.bcolors['FAIL']}[?]{prompt_ui.bcolors['ENDC']}{prompt_ui.bcolors['FAIL']} ¬_¬ wut? -- "+msg+f"{prompt_ui.bcolors['ENDC']}")
+    print(f"{prompt_ui.bcolors['BOLD']}[?]{prompt_ui.bcolors['FAIL']}{prompt_ui.bcolors['ENDC']}{prompt_ui.bcolors['FAIL']} ¬_¬ wut? -- "+msg+f"{prompt_ui.bcolors['ENDC']}")
     if cmd != "":
         help(cmd) # show the Help dialog from the listings above
 
@@ -434,7 +434,7 @@ def dps_update():
         g.pull(force=True)
         print(f"\n{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} {prompt_ui.bcolors['OKGREEN']}Successfully pulled changes to local repository: {session.DPSBINPATH} {prompt_ui.bcolors['ENDC']}\n")
     except:
-        print(f"{prompt_ui.bcolors['FAIL']} Something went wrong when trying to perform git operations. {prompt_ui.bcolors['ENDC']}")
+        print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']} Something went wrong when trying to perform git operations. {prompt_ui.bcolors['ENDC']}")
 
 def dps_update_config(args):
     if len(args) > 1:
@@ -444,8 +444,7 @@ def dps_update_config(args):
             session.CONFIG.set('Style','PRMPT_STYL',args[1]) # TODO int() ?
             with open(session.CONFIG_FILENAME, 'w') as config_file:
                 session.CONFIG.write(config_file)
-            #except:
-                #print(f"{prompt_ui.bcolors['FAIL']}[!] ERROR setting value in ini file.{prompt_ui.bcolors['ENDC']}")
+
 def dps_alias():
     print(prompt_ui.bcolors['BOLD']+"\n :: DPS.ini Defined [ALIASES] :: "+prompt_ui.bcolors['ENDC'])
     for alias in session.ALIASES:
@@ -496,16 +495,13 @@ def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format spec
                 formatted = re.sub("%L",name[1].rstrip(),formatted)
                 print(formatted)
     except:
-        print(prompt_ui.bcolors['FAIL']+"[!]"+prompt_ui.bcolors['ENDC']+" Could not open file: "+csv_file+" for reading.")
+        print(f"{prompt_ui.bcolors['BOLD']}[!]"+prompt_ui.bcolors['FAIL']+" Could not open file: "+csv_file+" for reading."+prompt_ui.bcolors['ENDC'])
 
 ###===========================================
 ## GENERAL METHODS FOR HANDLING THINGS:
 ###===========================================
 def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
-        #ans = input(f"{prompt_ui.bcolors['YELL']}\n[?] Do you wish to quit the {prompt_ui.bcolors['ITAL']}Demon Pentest Shell{prompt_ui.bcolors['ENDC']}{prompt_ui.bcolors['OKGREEN']} (y/N)? {prompt_ui.bcolors['ENDC']}")
-        #if ans == "Y" or ans == "y":
-            #print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Demon Pentest Shell session ended.\n{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} File logged: "+session.LOG_FILENAME)
-    sys.exit(1)
+    sys.exit(0);
 
 ###=======================================
 ## OUR CUSTOM COMPLETER: (a nightmare)
@@ -534,6 +530,19 @@ class DPSCompleter(Completer):
 
             if len(cmd_line): # at least 1 value
                 current_str = cmd_line[len(cmd_line)-1]
+                if current_str.startswith("foreach"):
+                    path=re.sub("foreach.","",current_str)
+                    if path.startswith("/"):
+                        path_to=re.sub("[^/]+$","",path) # chop off end text
+                        match = re.sub(".*/","",path) # greedily remove path
+                        options = os.listdir(path_to)
+                        for opt in options:
+                            if opt.startswith(match):
+                                yield Completion("foreach("+path_to+opt,-len(current_str),style='italic')
+                        return
+                    else:
+                        return
+                    return
                 if cmd_line[0] == "dps_config":
                     options = ["prompt","--show","--update-net"]
                     for opt in options:
