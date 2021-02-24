@@ -33,7 +33,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.2.23-g" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.2.23-i" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/dps.ini" # config (init) file name
@@ -61,10 +61,11 @@ class Session:
                 ### ADD ALL CONFIG STUFF HERE:
                 ## ADD STYLE:
                 config_file.write("[Style]\n")
-                config_file.write("PRMPT_STYL = 0\n")
+                config_file.write("PRMPT_STYL = 5\n")
                 ## ADD PATHS:
                 config_file.write("[Paths]\n")
                 config_file.write("MYPATHS = /usr/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin\n")
+                config_file.write("DPS_bin_path=/cyberpunk/shells/dps/")
                 print(f"{prompt_ui.bcolors['FAIL']}[!] Configuration file generated, please restart shell.{prompt_ui.bcolors['ENDC']}")
                 sys.exit(1)
         else:
@@ -581,7 +582,6 @@ class DPSCompleter(Completer):
                         elif path_to.startswith("/"): # full path:
                             dir = path_to
                         else:
-                            print(f"\nobject:{object}\n")
                             dir = os.getcwd()
 
                         # now that we have defined "dir" let's get the contents:
@@ -669,7 +669,8 @@ class DPS:
 
             self.message = [
                 ('class:text_uid'," "+uid+" "),
-                ('class:text_host',"▛ "+session.HOSTNAME+" "),
+                ('class:text_host_sep',"▛ "),
+                ('class:text_host',session.HOSTNAME+" "),
                 ('class:text_path_sep',"▛"),
                 ('class:text_path_colon'," ["),
             ]
@@ -678,8 +679,8 @@ class DPS:
                 if path != "":
                     self.message.append(("class:text_path",path)) # add the name
                     self.message.append(("class:text_path_slash","/")) # add the slash
-            self.message.append(('class:text_path_colon',"] "))
-            self.message.append(('class:prompt_tail_sep',"▛"))
+            self.message.append(('class:text_path_colon',"]"))
+            #self.message.append(('class:prompt_tail_sep',"▛"))
             self.message.append(('class:prompt_tail'," ▸ "))
             #print(self.message)
             #sys.exit(1)
@@ -754,15 +755,16 @@ class DPS:
             ### Nouveau: THEME:
             self.style = Style.from_dict({
                 # User input (default text).
-                'text_host':     'fg:#FFFBDA bg:#B44949 italic bold',
-                'text_uid':     'fg:#B44949 bg:#FFFBDA italic bold',
-                'text_path':     'fg:#B44949 bg:#2e2e2e italic bold underline',
-                'text_path_sep':     'fg:#B44949 bg:#2e2e2e',
-                'text_path_slash':     'fg:#FFFBDA bg:#2e2e2e italic',
-                'text_path_colon':     'fg:#888 bg:#2e2e2e bold',
+                'text_host':     'fg:#FFFBDA bg:#822d2d italic bold',
+                'text_host_sep':     'fg:#a59784 bg:#822d2d italic bold',
+                'text_uid':     'fg:#1e1e1e bg:#a59784 italic bold',
+                'text_path':     'fg:#FFFBDA bg: italic bold underline',
+                'text_path_sep':     'fg:#822d2d bg:',
+                'text_path_slash':     'fg:#a59784 bg: italic',
+                'text_path_colon':     'fg:#666 bg: bold',
                 'sep':     'fg:#FFFBDA bg:#B44949 ',
                 'tip':   'fg:black bg:#FFFBDA italic',
-                'prompt_tail':   'bg: fg:#B44949 ',
+                'prompt_tail':   'bg: fg:#822d2d ',
                 'prompt_tail_sep':  'fg:#2e2e2e bg:'
             })
 
