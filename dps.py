@@ -347,14 +347,14 @@ def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit
     ###---------
     elif(cmd_delta=="bash"):
         print(f"{prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}[i] WARNING - Leaving DPS for Bash shell (CTRL+D to return to DPS){prompt_ui.bcolors['ENDC']}")
-        cmd_run(cmd_delta)
+        run_cmd(cmd_delta)
 
     ###---------
     ## LS @override:
     ###---------
     elif(re.match("^ls",cmd_delta)):
         cmd_delta = re.sub("^ls","ls --color=auto",cmd)
-        cmd_run(cmd_delta)
+        run_cmd(cmd_delta)
     ###---------
     ## CLEAR @override:
     ###---------
