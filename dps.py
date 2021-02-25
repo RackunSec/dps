@@ -28,7 +28,7 @@ import git # for dps_update command
 ### SESSION AND USER INFO:
 class Session:
     def __init__(self):
-        self.ADAPTERS = ifaddr.get_adapters() # get network device info
+        self.ADAPTERS = ifaddr.get_adapters() # get network device info 
         self.NET_DEV = "" # store the network device
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
