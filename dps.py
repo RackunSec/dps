@@ -33,7 +33,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.2.25-alpha" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.2.25-beta" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/logs/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/config/dps.ini" # config (init) file name
@@ -386,6 +386,8 @@ def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit
 ## Actually RUN the commands:
 ###===========================================
 def run_cmd(cmd):
+    if cmd=="":
+        return
     if cmd.startswith("./") or cmd.startswith("/") or re.match("^[^/]+/",cmd):
         # user specified a path, just try it: TODO ensure binary in path before executing.
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
