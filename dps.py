@@ -33,7 +33,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.2.24-alpha" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.2.25-alpha" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/logs/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/config/dps.ini" # config (init) file name
@@ -115,7 +115,8 @@ class Prompt_UI:
         'ENDC' : '\033[0m',
         'BOLD' : '\033[1m',
         'YELL' : '\033[33m',
-        'ITAL' : '\033[3m'
+        'ITAL' : '\033[3m',
+        'BLUE' : '\033[34m'
     }
     dps_themes = {
         0 : 'DPS',
@@ -254,12 +255,7 @@ def help(cmd_name):
 ###===========================================
 ## COMMAND HOOKS:
 ###===========================================
-def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit","quit","cd","sudo",etc:
-
-    # how many commands are there?
-    cmd_list = cmd.split("|")
-    #print("cmd count: "+str(len(cmd_list))) # DEBUG
-
+def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit","quit","cd","sudo",etc:
     cmd_root = re.sub("\s+.*","",cmd) # just the first word of the command (no args)
     # check our user-defined aliases:
     if len(session.ALIASES) > 0:
@@ -309,7 +305,8 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
     elif re.match("^\s?sudo",cmd_delta): # for sudo, we will need the command's full path:
         sudo_regexp = re.compile("sudo ([^ ]+)")
         cmd_delta=re.sub(sudo_regexp,'sudo $(which \\1)',cmd_delta)
-        subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
+        run_cmd(cmd_delta)
+        return
     elif cmd_delta.startswith("dps_uid_gen"):
         args = cmd_delta.split()
         if len(args)==3:
@@ -345,14 +342,14 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
     ###---------
     elif(cmd_delta=="bash"):
         print(f"{prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}[i] WARNING - Leaving DPS for Bash shell (CTRL+D to return to DPS){prompt_ui.bcolors['ENDC']}")
-        subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
+        cmd_run(cmd_delta)
 
     ###---------
     ## LS @override:
     ###---------
     elif(re.match("^ls",cmd_delta)):
         cmd_delta = re.sub("^ls","ls --color=auto",cmd)
-        subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
+        cmd_run(cmd_delta)
     ###---------
     ## CLEAR @override:
     ###---------
@@ -382,7 +379,52 @@ def run_cmd(cmd): # run a command. We capture a few and handle them, like "exit"
         else:
             error("Path does not exist: "+where_to,"")
     else: # Any OTHER command:
-        subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd_delta])
+        run_cmd(cmd_delta)
+    return
+
+###===========================================
+## Actually RUN the commands:
+###===========================================
+def run_cmd(cmd):
+    if cmd.startswith("./") or cmd.startswith("/") or re.match("^[^/]+/",cmd):
+        # user specified a path, just try it: TODO ensure binary in path before executing.
+        subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
+        return
+    else:
+        # get the actual binary called:
+        bin = cmd.split()[0] # get the first arg which is the command
+        # Is the binary in any of our defined paths?
+        # get path contents:
+        bin_paths = [] # could be more than one instance in paths (python envs, etc)
+        all_paths = session.PATHS # this could change since we also have cwd (.)
+        if os.getcwd() not in all_paths:
+            all_paths.append(os.getcwd())
+        for path in all_paths:
+            if bin in os.listdir(path):
+                bin_paths.append(path+"/"+bin)
+        if len(bin_paths)>1:
+            print(f"{prompt_ui.bcolors['YELL']}[?] WARNING: binary file ({bin}) discovered in multiple paths:\n--------------------------------{prompt_ui.bcolors['ENDC']}")
+            count = 0;
+            for path in bin_paths:
+                print(f"{prompt_ui.bcolors['BOLD']}[{prompt_ui.bcolors['OKGREEN']}{count}{prompt_ui.bcolors['ENDC']}{prompt_ui.bcolors['BOLD']}]{prompt_ui.bcolors['ENDC']} {prompt_ui.bcolors['OKGREEN']}{path}{prompt_ui.bcolors['ENDC']}")
+                count+=1
+            print(f"\n{prompt_ui.bcolors['BOLD']}[?]{prompt_ui.bcolors['ENDC']} Please choose one:",end=" ")
+            ans=int(input())
+            try:
+                if bin_paths[ans]:
+                    #print(f"You chose: {ans} which is {bin_paths[ans]}")
+                    subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
+                    return
+            except:
+                print(f"{prompt_ui.bcolors['FAIL']} INDEX: {str(ans)} out of range of list provided to you.{prompt_ui.bcolors['ENDC']}")
+                return
+        elif len(bin_paths)==1: # we found the command (binary):
+            subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
+            return
+        else:
+            print(f"{prompt_ui.bcolors['FAIL']}[!] Binary: {bin} not found in paths.\n  Check your [Paths] within the DPS configuration file.")
+            return
+    return
 
 ###===========================================
 ## Built-In Programming Logic:
@@ -414,7 +456,7 @@ def foreach(cmd_delta): # FOREACH
                         do_re = re.compile("\$"+var)
                         do_cmd = re.sub(do_re,str(i),do)
                         #print(f"[pl] cmd: "+do_cmd+" var: "+var)
-                        subprocess.call(["/bin/bash","--init-file","/root/.bashrc","-c",do_cmd])
+                        run_cmd(do_cmd)
                 elif os.path.exists(object): # this is a file
                     # pull out what to do with the entry:
                     do = re.sub("^[^:]+:","",cmd_delta)
@@ -423,7 +465,7 @@ def foreach(cmd_delta): # FOREACH
                             # replace entry with $var in do:
                             do_re = re.compile("\$"+var)
                             do_cmd = re.sub(do_re,entry.strip(),do)
-                            subprocess.call(["/bin/bash","--init-file","/root/.bashrc","-c",do_cmd])
+                            run_cmd(do_cmd)
                 else:
                     error("Could not access object: "+object,"")
         else:
@@ -813,7 +855,7 @@ class DPS:
 def shell(dps):
     try:
         last_string = dps.prompt_session.prompt()
-        run_cmd(last_string)
+        hook_cmd(last_string)
         dps.update_prompt()
     except KeyboardInterrupt:
         #exit_gracefully()
