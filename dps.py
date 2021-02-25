@@ -28,7 +28,7 @@ import git # for dps_update command
 ### SESSION AND USER INFO:
 class Session:
     def __init__(self):
-        self.ADAPTERS = ifaddr.get_adapters() # get network device info 
+        self.ADAPTERS = ifaddr.get_adapters() # get network device info
         self.NET_DEV = "" # store the network device
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
@@ -46,12 +46,13 @@ class Session:
         self.prompt_tail = "# " if self.UID == "root" else "> " # diff root prompt
         self.ALIASES = {} # all user-defined aliases
         self.DPSBINPATH = "" # binary path for this (or installaed) dps.py executable
+        self.CUSTPATHS = [] # custom paths in dps.ini file, dedpuled and link-read
         # Bash built-ins:
         self.BASHBI=['bg', 'bind', 'break', 'builtin', 'case', 'cd', 'command', 'compgen', 'complete', 'continue', 'declare',
             'dirs', 'disown', 'echo', 'enable', 'eval', 'exec', 'exit', 'export', 'fc', 'fg', 'getopts', 'hash', 'if', 'jobs', 'kill',
             'let', 'local', 'logout', 'popd', 'printf', 'pushd', 'pwd', 'read', 'readonly', 'return', 'set', 'shift', 'shopt', 'source',
             'suspend', 'test', 'times', 'trap', 'type', 'typeset', 'ulimit', 'umask', 'unalias', 'unset', 'until', 'wait','while']
-
+        self.IGNOREDUPES = ['ls','which','pwd','cwd','grep','egrep','sed','awk',]
     def init_config(self): # initialize the configuration:
         if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")): # create the directory if it does not exist
             os.mkdir(os.path.join(os.path.expanduser("~"),".dps")) # mkdir
@@ -87,6 +88,16 @@ class Session:
 
             if 'Paths' in self.CONFIG:
                 self.PATHS = self.CONFIG['Paths']['MYPATHS'].split(":") # ARRAY
+                # check if symlinks in paths. Also, remove dpues:
+                for path in self.PATHS:
+                    print(f"Trying: {path}")
+                    if path not in self.CUSTPATHS:
+                        if os.path.islink(path): # was it a symlink?
+                            if "/"+os.readlink(path) not in self.CUSTPATHS:
+                                self.CUSTPATHS.append("/"+os.readlink(path))
+                        else:
+                            self.CUSTPATHS.append(path)
+                self.PATHS = self.CUSTPATHS # overwrite it
                 self.DPSBINPATH = self.CONFIG['Paths']['DPS_bin_path']
                 # check if valid
                 if os.path.isdir(self.DPSBINPATH):
