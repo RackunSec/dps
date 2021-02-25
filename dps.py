@@ -90,7 +90,7 @@ class Session:
                 self.PATHS = self.CONFIG['Paths']['MYPATHS'].split(":") # ARRAY
                 # check if symlinks in paths. Also, remove dpues:
                 for path in self.PATHS:
-                    print(f"Trying: {path}")
+                    #print(f"Trying: {path}")
                     if path not in self.CUSTPATHS:
                         if os.path.islink(path): # was it a symlink?
                             if "/"+os.readlink(path) not in self.CUSTPATHS:
