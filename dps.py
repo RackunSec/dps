@@ -537,13 +537,13 @@ def dps_wifi_mon(dev): # set an AC device into monitor mode using iw
     print("Set device "+dev+" into RFMON monitor mode.")
 # stats for shell logging
 def dps_stats():
-    file_count = len(os.listdir(os.path.expanduser("~/.dps/")))
+    file_count = len(os.listdir(os.path.expanduser("~/.dps/logs/")))
     print(prompt_ui.bcolors['BOLD']+"\n :: DPS Logging Stats :: "+prompt_ui.bcolors['ENDC'])
     print(f"  • Log file count: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+str(file_count)+prompt_ui.bcolors['ENDC'])
-    print(f"  • Log file location: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+os.path.expanduser("~/.dps/")+prompt_ui.bcolors['ENDC'])
+    print(f"  • Log file location: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+os.path.expanduser("~/.dps/logs/")+prompt_ui.bcolors['ENDC'])
     line_count = int(0) # declare this
-    for file in os.listdir(os.path.expanduser("~/.dps/")):
-        line_count += len(open(os.path.expanduser("~/.dps/")+file).readlines())
+    for file in os.listdir(os.path.expanduser("~/.dps/logs/")):
+        line_count += len(open(os.path.expanduser("~/.dps/logs/")+file).readlines())
     print(f"  • Total entries: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+str(line_count)+prompt_ui.bcolors['ENDC']+"\n")
 
 # USER ID FROM CSV GENERATOR:
