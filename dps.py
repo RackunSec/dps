@@ -33,7 +33,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.2.25 (gamma mega)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.2.25 (voltron)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/logs/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/config/dps.ini" # config (init) file name
@@ -420,6 +420,9 @@ def run_cmd(cmd):
         for path in all_paths:
             if bin in os.listdir(path):
                 bin_paths.append(path+"/"+bin)
+        if bin in session.BASHBI: # pass to Bash:
+            subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
+            return
         if len(bin_paths)>1:
             print(f"{prompt_ui.bcolors['YELL']}[?] WARNING: binary file ({bin}) discovered in multiple paths:\n--------------------------------{prompt_ui.bcolors['ENDC']}")
             count = 0;
