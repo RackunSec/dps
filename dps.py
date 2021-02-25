@@ -33,7 +33,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.2.25-beta" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.2.25-gamma-1" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/logs/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/config/dps.ini" # config (init) file name
@@ -46,6 +46,11 @@ class Session:
         self.prompt_tail = "# " if self.UID == "root" else "> " # diff root prompt
         self.ALIASES = {} # all user-defined aliases
         self.DPSBINPATH = "" # binary path for this (or installaed) dps.py executable
+        # Bash built-ins:
+        self.BASHBI = ['bg', 'bind', 'break', 'builtin', 'case', 'cd', 'command', 'compgen', 'complete', 'continue', 'declare',
+            'dirs', 'disown', 'echo', 'enable', 'eval', 'exec', 'exit', 'export', 'fc', 'fg', 'getopts', 'hash', 'if', 'jobs', 'kill',
+            'let', 'local', 'logout', 'popd', 'printf', 'pushd', 'pwd', 'read', 'readonly', 'return', 'set', 'shift', 'shopt', 'source',
+            'suspend', 'test', 'times', 'trap', 'type', 'typeset', 'ulimit', 'umask', 'unalias', 'unset', 'until', 'wait','while' ]
 
     def init_config(self): # initialize the configuration:
         if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")): # create the directory if it does not exist
@@ -668,12 +673,16 @@ class DPSCompleter(Completer):
                                 yield Completion("./"+opt, -len(current_str),style='italic')
                         return
                     # Run from PATH:
-                    else:
-                        options = session.BUILTINS # make sure we get these
+                    else: # just pull in what we need - not everything:
+                        options = session.BUILTINS # make sure we get the built-in DPS commands
+                        options.append(session.BASHBI) # append Bash built-ins as they don't live in $PATH
                         for path in session.PATHS:
-                            options+=os.listdir(path)
+                            for binary in os.listdir(path):
+                                if binary.startswith(current_str):
+                                    if binary not in options:
+                                        options.append(binary)
                         for opt in options:
-                            if opt.startswith(current_str):
+                            if opt.startswith(current_str): # weeds out dps_ built-ins
                                 yield Completion(opt, -len(current_str),style='italic')
                         return
 
