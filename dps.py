@@ -33,14 +33,81 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.2.25 (voltron)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.2.26 (gettin' thair)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/logs/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/config/dps.ini" # config (init) file name
         self.CONFIG = configparser.ConfigParser() # config object
         self.OWD=os.getcwd() # historical purposes
         # Add all built-in commands here so they populate in the tab-autocompler:
-        self.BUILTINS=['dps_stats','dps_uid_gen','dps_wifi_mon','dps_config','foreach','dps_alias','dps_update']
+        #self.BUILTINS=['dps_stats','dps_uid_gen','dps_wifi_mon','dps_config','foreach','dps_alias','dps_update']
+        self.BUILTINS={
+            'dps_stats':
+                {'title':'DPS Statistics Information',
+                    'desc':'Statistics for all log files and session data. This is produced from the local DPS ~/.dps/ directory.',
+                    'args':[],
+                    'syntax_examples':['dps_stats'],
+                    'author':'RackunSec'
+                },
+            'dps_alias':
+                {'title':'DPS Aliases Configuration',
+                    'desc':'Aliases for commands and binaries (including arguments).',
+                    'args':[],
+                    'syntax_examples':[],
+                    'author':'RackunSec'
+                },
+            'dps_update':
+                {'title':'Update the Demon Pentest Shell to Latest Version',
+                    'desc':'Update the Demon Pentest Shell to Latest Version from RackunSec\'s GitHUB repository. This must be done as root user if updating for all users.',
+                    'args':[],
+                    'syntax_examples':['dps_update'],
+                    'author':'RackunSec'
+                },
+            'foreach':
+                {'title':'DPS Foreach Loop Iterator',
+                    'desc':'Loop over a range or file and perform actions on each entry.',
+                    'args':['(path to file)','as (entry variable)',': (stuff to do per entry)'],
+                    'syntax_examples':['foreach(/path/to/file.txt) as line: echo $line','foreach(m..n) as int: nmap 192.168.1.$int'],
+                    'author':'RackunSec'
+                },
+            'def':
+                {'title':'DPS Variable Definitions',
+                    'desc':'Define variables and use them in commands.',
+                    'args':['(Variable Name)','(Variable Value)'],
+                    'syntax_examples':['def TARGET 192.168.1.1','nmap {TARGET}'],
+                    'author':'RackunSec'
+                },
+            'dps_uid_gen':
+                {'title':'User ID Generation Tool',
+                    'desc':'Provide a CSV File with: First, Last fields to generate user IDs, Emails, etc. used for penetration testing.',
+                    'args':['(format specifier)','(csv file)'],
+                    'syntax_examples':['%F: First Name.','%f: First Initial.','%L: Last Name.','%l: Last Initial.'],
+                    'author':'RackunSec'
+                },
+            'dps_wifi_mon':
+                {'title':'DPS Wi-Fi Monitor Mode',
+                    'desc':'Set a wireless device into RFMON mode with a single command.',
+                    'args':['(Wi-Fi device name)'],
+                    'syntax_examples':['dps_wifi_mon wlan0'],
+                    'author':'RackunSec'
+                },
+            'dps_config':
+                {'title':'DPS Configuration Settings',
+                    'desc':'',
+                    'args':['prompt (0-9) - Set the prompt style.','--show - Show all config options from the dps.ini file.','--update-net - Get an IP address.'],
+                    'syntax_examples':[],
+                    'author':'RackunSec'
+                },
+            ## Do not delete below, that is a template for adding commands:
+            #'name':
+            #    {'title':'',
+            #        'desc':'',
+            #        'args':[],
+            #        'syntax_examples':[]
+            #    },
+        }
+
+
         self.VARIABLES = {} # all user-defined variables.
         self.PRMPT_STYL=0 # Prompt style setting
         self.prompt_tail = "# " if self.UID == "root" else "> " # diff root prompt
@@ -132,7 +199,10 @@ class Prompt_UI:
         'BOLD' : '\033[1m',
         'YELL' : '\033[33m',
         'ITAL' : '\033[3m',
-        'BLUE' : '\033[34m'
+        'UNDER' : '\033[4m',
+        'BLUE' : '\033[34m',
+        'BUNDER': '\033[1m\033[4m',
+        'WARN': '\033[33m\033[3m',
     }
     dps_themes = {
         0 : 'DPS',
@@ -177,96 +247,32 @@ def log_cmd(cmd): # logging a command to the log file:
 ###===========================================
 def help(cmd_name):
     if cmd_name != "":
-        if cmd_name == "dps_uid_gen":
-                print(f"""
- -- {prompt_ui.bcolors['BOLD']}DPS UID Generator Usage{prompt_ui.bcolors['ENDC']} --
-
-  {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}dps_uid_gen {prompt_ui.bcolors['ENDC']}(format specifier) (csv file)
-
-  :: {prompt_ui.bcolors['BOLD']}Format Specifiers{prompt_ui.bcolors['ENDC']} ::
-   • {prompt_ui.bcolors['BOLD']}%F{prompt_ui.bcolors['ENDC']}: First Name.
-   • {prompt_ui.bcolors['BOLD']}%f{prompt_ui.bcolors['ENDC']}: First Initial.
-   • {prompt_ui.bcolors['BOLD']}%L{prompt_ui.bcolors['ENDC']}: Last Name.
-   • {prompt_ui.bcolors['BOLD']}%l{prompt_ui.bcolors['ENDC']}: Last Initial.
-
-  :: {prompt_ui.bcolors['BOLD']}Notes:{prompt_ui.bcolors['BOLD']} ::
-  You can add anything else you wish, such as,
-   e.g: %f.%L123@client.org
-   result: j.doe123@client.org
-                """)
-        elif cmd_name == "def":
-            print(f"""
- -- {prompt_ui.bcolors['BOLD']}Defining Variables{prompt_ui.bcolors['ENDC']} --
-
-   :: {prompt_ui.bcolors['BOLD']}Syntax{prompt_ui.bcolors['ENDC']} ::
-    • {prompt_ui.bcolors['BOLD']}def (var name): (value){prompt_ui.bcolors['ENDC']}
-            """
-            )
-        elif cmd_name == "dps_alias":
-            print(f"""
- -- {prompt_ui.bcolors['BOLD']}List aliases defined in ~/.dps/dps.ini's [ALIASES] section{prompt_ui.bcolors['ENDC']} --
-
-   :: {prompt_ui.bcolors['BOLD']}Syntax{prompt_ui.bcolors['ENDC']} ::
-    • {prompt_ui.bcolors['BOLD']}dps_alias{prompt_ui.bcolors['ENDC']}
-            """
-            )
-        elif cmd_name == "foreach":
-                print(f"""
- -- {prompt_ui.bcolors['BOLD']}DPS foreach(){prompt_ui.bcolors['ENDC']} --
-
-  {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}foreach() {prompt_ui.bcolors['ENDC']}Loop function.
-
-  :: {prompt_ui.bcolors['BOLD']} Syntax Examples{prompt_ui.bcolors['ENDC']} ::
-   • {prompt_ui.bcolors['BOLD']}foreach({prompt_ui.bcolors['ENDC']}/path/to/file.txt{prompt_ui.bcolors['BOLD']}){prompt_ui.bcolors['ENDC']} as line: echo $line
-   • {prompt_ui.bcolors['BOLD']}foreach({prompt_ui.bcolors['ENDC']}m..n{prompt_ui.bcolors['BOLD']}){prompt_ui.bcolors['ENDC']} as int: nmap 192.168.1.$int
-                """)
-        elif cmd_name == "dps_wifi_mon":
-            print(f"""
- -- {prompt_ui.bcolors['BOLD']}DPS Wi-Fi Monitor Mode{prompt_ui.bcolors['ENDC']} --
-
-  {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}dps_wifi_mon {prompt_ui.bcolors['ENDC']}(wi-fi device)
-
-  :: {prompt_ui.bcolors['BOLD']}Requirements{prompt_ui.bcolors['ENDC']} ::
-   • {prompt_ui.bcolors['BOLD']}iw{prompt_ui.bcolors['ENDC']} - used to set up the Wi-Fi adapter.
-   • {prompt_ui.bcolors['BOLD']}airmon-ng{prompt_ui.bcolors['ENDC']} - Used to kill processes.
-   • {prompt_ui.bcolors['BOLD']}ifconfig{prompt_ui.bcolors['ENDC']} - used to turn on and off the adapter.
-            """)
-        elif cmd_name == "dps_config":
-            print(f"""
- -- {prompt_ui.bcolors['BOLD']}DPS Configuration Settings{prompt_ui.bcolors['ENDC']} --
-
-  {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}dps_config {prompt_ui.bcolors['ENDC']}(Options)
-
-  :: {prompt_ui.bcolors['BOLD']}Options{prompt_ui.bcolors['ENDC']} ::
-   • {prompt_ui.bcolors['BOLD']}prompt (0-9){prompt_ui.bcolors['ENDC']} - Set the prompt style.
-   • {prompt_ui.bcolors['BOLD']}--show{prompt_ui.bcolors['ENDC']} - Show all config options from the dps.ini file.
-   • {prompt_ui.bcolors['BOLD']}--update-net{prompt_ui.bcolors['ENDC']} - Get an IP address.
-            """)
+        dialog=session.BUILTINS[cmd_name]
+        print(f"\n▾ {dialog['title']} ▾ ")
+        print(f"{dialog['desc']}\n")
+        print(f"{prompt_ui.bcolors['BUNDER']}Command Arguments{prompt_ui.bcolors['ENDC']}\n{cmd_name}",end=" ")
+        for arg in dialog['args']:
+            print(f"{arg}",end=" ")
+        print(f"\n\n{prompt_ui.bcolors['BUNDER']}Command Syntax{prompt_ui.bcolors['ENDC']}")
+        for syntax in dialog['syntax_examples']:
+            print(f"* {syntax}")
+        print()
+        return
     else:
-            print(f"""
- -- {prompt_ui.bcolors['BOLD']}Demon Pentest Shell{prompt_ui.bcolors['ENDC']} --
-
- {prompt_ui.bcolors['BOLD']}:: Built-In Commands ::{prompt_ui.bcolors['ENDC']}
-  • {prompt_ui.bcolors['BOLD']}help{prompt_ui.bcolors['ENDC']}: this cruft.
-  • {prompt_ui.bcolors['BOLD']}dps_stats{prompt_ui.bcolors['ENDC']}: all logging stats.
-  • {prompt_ui.bcolors['BOLD']}dps_alias{prompt_ui.bcolors['ENDC']}: show all aliases defined in dps.ini's [ALIASES] section.
-  • {prompt_ui.bcolors['BOLD']}dps_update{prompt_ui.bcolors['ENDC']}: update DPS (using GitPython) in DPS_bin_path as defined in dps.ini's [Paths] section.
-  • {prompt_ui.bcolors['BOLD']}dps_uid_gen{prompt_ui.bcolors['ENDC']}: generate UIDs using "Firstname,Lastname" CSV file.
-  • {prompt_ui.bcolors['BOLD']}dps_wifi_mon{prompt_ui.bcolors['ENDC']}: Set Wi-Fi radio to RFMON.
-  • {prompt_ui.bcolors['BOLD']}dps_config{prompt_ui.bcolors['ENDC']}: Set prompt and shell options.
-  • {prompt_ui.bcolors['BOLD']}exit/quit{prompt_ui.bcolors['ENDC']}: return to terminal OS shell.
-
- {prompt_ui.bcolors['BOLD']}:: Programming Logic ::{prompt_ui.bcolors['ENDC']}
-  • {prompt_ui.bcolors['BOLD']}foreach(){prompt_ui.bcolors['ENDC']}: perform for loop on file contents or integer range.
-
- {prompt_ui.bcolors['BOLD']}:: Keyboard Shortcuts ::{prompt_ui.bcolors['ENDC']}
-  • {prompt_ui.bcolors['BOLD']}CTRL+R{prompt_ui.bcolors['ENDC']}: Search command history.
-  • {prompt_ui.bcolors['BOLD']}CTRL+A{prompt_ui.bcolors['ENDC']}: Move cursor to beginning of line (similar to "HOME" key).
-  • {prompt_ui.bcolors['BOLD']}CTRL+P{prompt_ui.bcolors['ENDC']}: Place the previously ran command into the command line.
-  • {prompt_ui.bcolors['BOLD']}CTRL+B{prompt_ui.bcolors['ENDC']}: Move one character before cursor.
-  • {prompt_ui.bcolors['BOLD']}ALT+F{prompt_ui.bcolors['ENDC']}:  Move one character forward.
-  • {prompt_ui.bcolors['BOLD']}CTRL+C{prompt_ui.bcolors['ENDC']}: Kill current process.
-            """)
+        print(f"\n{prompt_ui.bcolors['BOLD']}The Demon Pentest Shell (Version: {session.VERSION}){prompt_ui.bcolors['ENDC']}")
+        print(f"\n{prompt_ui.bcolors['BUNDER']}Built In Commands{prompt_ui.bcolors['ENDC']}")
+        print (f" * {prompt_ui.bcolors['YELL']}help{prompt_ui.bcolors['ENDC']} - this cruft.")
+        print (f" * {prompt_ui.bcolors['YELL']}exit/quit/CTRL+D{prompt_ui.bcolors['ENDC']} - return to terminal OS shell.")
+        for bi in session.BUILTINS:
+            dialog=session.BUILTINS[bi]
+            print (f" * {prompt_ui.bcolors['YELL']}{bi}{prompt_ui.bcolors['ENDC']} - {dialog['title']}")
+        print(f"\n{prompt_ui.bcolors['BUNDER']}Keyboard Shortcuts{prompt_ui.bcolors['ENDC']}")
+        print(f" * {prompt_ui.bcolors['YELL']}CTRL+R{prompt_ui.bcolors['ENDC']} - Search command history.")
+        print(f" * {prompt_ui.bcolors['YELL']}CTRL+A{prompt_ui.bcolors['ENDC']} - Move cursor to beginning of line (similar to \"HOME\" key).")
+        print(f" * {prompt_ui.bcolors['YELL']}CTRL+P{prompt_ui.bcolors['ENDC']} - Place the previously ran command into the command line.")
+        print(f" * {prompt_ui.bcolors['YELL']}CTRL+B{prompt_ui.bcolors['ENDC']} - Move one character before cursor.")
+        print(f" * {prompt_ui.bcolors['YELL']}ALT+F{prompt_ui.bcolors['ENDC']} -  Move one character forward.")
+        print(f" * {prompt_ui.bcolors['YELL']}CTRL+C{prompt_ui.bcolors['ENDC']} - Kill current process.\n")
 
 ###===========================================
 ## COMMAND HOOKS:
@@ -541,8 +547,7 @@ def dps_wifi_mon(dev): # set an AC device into monitor mode using iw
 # stats for shell logging
 def dps_stats():
     file_count = len(os.listdir(os.path.expanduser("~/.dps/logs/")))
-    print(prompt_ui.bcolors['BOLD']+"\n :: DPS Logging Stats :: "+prompt_ui.bcolors['ENDC'])
-    print(f"  • Log file count: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+str(file_count)+prompt_ui.bcolors['ENDC'])
+    print(f"\n  • Log file count: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+str(file_count)+prompt_ui.bcolors['ENDC'])
     print(f"  • Log file location: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+os.path.expanduser("~/.dps/logs/")+prompt_ui.bcolors['ENDC'])
     line_count = int(0) # declare this
     for file in os.listdir(os.path.expanduser("~/.dps/logs/")):
@@ -564,7 +569,8 @@ def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format spec
                 formatted = re.sub("%L",name[1].rstrip(),formatted)
                 print(formatted)
     except:
-        print(f"{prompt_ui.bcolors['BOLD']}[!]"+prompt_ui.bcolors['FAIL']+" Could not open file: "+csv_file+" for reading."+prompt_ui.bcolors['ENDC'])
+        error("Could not open file: "+csv_file+" for reading.","dps_uid_gen")
+        return
 
 ###===========================================
 ## GENERAL METHODS FOR HANDLING THINGS:
@@ -688,7 +694,9 @@ class DPSCompleter(Completer):
                         return
                     # Run from PATH:
                     else: # just pull in what we need - not everything:
-                        options = session.BUILTINS # make sure we get the built-in DPS commands
+                        options = []
+                        for builtin in session.BUILTINS:
+                            options.append(builtin)
                         options += session.BASHBI # append Bash built-ins as they don't live in $PATH
                         for path in session.PATHS:
                             for binary in os.listdir(path):
