@@ -33,7 +33,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.2.26 (by the by)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.2.26 (rockin' the suburbs)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/logs/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/config/dps.ini" # config (init) file name
@@ -52,14 +52,14 @@ class Session:
             'dps_alias':
                 {'title':'DPS Aliases Configuration',
                     'desc':'Aliases for commands and binaries (including arguments).',
-                    'args':[],
-                    'syntax_examples':[],
+                    'args':[''],
+                    'syntax_examples':['dps_alias'],
                     'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
                 },
             'dps_update':
                 {'title':'Update the Demon Pentest Shell to Latest Version',
                     'desc':'Update the Demon Pentest Shell to Latest Version from RackunSec\'s GitHUB repository. This must be done as root user if updating for all users.',
-                    'args':[],
+                    'args':[''],
                     'syntax_examples':['dps_update'],
                     'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
                 },
@@ -81,7 +81,7 @@ class Session:
                 {'title':'User ID Generation Tool',
                     'desc':'Provide a CSV File with: First, Last fields to generate user IDs, Emails, etc. used for penetration testing.',
                     'args':['(format specifier)','(csv file)'],
-                    'syntax_examples':['%F: First Name.','%f: First Initial.','%L: Last Name.','%l: Last Initial.'],
+                    'syntax_examples':['dps_uid_gen %f%l@acme.corp acme.corp.employees.txt # first and last initial','dps_uid_gen %F%l@acme.corp acme.corp.employees.txt # first name and last initial','dps_uid_gen %f%L@acme.corp acme.corp.employees.txt # first initial and last name'],
                     'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
                 },
             'dps_wifi_mon':
@@ -93,9 +93,9 @@ class Session:
                 },
             'dps_config':
                 {'title':'DPS Configuration Settings',
-                    'desc':'',
-                    'args':['prompt (0-9) - Set the prompt style.','--show - Show all config options from the dps.ini file.','--update-net - Get an IP address.'],
-                    'syntax_examples':[],
+                    'desc':'Set configuration settings for your own sessions. This will update the local ~/.dps/config/dps.ini file with your arguments.',
+                    'args':['prompt (0-9)','--show','--update-net'],
+                    'syntax_examples':['dps_config prompt 5 # set current theme to 5', 'dps_config --show # show current theme', 'dps_config --update-net # get an ip address'],
                     'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
                 },
             ## Do not delete below, that is a template for adding commands:
@@ -203,6 +203,7 @@ class Prompt_UI:
         'BLUE' : '\033[34m',
         'BUNDER': '\033[1m\033[4m',
         'WARN': '\033[33m\033[3m',
+        'COMMENT': '\033[90m\033[3m',
     }
     dps_themes = {
         0 : 'DPS',
@@ -250,6 +251,7 @@ def help(cmd_name):
     BUNDER=prompt_ui.bcolors['BUNDER']
     ENDC=prompt_ui.bcolors['ENDC']
     BOLD=prompt_ui.bcolors['BOLD']
+    CMT=prompt_ui.bcolors['COMMENT']
     if cmd_name != "":
         dialog=session.BUILTINS[cmd_name]
         print(f"\n{BOLD}▾ {dialog['title']} ▾ {ENDC}")
@@ -259,7 +261,15 @@ def help(cmd_name):
             print(f"{arg}",end=" ")
         print(f"\n\n{BUNDER}Command Syntax{ENDC}")
         for syntax in dialog['syntax_examples']:
-            print(f" ▹ {syntax}")
+            syntax_cmd = cmd_name.split(" ",1)[0] # drop off args
+            if len(syntax.split())>0:
+                syntax_args = syntax.split(" ",1)[1] # drop off command
+                syntax_comment = syntax_args.split("#")
+                if len(syntax_comment)>0:
+                    syntax_args = syntax_comment[0]+CMT+"#"+syntax_comment[1]+ENDC
+            else:
+                syntax_args = ""
+            print(f" ▹ {WARN}{syntax_cmd}{ENDC} {syntax_args}")
         print(f"\n{BUNDER}Author{ENDC}\n ▹ {dialog['author']['name']} ({dialog['author']['url']})\n")
         return
     else:
