@@ -33,7 +33,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.2.26 (gettin' thair)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.2.26 (by the by)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/logs/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/config/dps.ini" # config (init) file name
@@ -246,33 +246,37 @@ def log_cmd(cmd): # logging a command to the log file:
 ## CUSTOM HELP DIALOGS:
 ###===========================================
 def help(cmd_name):
+    WARN=prompt_ui.bcolors['WARN']
+    BUNDER=prompt_ui.bcolors['BUNDER']
+    ENDC=prompt_ui.bcolors['ENDC']
+    BOLD=prompt_ui.bcolors['BOLD']
     if cmd_name != "":
         dialog=session.BUILTINS[cmd_name]
-        print(f"\n▾ {dialog['title']} ▾ ")
+        print(f"\n{BOLD}▾ {dialog['title']} ▾ {ENDC}")
         print(f"{dialog['desc']}\n")
-        print(f"{prompt_ui.bcolors['BUNDER']}Command Arguments{prompt_ui.bcolors['ENDC']}\n{cmd_name}",end=" ")
+        print(f"{BUNDER}Command Arguments{ENDC}\n ▹ {WARN}{cmd_name}{ENDC}",end=" ")
         for arg in dialog['args']:
             print(f"{arg}",end=" ")
-        print(f"\n\n{prompt_ui.bcolors['BUNDER']}Command Syntax{prompt_ui.bcolors['ENDC']}")
+        print(f"\n\n{BUNDER}Command Syntax{ENDC}")
         for syntax in dialog['syntax_examples']:
-            print(f"* {syntax}")
+            print(f" ▹ {syntax}")
         print()
         return
     else:
         print(f"\n{prompt_ui.bcolors['BOLD']}The Demon Pentest Shell (Version: {session.VERSION}){prompt_ui.bcolors['ENDC']}")
         print(f"\n{prompt_ui.bcolors['BUNDER']}Built In Commands{prompt_ui.bcolors['ENDC']}")
-        print (f" * {prompt_ui.bcolors['YELL']}help{prompt_ui.bcolors['ENDC']} - this cruft.")
-        print (f" * {prompt_ui.bcolors['YELL']}exit/quit/CTRL+D{prompt_ui.bcolors['ENDC']} - return to terminal OS shell.")
+        print (f" ▹ {prompt_ui.bcolors['YELL']}help{prompt_ui.bcolors['ENDC']} - this cruft.")
+        print (f" ▹ {prompt_ui.bcolors['YELL']}exit/quit/CTRL+D{prompt_ui.bcolors['ENDC']} - return to terminal OS shell.")
         for bi in session.BUILTINS:
             dialog=session.BUILTINS[bi]
-            print (f" * {prompt_ui.bcolors['YELL']}{bi}{prompt_ui.bcolors['ENDC']} - {dialog['title']}")
+            print (f" ▹ {prompt_ui.bcolors['YELL']}{bi}{prompt_ui.bcolors['ENDC']} - {dialog['title']}")
         print(f"\n{prompt_ui.bcolors['BUNDER']}Keyboard Shortcuts{prompt_ui.bcolors['ENDC']}")
-        print(f" * {prompt_ui.bcolors['YELL']}CTRL+R{prompt_ui.bcolors['ENDC']} - Search command history.")
-        print(f" * {prompt_ui.bcolors['YELL']}CTRL+A{prompt_ui.bcolors['ENDC']} - Move cursor to beginning of line (similar to \"HOME\" key).")
-        print(f" * {prompt_ui.bcolors['YELL']}CTRL+P{prompt_ui.bcolors['ENDC']} - Place the previously ran command into the command line.")
-        print(f" * {prompt_ui.bcolors['YELL']}CTRL+B{prompt_ui.bcolors['ENDC']} - Move one character before cursor.")
-        print(f" * {prompt_ui.bcolors['YELL']}ALT+F{prompt_ui.bcolors['ENDC']} -  Move one character forward.")
-        print(f" * {prompt_ui.bcolors['YELL']}CTRL+C{prompt_ui.bcolors['ENDC']} - Kill current process.\n")
+        print(f" ▹ {prompt_ui.bcolors['YELL']}CTRL+R{prompt_ui.bcolors['ENDC']} - Search command history.")
+        print(f" ▹ {prompt_ui.bcolors['YELL']}CTRL+A{prompt_ui.bcolors['ENDC']} - Move cursor to beginning of line (similar to \"HOME\" key).")
+        print(f" ▹ {prompt_ui.bcolors['YELL']}CTRL+P{prompt_ui.bcolors['ENDC']} - Place the previously ran command into the command line.")
+        print(f" ▹ {prompt_ui.bcolors['YELL']}CTRL+B{prompt_ui.bcolors['ENDC']} - Move one character before cursor.")
+        print(f" ▹ {prompt_ui.bcolors['YELL']}ALT+F{prompt_ui.bcolors['ENDC']} -  Move one character forward.")
+        print(f" ▹ {prompt_ui.bcolors['YELL']}CTRL+C{prompt_ui.bcolors['ENDC']} - Kill current process.\n")
 
 ###===========================================
 ## COMMAND HOOKS:
