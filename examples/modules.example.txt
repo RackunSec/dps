@@ -1,0 +1,25 @@
+##############################################
+## Custom DPS Module.
+## Name:
+## Description:
+## TODO:
+## Author:
+## Author URL:
+##
+##
+## NOTE: Ensure that dps_help.py -> modules.list is updated with the following:
+'(app name)':
+    {'title':'',
+        'desc':'', # give a description
+        'args':[], # what arguments can you pass to this method?
+        'syntax_examples':['dps_my_app --show-stuff','dps_my_app'], # show some examples of your shiny new module!
+        'author':{'name':'(YOUR NAME HERE)','url':'https://github.com/(YOUR NAME HERE)'} # Take credit and share!
+    },
+## NOTE: Ensure that dps.py know what to do with your new module! (search for "9387ee" and place below using the logic already there)
+
+## REQUIREMENTS (import stuff below):
+
+## DEFINE Method: (What does this method do?)
+def foo(session,prompt_ui):
+  bar.baz("bingo!")
+  return

@@ -23,7 +23,18 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import Completer, Completion, PathCompleter
 from prompt_toolkit.styles import Style # Style the prompt
 from prompt_toolkit.output.color_depth import ColorDepth # colors for prompt
-import git # for dps_update command
+
+# Custom modules:
+sys.path.append('/tmp/dps/modules/') #TODO get this dynamically from dps.ini
+import dps_foreach as foreach
+import dps_run_cmd as run_cmd
+import dps_update as dps_update
+import dps_uid_gen as dps_uid_gen
+import dps_error as error
+import dps_help as help
+import dps_stats as dps_stats
+import dps_alias as dps_alias
+import dps_wifi as dps_wifi
 
 ### SESSION AND USER INFO:
 class Session:
@@ -33,81 +44,12 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.2.26 (rockin' the suburbs)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.2.26 (rockin' the glass pipe)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/logs/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/config/dps.ini" # config (init) file name
         self.CONFIG = configparser.ConfigParser() # config object
         self.OWD=os.getcwd() # historical purposes
-        # Add all built-in commands here so they populate in the tab-autocompler:
-        #self.BUILTINS=['dps_stats','dps_uid_gen','dps_wifi_mon','dps_config','foreach','dps_alias','dps_update']
-        self.BUILTINS={
-            'dps_stats':
-                {'title':'DPS Statistics Information',
-                    'desc':'Statistics for all log files and session data. This is produced from the local DPS ~/.dps/ directory.',
-                    'args':[],
-                    'syntax_examples':['dps_stats'],
-                    'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
-                },
-            'dps_alias':
-                {'title':'DPS Aliases Configuration',
-                    'desc':'Aliases for commands and binaries (including arguments).',
-                    'args':[''],
-                    'syntax_examples':['dps_alias'],
-                    'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
-                },
-            'dps_update':
-                {'title':'Update the Demon Pentest Shell to Latest Version',
-                    'desc':'Update the Demon Pentest Shell to Latest Version from RackunSec\'s GitHUB repository. This must be done as root user if updating for all users.',
-                    'args':[''],
-                    'syntax_examples':['dps_update'],
-                    'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
-                },
-            'foreach':
-                {'title':'DPS Foreach Loop Iterator',
-                    'desc':'Loop over a range or file and perform actions on each entry.',
-                    'args':['(path to file)','as (entry variable)',': (stuff to do per entry)'],
-                    'syntax_examples':['foreach(/path/to/file.txt) as line: echo $line','foreach(m..n) as int: nmap 192.168.1.$int'],
-                    'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
-                },
-            'def':
-                {'title':'DPS Variable Definitions',
-                    'desc':'Define variables and use them in commands.',
-                    'args':['(Variable Name)','(Variable Value)'],
-                    'syntax_examples':['def TARGET 192.168.1.1','nmap {TARGET}'],
-                    'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
-                },
-            'dps_uid_gen':
-                {'title':'User ID Generation Tool',
-                    'desc':'Provide a CSV File with: First, Last fields to generate user IDs, Emails, etc. used for penetration testing.',
-                    'args':['(format specifier)','(csv file)'],
-                    'syntax_examples':['dps_uid_gen %f%l@acme.corp acme.corp.employees.txt # first and last initial','dps_uid_gen %F%l@acme.corp acme.corp.employees.txt # first name and last initial','dps_uid_gen %f%L@acme.corp acme.corp.employees.txt # first initial and last name'],
-                    'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
-                },
-            'dps_wifi_mon':
-                {'title':'DPS Wi-Fi Monitor Mode',
-                    'desc':'Set a wireless device into RFMON mode with a single command.',
-                    'args':['(Wi-Fi device name)'],
-                    'syntax_examples':['dps_wifi_mon wlan0'],
-                    'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
-                },
-            'dps_config':
-                {'title':'DPS Configuration Settings',
-                    'desc':'Set configuration settings for your own sessions. This will update the local ~/.dps/config/dps.ini file with your arguments.',
-                    'args':['prompt (0-9)','--show','--update-net'],
-                    'syntax_examples':['dps_config prompt 5 # set current theme to 5', 'dps_config --show # show current theme', 'dps_config --update-net # get an ip address'],
-                    'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
-                },
-            ## Do not delete below, that is a template for adding commands:
-            #'name':
-            #    {'title':'',
-            #        'desc':'',
-            #        'args':[],
-            #        'syntax_examples':[]
-            #    },
-        }
-
-
         self.VARIABLES = {} # all user-defined variables.
         self.PRMPT_STYL=0 # Prompt style setting
         self.prompt_tail = "# " if self.UID == "root" else "> " # diff root prompt
@@ -157,7 +99,6 @@ class Session:
                 self.PATHS = self.CONFIG['Paths']['MYPATHS'].split(":") # ARRAY
                 # check if symlinks in paths. Also, remove dpues:
                 for path in self.PATHS:
-                    #print(f"Trying: {path}")
                     if path not in self.CUSTPATHS:
                         if os.path.islink(path): # was it a symlink?
                             if "/"+os.readlink(path) not in self.CUSTPATHS:
@@ -221,11 +162,6 @@ session.init_config() # initialize the configuration.
 ###===========================================
 
 
-def error(msg,cmd):
-    print(f"{prompt_ui.bcolors['BOLD']}[?]{prompt_ui.bcolors['FAIL']}{prompt_ui.bcolors['ENDC']}{prompt_ui.bcolors['FAIL']} ¬_¬ wut? -- "+msg+f"{prompt_ui.bcolors['ENDC']}")
-    if cmd != "":
-        help(cmd) # show the Help dialog from the listings above
-
 # Get the adapter and IP address:
 def get_net_info():
     for adapter in session.ADAPTERS: # loop through adapters
@@ -233,8 +169,8 @@ def get_net_info():
             try:
                 session.NET_DEV = adapter.nice_name+":"+adapter.ips[0].ip
             except:
-                error("No network address is ready. Please get a network address before continuing for logging purposes.","")
-                help("dps_config") # show help for config.
+                error.msg("No network address is ready. Please get a network address before continuing for logging purposes.","",session,prompt_ui)
+                help.msg("dps_config",session,prompt_ui) # show help for config.
                 session.NET_DEV = "0.0.0.0" # no address?
 get_net_info()
 
@@ -246,47 +182,6 @@ def log_cmd(cmd): # logging a command to the log file:
 ###===========================================
 ## CUSTOM HELP DIALOGS:
 ###===========================================
-def help(cmd_name):
-    WARN=prompt_ui.bcolors['WARN']
-    BUNDER=prompt_ui.bcolors['BUNDER']
-    ENDC=prompt_ui.bcolors['ENDC']
-    BOLD=prompt_ui.bcolors['BOLD']
-    CMT=prompt_ui.bcolors['COMMENT']
-    if cmd_name != "":
-        dialog=session.BUILTINS[cmd_name]
-        print(f"\n{BOLD}▾ {dialog['title']} ▾ {ENDC}")
-        print(f"{dialog['desc']}\n")
-        print(f"{BUNDER}Command Arguments{ENDC}\n ▹ {WARN}{cmd_name}{ENDC}",end=" ")
-        for arg in dialog['args']:
-            print(f"{arg}",end=" ")
-        print(f"\n\n{BUNDER}Command Syntax{ENDC}")
-        for syntax in dialog['syntax_examples']:
-            syntax_cmd = cmd_name.split(" ",1)[0] # drop off args
-            if len(syntax.split())>0:
-                syntax_args = syntax.split(" ",1)[1] # drop off command
-                syntax_comment = syntax_args.split("#")
-                if len(syntax_comment)>0:
-                    syntax_args = syntax_comment[0]+CMT+"#"+syntax_comment[1]+ENDC
-            else:
-                syntax_args = ""
-            print(f" ▹ {WARN}{syntax_cmd}{ENDC} {syntax_args}")
-        print(f"\n{BUNDER}Author{ENDC}\n ▹ {dialog['author']['name']} ({dialog['author']['url']})\n")
-        return
-    else:
-        print(f"\n{prompt_ui.bcolors['BOLD']}The Demon Pentest Shell (Version: {session.VERSION}){prompt_ui.bcolors['ENDC']}")
-        print(f"\n{prompt_ui.bcolors['BUNDER']}Built In Commands{prompt_ui.bcolors['ENDC']}")
-        print (f" ▹ {prompt_ui.bcolors['YELL']}help{prompt_ui.bcolors['ENDC']} - this cruft.")
-        print (f" ▹ {prompt_ui.bcolors['YELL']}exit/quit/CTRL+D{prompt_ui.bcolors['ENDC']} - return to terminal OS shell.")
-        for bi in session.BUILTINS:
-            dialog=session.BUILTINS[bi]
-            print (f" ▹ {prompt_ui.bcolors['YELL']}{bi}{prompt_ui.bcolors['ENDC']} - {dialog['title']}")
-        print(f"\n{prompt_ui.bcolors['BUNDER']}Keyboard Shortcuts{prompt_ui.bcolors['ENDC']}")
-        print(f" ▹ {prompt_ui.bcolors['YELL']}CTRL+R{prompt_ui.bcolors['ENDC']} - Search command history.")
-        print(f" ▹ {prompt_ui.bcolors['YELL']}CTRL+A{prompt_ui.bcolors['ENDC']} - Move cursor to beginning of line (similar to \"HOME\" key).")
-        print(f" ▹ {prompt_ui.bcolors['YELL']}CTRL+P{prompt_ui.bcolors['ENDC']} - Place the previously ran command into the command line.")
-        print(f" ▹ {prompt_ui.bcolors['YELL']}CTRL+B{prompt_ui.bcolors['ENDC']} - Move one character before cursor.")
-        print(f" ▹ {prompt_ui.bcolors['YELL']}ALT+F{prompt_ui.bcolors['ENDC']} -  Move one character forward.")
-        print(f" ▹ {prompt_ui.bcolors['YELL']}CTRL+C{prompt_ui.bcolors['ENDC']} - Kill current process.\n")
 
 ###===========================================
 ## COMMAND HOOKS:
@@ -310,7 +205,7 @@ def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit
         if session.VARIABLES.get(var123_0x031337): # it exists
             cmd_delta = re.sub(var_re,session.VARIABLES[var123_0x031337],cmd_delta)
         else:
-            error(f"Variable declared not yet defined: {var123_0x031337}","def")
+            error.msg(f"Variable declared not yet defined: {var123_0x031337}","def",session,prompt_ui)
             return
 
     log_cmd(cmd_delta) # first, log the command.
@@ -318,15 +213,19 @@ def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit
     if cmd_delta == "exit" or cmd_delta == "quit":
         exit_gracefully()
 
+    ### ===============================================
+    ### DEFINE HOW TO HANDLE YOUR NEW MODULES! (9387ee)
+    ### ===============================================
+
     ### Programming logic:
     elif cmd_delta.startswith("foreach"): # foreach (file.txt) as line: echo line
-        foreach(cmd_delta) # See "Built-In Programming Logic" section below for definition of method.
-    elif cmd_delta.startswith("dps_wifi_mon"):
+        foreach.foreach(cmd_delta,session) #
+    elif cmd_delta.startswith("dps_wifi"):
         args = cmd_delta.split()
         if len(args)>1:
-            dps_wifi_mon(args[1]) # should be the device
+            dps_wifi.set(args[1]) # should be the device
         else:
-            error("Not enough arguments.","dps_wifi_mon")
+            error.msg("Not enough arguments.","dps_wifi",session,prompt_ui)
             return
     elif cmd_delta.startswith("def "): # def var: val
         args = re.sub("^def\s+","",cmd_delta) # grab the arguments
@@ -336,38 +235,39 @@ def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit
             print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Assigning {prompt_ui.bcolors['BOLD']}{prompt_ui.bcolors['ITAL']}{val}{prompt_ui.bcolors['ENDC']} to {prompt_ui.bcolors['BOLD']}{prompt_ui.bcolors['ITAL']}{var}{prompt_ui.bcolors['ENDC']}") # DEBUG
             session.VARIABLES[var]=val # set it.
         else:
-            error("Incorrect syntax for defining a value.","def")
+            error.msg("Incorrect syntax for defining a value.","def",session,prompt_ui)
             return
     elif re.match("^\s?sudo",cmd_delta): # for sudo, we will need the command's full path:
         sudo_regexp = re.compile("sudo ([^ ]+)")
         cmd_delta=re.sub(sudo_regexp,'sudo $(which \\1)',cmd_delta)
-        run_cmd(cmd_delta)
+        run_cmd.run(cmd_delta,session,prompt_ui)
         return
     elif cmd_delta.startswith("dps_uid_gen"):
         args = cmd_delta.split()
         if len(args)==3:
-            dps_uid_gen(args[1],args[2]) # should be "format specifier, filename"
+            dps_uid_gen.gen_uids(args[1],args[2],session,prompt_ui) # should be "format specifier, filename"
         else:
-            error("Not enough arguments.","dps_uid_gen")
+            error.msg("Not enough arguments.","dps_uid_gen",session,prompt_ui)
             return
     elif(cmd_delta=="dps_stats"):
-        dps_stats()
+        dps_stats.show(prompt_ui)
     elif(cmd_delta=="dps_update"):
-        dps_update()
+        dps_update.app(session,prompt_ui)
     elif(cmd_delta=="dps_alias"):
-        dps_alias()
+        dps_alias.show(session,prompt_ui)
     elif(cmd_delta.startswith("dps_config")):
         args = re.sub("dps_config","",cmd_delta).split() # make an array
         if len(args) > 0:
-            dps_config(args)
+            dps_update.config(args,session,prompt_ui)
         else:
-            error("Not enough arguments.","dps_config")
+            error.msg("Not enough arguments.","dps_config",session,prompt_ui)
     elif(cmd_delta.startswith("help")):
         args = cmd_delta.split()
         if(len(args)>1):
-            help(args[1])
+            help.msg(args[1],session,prompt_ui)
         else:
-            help("")
+            help.msg("",session,prompt_ui)
+
     ###---------
     ## VERSION @override:
     ###---------
@@ -378,14 +278,14 @@ def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit
     ###---------
     elif(cmd_delta=="bash"):
         print(f"{prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}[i] WARNING - Leaving DPS for Bash shell (CTRL+D to return to DPS){prompt_ui.bcolors['ENDC']}")
-        run_cmd(cmd_delta)
+        run_cmd.run(cmd_delta,session,prompt_ui)
 
     ###---------
     ## LS @override:
     ###---------
     elif(re.match("^ls",cmd_delta)):
         cmd_delta = re.sub("^ls","ls --color=auto",cmd)
-        run_cmd(cmd_delta)
+        run_cmd.run(cmd_delta,session,prompt_ui)
     ###---------
     ## CLEAR @override:
     ###---------
@@ -413,139 +313,23 @@ def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit
             os.chdir(where_to)
             return
         else:
-            error("Path does not exist: "+where_to,"")
+            error.msg("Path does not exist: "+where_to,"",session,prompt_ui)
     else: # Any OTHER command:
-        run_cmd(cmd_delta)
+        run_cmd.run(cmd_delta,session,prompt_ui)
     return
 
 ###===========================================
-## Actually RUN the commands:
+## GENERAL METHODS FOR HANDLING THINGS:
 ###===========================================
-def run_cmd(cmd):
-    if cmd=="":
-        return
-    if cmd.startswith("./") or cmd.startswith("/") or re.match("^[^/]+/",cmd):
-        # user specified a path, just try it: TODO ensure binary in path before executing.
-        subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
-        return
-    else:
-        # get the actual binary called:
-        bin = cmd.split()[0] # get the first arg which is the command
-        # Is the binary in any of our defined paths?
-        # get path contents:
-        bin_paths = [] # could be more than one instance in paths (python envs, etc)
-        all_paths = session.PATHS # this could change since we also have cwd (.)
-        if os.getcwd() not in all_paths:
-            all_paths.append(os.getcwd())
-        for path in all_paths:
-            if bin in os.listdir(path):
-                bin_paths.append(path+"/"+bin)
-        if bin in session.BASHBI: # pass to Bash:
-            subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
-            return
-        if len(bin_paths)>1:
-            print(f"{prompt_ui.bcolors['YELL']}[?] WARNING: binary file ({bin}) discovered in multiple paths:\n--------------------------------{prompt_ui.bcolors['ENDC']}")
-            count = 0;
-            for path in bin_paths:
-                print(f"{prompt_ui.bcolors['BOLD']}[{prompt_ui.bcolors['OKGREEN']}{count}{prompt_ui.bcolors['ENDC']}{prompt_ui.bcolors['BOLD']}]{prompt_ui.bcolors['ENDC']} {prompt_ui.bcolors['OKGREEN']}{path}{prompt_ui.bcolors['ENDC']}")
-                count+=1
-            print(f"\n{prompt_ui.bcolors['BOLD']}[?]{prompt_ui.bcolors['ENDC']} Please choose one:",end=" ")
-            ans=int(input())
-            try:
-                if bin_paths[ans]:
-                    #print(f"You chose: {ans} which is {bin_paths[ans]}")
-                    subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
-                    return
-            except:
-                print(f"{prompt_ui.bcolors['FAIL']} INDEX: {str(ans)} out of range of list provided to you.{prompt_ui.bcolors['ENDC']}")
-                return
-        elif len(bin_paths)==1: # we found the command (binary):
-            subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
-            return
-        else:
-            print(f"{prompt_ui.bcolors['FAIL']}[!] Binary: {bin} not found in paths.\n  Check your [Paths] within the DPS configuration file.")
-            return
-    return
+def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
+    sys.exit(0);
 
-###===========================================
-## Built-In Programming Logic:
-###===========================================
-def foreach(cmd_delta): # FOREACH
-    cmd_args = re.sub("^foreach(\s+)?","",cmd_delta)
-    if cmd_args == "":
-        help("foreach")
-    else:
-        object = re.sub(".*\(([^\)]+)\).*","\\1",cmd_args)
-        if object != "":
-            # now get the variable:
-            var = re.sub(".*as\s+([^:]+).*","\\1",cmd_args)
-            cmd_do = re.sub("[^:]+:","",cmd_args)
-            if var == "":
-                error("Programming logic syntax error. Please check the documentation.","")
-            elif var not in cmd_do:
-                # the wrong varname was used in the do{} portion:
-                error("Programming logic syntax error. Did you mean to use: $"+var+"?","")
-            else:
-                if re.search("[0-9]+\.\.[0-9]+",object):
-                    # we have integers:
-                    int_start = int(re.sub("^([0-9]+)\..*","\\1",object))
-                    int_end = int(re.sub(".*\.\.([0-9]+)$","\\1",object))+1
-                    int_range = range(int_start,int_end)
-                    # pull out what to do with the entry:
-                    do = re.sub("^[^:]+:","",cmd_delta)
-                    for i in int_range: # 0..9
-                        do_re = re.compile("\$"+var)
-                        do_cmd = re.sub(do_re,str(i),do)
-                        #print(f"[pl] cmd: "+do_cmd+" var: "+var)
-                        run_cmd(do_cmd)
-                elif os.path.exists(object): # this is a file
-                    # pull out what to do with the entry:
-                    do = re.sub("^[^:]+:","",cmd_delta)
-                    with open(object) as object_file:
-                        for entry in object_file:
-                            # replace entry with $var in do:
-                            do_re = re.compile("\$"+var)
-                            do_cmd = re.sub(do_re,entry.strip(),do)
-                            run_cmd(do_cmd)
-                else:
-                    error("Could not access object: "+object,"")
-        else:
-            error("Programming logic syntax error. Please check the documentation.","")
-
-###===========================================
-## DPS CUSTOM BUILT-IN SHELL CMD METHODS:
-###===========================================
-def dps_update():
-    # pull an updated version from GitHUB and rewrite the specified path in [Paths]['DPS_bin_path'] from the ini file:
-    try:
-        g = git.cmd.Git(session.DPSBINPATH)
-        g.stash('save')
-        g.pull(force=True)
-        print(f"\n{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} {prompt_ui.bcolors['OKGREEN']}Successfully pulled changes to local repository: {session.DPSBINPATH} {prompt_ui.bcolors['ENDC']}\n")
-    except:
-        print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']} Something went wrong when trying to perform git operations. {prompt_ui.bcolors['ENDC']}")
-
-def dps_update_config(args):
-    if len(args) > 1:
-        if args[0] == "prompt": # set it in the config file:
-            #try:
-            print(f"{prompt_ui.bcolors['OKGREEN']}[i]{prompt_ui.bcolors['ENDC']} Adding "+str(args[1])+" as PRMPT_STYL in "+session.CONFIG_FILENAME)
-            session.CONFIG.set('Style','PRMPT_STYL',args[1]) # TODO int() ?
-            with open(session.CONFIG_FILENAME, 'w') as config_file:
-                session.CONFIG.write(config_file)
-
-def dps_alias():
-    print(prompt_ui.bcolors['BOLD']+"\n :: DPS.ini Defined [ALIASES] :: "+prompt_ui.bcolors['ENDC'])
-    for alias in session.ALIASES:
-        print(f"  • Alias found for {prompt_ui.bcolors['OKGREEN']}{alias}{prompt_ui.bcolors['ENDC']} as '{prompt_ui.bcolors['OKGREEN']}{session.ALIASES[alias]}{prompt_ui.bcolors['ENDC']}'")
-    print("")
-    return
 def dps_config(args): # configure the shell
     session.PRMPT_STYL # this is the prompt color setting
     if args[0] == "prompt" and args[1] != "":
         session.PRMPT_STYL = int(args[1])
         # Now set it for session / preference in the dps.ini file:
-        dps_update_config(args)
+        dps_update.config(args)
     elif args[0] == "--show":
         print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Current DPS Prompt Theme: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+prompt_ui.dps_themes[session.PRMPT_STYL]+f"{prompt_ui.bcolors['ENDC'] }")
     elif args[0] == "--update-net":
@@ -555,42 +339,6 @@ def dps_config(args): # configure the shell
         return
     else:
         print("Usage: dps_config prompt [0-9] for new prompt.")
-
-def dps_wifi_mon(dev): # set an AC device into monitor mode using iw
-    print("Set device "+dev+" into RFMON monitor mode.")
-# stats for shell logging
-def dps_stats():
-    file_count = len(os.listdir(os.path.expanduser("~/.dps/logs/")))
-    print(f"\n  • Log file count: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+str(file_count)+prompt_ui.bcolors['ENDC'])
-    print(f"  • Log file location: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+os.path.expanduser("~/.dps/logs/")+prompt_ui.bcolors['ENDC'])
-    line_count = int(0) # declare this
-    for file in os.listdir(os.path.expanduser("~/.dps/logs/")):
-        line_count += len(open(os.path.expanduser("~/.dps/logs/")+file).readlines())
-    print(f"  • Total entries: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+str(line_count)+prompt_ui.bcolors['ENDC']+"\n")
-
-# USER ID FROM CSV GENERATOR:
-def dps_uid_gen(fs,csv_file): # take a CSV and generate UIDs using a format specifier from the user
-    try:
-        with open(csv_file) as nfh: # names file handle
-            for line in nfh: # loop over each line
-                name = line.split(',') # split up the line
-                if name[0] == "First": continue # we don't need the first line
-                f_init = re.sub("^([A-Za-z]).*","\\1",name[0]).rstrip()
-                l_init = re.sub("^([A-Za-z]).*","\\1",name[1]).rstrip()
-                formatted = re.sub("%f",f_init,fs)
-                formatted = re.sub("%l",l_init,formatted)
-                formatted = re.sub("%F",name[0].rstrip(),formatted)
-                formatted = re.sub("%L",name[1].rstrip(),formatted)
-                print(formatted)
-    except:
-        error("Could not open file: "+csv_file+" for reading.","dps_uid_gen")
-        return
-
-###===========================================
-## GENERAL METHODS FOR HANDLING THINGS:
-###===========================================
-def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
-    sys.exit(0);
 
 ###=======================================
 ## OUR CUSTOM COMPLETER: (a nightmare)
@@ -709,7 +457,7 @@ class DPSCompleter(Completer):
                     # Run from PATH:
                     else: # just pull in what we need - not everything:
                         options = []
-                        for builtin in session.BUILTINS:
+                        for builtin in help.modules_list:
                             options.append(builtin)
                         options += session.BASHBI # append Bash built-ins as they don't live in $PATH
                         for path in session.PATHS:
