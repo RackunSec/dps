@@ -35,6 +35,7 @@ import dps_help as help
 import dps_stats as dps_stats
 import dps_alias as dps_alias
 import dps_wifi as dps_wifi
+import dps_self_destruct as dps_self_destruct
 
 ### SESSION AND USER INFO:
 class Session:
@@ -44,7 +45,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.2.26 (rockin' the glass pipe)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.3.1 (compliance linus)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/logs/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/config/dps.ini" # config (init) file name
@@ -220,6 +221,9 @@ def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit
     ### Programming logic:
     elif cmd_delta.startswith("foreach"): # foreach (file.txt) as line: echo line
         foreach.foreach(cmd_delta,session) #
+    elif cmd_delta.startswith("dps_self_destruct"):
+        dps_self_destruct.self_destruct(session,prompt_ui)
+        return
     elif cmd_delta.startswith("dps_wifi"):
         args = cmd_delta.split()
         if len(args)>1:

@@ -18,6 +18,13 @@ modules_list={
             'syntax_examples':['dps_stats'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
+    'dps_self_destruct':
+        {'title':'DPS Log Shredding',
+            'desc':'After penetration test, shred all logs located in the local DPS ~/.dps/logs/ directory. Ensure that a backup was made beforehand!',
+            'args':[],
+            'syntax_examples':['dps_self_destruct'],
+            'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
+        },
     'dps_alias':
         {'title':'DPS Aliases Configuration',
             'desc':'Aliases for commands and binaries (including arguments).',
