@@ -57,6 +57,7 @@ class Session:
         self.ALIASES = {} # all user-defined aliases
         self.DPSBINPATH = "" # binary path for this (or installaed) dps.py executable
         self.CUSTPATHS = [] # custom paths in dps.ini file, dedpuled and link-read
+        self.NEWLOG=False
         # Bash built-ins:
         self.BASHBI=['bg', 'bind', 'break', 'builtin', 'case', 'cd', 'command', 'compgen', 'complete', 'continue', 'declare',
             'dirs', 'disown', 'echo', 'enable', 'eval', 'exec', 'exit', 'export', 'fc', 'fg', 'getopts', 'hash', 'if', 'jobs', 'kill',
@@ -72,6 +73,7 @@ class Session:
         if not os.path.exists(self.LOG_FILENAME):
             with open(self.LOG_FILENAME,'a') as log_file:
                 log_file.write("When,Host,Network,Who,Where,What\n")
+            self.NEWLOG=True
         # Set up the config file/pull values:
         if not os.path.exists(self.CONFIG_FILENAME):
             # Add the file
@@ -670,7 +672,9 @@ def shell(dps):
 
 # standard boilerplate
 if __name__ == "__main__":
-    print(prompt_ui.bcolors['BOLD']+"\n *** Welcome to the Demon Pentest Shell ("+session.VERSION+")\n *** Type \"exit\" to return to standard shell.\n"+prompt_ui.bcolors['ENDC'])
+    print(prompt_ui.bcolors['BOLD']+"\n ▹▹▹ Welcome to the Demon Pentest Shell ("+session.VERSION+")\n ▹▹▹ Type \"exit\" to return to standard shell.\n"+prompt_ui.bcolors['ENDC'])
+    if session.NEWLOG==True:
+        print(f" ▹ New log file created for today's sessions ({session.LOG_FILENAME})\n")
     dps = DPS() # Prompt-toolkit class instance
     while True:
         shell(dps) #start the app
