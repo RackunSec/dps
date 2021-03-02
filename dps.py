@@ -24,8 +24,31 @@ from prompt_toolkit.completion import Completer, Completion, PathCompleter
 from prompt_toolkit.styles import Style # Style the prompt
 from prompt_toolkit.output.color_depth import ColorDepth # colors for prompt
 
-# Custom modules:
-sys.path.append('/cyberpunk/shells/dps/modules/') #TODO get this dynamically from dps.ini
+# GET custom modules from dpsrc:
+    # Add the file
+dps_config_file=os.path.expanduser("~")+"/.dps/config/.dpsrc"
+if not os.path.exists(dps_config_file):
+    with open(dps_config_file,'a') as config_file:
+        ### ADD ALL CONFIG STUFF HERE:
+        ## ADD STYLE:
+        config_file.write("[Style]\n")
+        config_file.write("prompt_theme = 5\n")
+        ## ADD PATHS:
+        config_file.write("\n[Paths]\n")
+        config_file.write("MYPATHS = /usr/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin\n")
+        config_file.write("DPS_bin_path=/cyberpunk/shells/dps/\n")
+        config_file.write("\n[Aliases]\n")
+        config_file.write("grep = grep --color\n")
+        config_file.write("egrep = egrep --color\n")
+        config_file.write("ls = ls --color=auto\n")
+    print(f"[!] Configuration file generated. Please restart shell.")
+    sys.exit(0)
+config=configparser.ConfigParser()
+config.read(dps_config_file) # read the file
+config.sections() # get all sections of the config
+dpsbinpath=config['Paths']['DPS_bin_path']
+dpsbinpath="/tmp/dps/" # DEBUG
+sys.path.append(dpsbinpath+"modules/")
 import dps_foreach as foreach
 import dps_run_cmd as run_cmd
 import dps_update as dps_update
@@ -49,15 +72,15 @@ class Session:
         self.VERSION = "v1.3.2 (spider me)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/logs/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
-        self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/config/dps.ini" # config (init) file name
+        self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/config/.dpsrc" # config (init) file name
         self.CONFIG = configparser.ConfigParser() # config object
         self.OWD=os.getcwd() # historical purposes
         self.VARIABLES = {} # all user-defined variables.
-        self.PRMPT_STYL=0 # Prompt style setting
+        self.prompt_theme=0 # Prompt style setting
         self.prompt_tail = "# " if self.UID == "root" else "> " # diff root prompt
         self.ALIASES = {} # all user-defined aliases
         self.DPSBINPATH = "" # binary path for this (or installaed) dps.py executable
-        self.CUSTPATHS = [] # custom paths in dps.ini file, dedpuled and link-read
+        self.CUSTPATHS = [] # custom paths in .dpsrc file, dedpuled and link-read
         self.NEWLOG=False
         # Bash built-ins:
         self.BASHBI=['bg', 'bind', 'break', 'builtin', 'case', 'cd', 'command', 'compgen', 'complete', 'continue', 'declare',
@@ -75,65 +98,45 @@ class Session:
             with open(self.LOG_FILENAME,'a') as log_file:
                 log_file.write("When,Host,Network,Who,Where,What\n")
             self.NEWLOG=True
-        # Set up the config file/pull values:
-        if not os.path.exists(self.CONFIG_FILENAME):
-            # Add the file
-            with open(self.CONFIG_FILENAME,'a') as config_file:
-                ### ADD ALL CONFIG STUFF HERE:
-                ## ADD STYLE:
-                config_file.write("[Style]\n")
-                config_file.write("PRMPT_STYL = 5\n")
-                ## ADD PATHS:
-                config_file.write("\n[Paths]\n")
-                config_file.write("MYPATHS = /usr/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin\n")
-                config_file.write("DPS_bin_path=/cyberpunk/shells/dps/\n")
-                config_file.write("\n[Aliases]\n")
-                config_file.write("grep = grep --color\n")
-                config_file.write("egrep = egrep --color\n")
-                config_file.write("ls = ls --color=auto\n")
-            print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['OKGREEN']} Configuration file generated. Please restart shell.{prompt_ui.bcolors['ENDC']}")
-            sys.exit(0)
-        else:
-            # Config file exists, grab the values using configparser:
-            self.CONFIG.read(self.CONFIG_FILENAME) # read the file
-            self.CONFIG.sections() # get all sections of the config
-            # Check for a prompt-style or die:
 
-            if 'Paths' in self.CONFIG:
-                self.PATHS = self.CONFIG['Paths']['MYPATHS'].split(":") # ARRAY
-                # check if symlinks in paths. Also, remove dpues:
+        self.CONFIG.read(self.CONFIG_FILENAME) # read the file
+        self.CONFIG.sections() # get all sections of the config
+        # Check for a prompt-style or die:
+        if 'Paths' in self.CONFIG:
+            self.PATHS = self.CONFIG['Paths']['mypaths'].split(":") # ARRAY
+            # check if symlinks in paths. Also, remove dpues:
+            for path in self.PATHS:
+                if path not in self.CUSTPATHS:
+                    if os.path.islink(path): # was it a symlink?
+                        if "/"+os.readlink(path) not in self.CUSTPATHS:
+                            self.CUSTPATHS.append("/"+os.readlink(path))
+                    else:
+                        self.CUSTPATHS.append(path)
+            self.PATHS = self.CUSTPATHS # overwrite it
+            self.DPSBINPATH = self.CONFIG['Paths']['DPS_bin_path']
+            # check if valid
+            if os.path.isdir(self.DPSBINPATH):
+                # check all paths and issue warning:
                 for path in self.PATHS:
-                    if path not in self.CUSTPATHS:
-                        if os.path.islink(path): # was it a symlink?
-                            if "/"+os.readlink(path) not in self.CUSTPATHS:
-                                self.CUSTPATHS.append("/"+os.readlink(path))
-                        else:
-                            self.CUSTPATHS.append(path)
-                self.PATHS = self.CUSTPATHS # overwrite it
-                self.DPSBINPATH = self.CONFIG['Paths']['DPS_bin_path']
-                # check if valid
-                if os.path.isdir(self.DPSBINPATH):
-                    # check all paths and issue warning:
-                    for path in self.PATHS:
-                        if not os.path.isdir(path):
-                            print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']} FATAL: Path defined ({path}) in [Paths] section of dps.ini file does not exist! {prompt_ui.bcolors['ENDC']}")
-                            sys.exit(1)
-                else:
-                    print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']} Error in config file: Ensure 'DPS_bin_path' value is a valid path in [Paths] of "+self.CONFIG_FILENAME+f"{prompt_ui.bcolors['ENDC']}")
-                    sys.exit() # die
+                    if not os.path.isdir(path):
+                        print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']} FATAL: Path defined ({path}) in [Paths] section of .dpsrc file does not exist! {prompt_ui.bcolors['ENDC']}")
+                        sys.exit(1)
             else:
-                print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']} Error in config file: Add [Paths] section to "+self.CONFIG_FILENAME+f"{prompt_ui.bcolors['ENDC']}")
+                print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']} Error in config file: Ensure 'DPS_bin_path' value is a valid path in [Paths] of "+self.CONFIG_FILENAME+f"{prompt_ui.bcolors['ENDC']}")
                 sys.exit() # die
+        else:
+            print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']} Error in config file: Add [Paths] section to "+self.CONFIG_FILENAME+f"{prompt_ui.bcolors['ENDC']}")
+            sys.exit() # die
 
-            if 'Style' in self.CONFIG:
-                session.PRMPT_STYL = int(self.CONFIG['Style']['PRMPT_STYL']) # grab the value of the style
-            else:
-                print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']}{prompt_ui.bcolors['ENDC']} Error in config file: Add [Style] section to "+self.CONFIG_FILENAME)
-                sys.exit() # die
+        if 'Style' in self.CONFIG:
+            session.prompt_theme = int(self.CONFIG['Style']['prompt_theme']) # grab the value of the style
+        else:
+            print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']}{prompt_ui.bcolors['ENDC']} Error in config file: Add [Style] section to "+self.CONFIG_FILENAME)
+            sys.exit() # die
 
-            # check for aliases:
-            if 'Aliases' in self.CONFIG:
-                self.ALIASES = self.CONFIG['Aliases']
+        # check for aliases:
+        if 'Aliases' in self.CONFIG:
+            self.ALIASES = self.CONFIG['Aliases']
 
 ### UI STUFF:
 class Prompt_UI:
@@ -344,13 +347,13 @@ def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
     sys.exit(0);
 
 def dps_config(args): # configure the shell
-    session.PRMPT_STYL # this is the prompt color setting
+    session.prompt_theme # this is the prompt color setting
     if args[0] == "prompt" and args[1] != "":
-        session.PRMPT_STYL = int(args[1])
-        # Now set it for session / preference in the dps.ini file:
+        session.prompt_theme = int(args[1])
+        # Now set it for session / preference in the .dpsrc file:
         dps_update.config(args)
     elif args[0] == "--show":
-        print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Current DPS Prompt Theme: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+prompt_ui.dps_themes[session.PRMPT_STYL]+f"{prompt_ui.bcolors['ENDC'] }")
+        print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Current DPS Prompt Theme: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+prompt_ui.dps_themes[session.prompt_theme]+f"{prompt_ui.bcolors['ENDC'] }")
     elif args[0] == "--update-net":
         print(f"{prompt_ui.bcolors['BOLD']}{prompt_ui.bcolors['OKGREEN']}[i] Obtaining IP address via dhclient... {prompt_ui.bcolors['ENDC']}")
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", "dhclient -v"])
@@ -499,7 +502,7 @@ class DPS:
         self.path = os.getcwd()+"/"
 
 
-        if session.PRMPT_STYL == 0: # DEFAULT SHELL
+        if session.prompt_theme == 0: # DEFAULT SHELL
             self.message = [
                 ('class:username', session.UID),
                 ('class:at','@'),
@@ -509,7 +512,7 @@ class DPS:
                 ('class:dps','(dps)'),
                 ('class:pound',session.prompt_tail),
             ]
-        elif session.PRMPT_STYL == 1: # MINIMAL SKULL
+        elif session.prompt_theme == 1: # MINIMAL SKULL
             self.message = [
                 ('class:parens_open_outer','('),
                 ('class:parens_open','('),
@@ -518,7 +521,7 @@ class DPS:
                 ('class:parens_close_outer',')'),
                 ('class:skull','☠️  '),
             ]
-        elif session.PRMPT_STYL == 2 or session.PRMPT_STYL == 3 or session.PRMPT_STYL == 4: # MINIMAL
+        elif session.prompt_theme == 2 or session.prompt_theme == 3 or session.prompt_theme == 4: # MINIMAL
             self.message = [
                 ('class:parens_open_outer','('),
                 ('class:parens_open','('),
@@ -531,7 +534,7 @@ class DPS:
                 ('class:parens_close_outer',')'),
                 ('class:prompt',session.prompt_tail),
             ]
-        elif session.PRMPT_STYL == 5: # MINIMAL
+        elif session.prompt_theme == 5: # MINIMAL
             if session.UID == "root":
                 uid = "#"
             else:
@@ -563,8 +566,8 @@ class DPS:
         ## BUILD THEMES HERE, TEST COLORS THOROUGHLY (256bit):
         ###===========================================
         #####
-        ### THIS THEME WILL BE DEFAULT WITH DPS.INI:
-        if session.PRMPT_STYL == 0:
+        ### THIS THEME WILL BE DEFAULT WITH .DPSRC:
+        if session.prompt_theme == 0:
                 self.style = Style.from_dict({
                     # User input (default text).
                     '':          '#fff',
@@ -579,7 +582,7 @@ class DPS:
                 })
         #####
         ### MINIMAL SKULL THEME
-        elif session.PRMPT_STYL == 1:
+        elif session.prompt_theme == 1:
                 self.style = Style.from_dict({
                     # User input (default text).
                     '':          'italic #af5f00',
@@ -591,7 +594,7 @@ class DPS:
                     'parens_close':    '#af0000',
                     'skull':    '#8e8e8e',
                 })
-        elif session.PRMPT_STYL == 2:
+        elif session.prompt_theme == 2:
             #####
             ### BONEYARD:
             self.style = Style.from_dict({
@@ -606,7 +609,7 @@ class DPS:
                 'pound':    'bold #aaa',
 		        'path': 'italic #ffffd7'
             })
-        elif session.PRMPT_STYL == 3:
+        elif session.prompt_theme == 3:
             #####
             ### 1980s THEME:
             self.style = Style.from_dict({
@@ -622,7 +625,7 @@ class DPS:
                 'parens_close':    '#d7ff00',
                 'pound':    '#00aa00',
             })
-        elif session.PRMPT_STYL == 5:
+        elif session.prompt_theme == 5:
             #####
             ### Nouveau: THEME:
             self.style = Style.from_dict({
