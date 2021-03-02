@@ -48,7 +48,7 @@ config.read(dps_config_file) # read the file
 config.sections() # get all sections of the config
 dpsbinpath=config['Paths']['DPS_bin_path']
 
-#dpsbinpath="/tmp/dps/" # DEBUG
+#dpsbinpath="/tmp/dps/" # DEBUG ### REMOVE ME BEFORE PUSHING AND COMMITTING
 
 sys.path.append(dpsbinpath+"modules/")
 import dps_foreach as foreach
@@ -71,7 +71,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.3.2 (spider me)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.3.2 (what a day)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/logs/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/config/.dpsrc" # config (init) file name
