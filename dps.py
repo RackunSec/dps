@@ -25,7 +25,7 @@ from prompt_toolkit.styles import Style # Style the prompt
 from prompt_toolkit.output.color_depth import ColorDepth # colors for prompt
 
 # Custom modules:
-sys.path.append('/tmp/dps/modules/') #TODO get this dynamically from dps.ini
+sys.path.append('/cyberpunk/shells/dps/modules/') #TODO get this dynamically from dps.ini
 import dps_foreach as foreach
 import dps_run_cmd as run_cmd
 import dps_update as dps_update
