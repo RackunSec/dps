@@ -8,5 +8,9 @@
 ##
 
 ## REQUIREMENTS:
-def set(dev): # set an AC device into monitor mode using iw
-    print("Set device "+dev+" into RFMON monitor mode.")
+def set(cmd,session,prompt_ui): # set an AC device into monitor mode using iw
+    if len(cmd.split())==2:
+        dev = cmd.split()[1]
+        print("Set device "+dev+" into RFMON monitor mode.")
+    else:
+        session.help.msg("dps_wifi",session,prompt_ui)

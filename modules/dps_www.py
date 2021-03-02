@@ -26,7 +26,7 @@ def comment_scrape(cmd,session,prompt_ui):
         ITAL = prompt_ui.bcolors['ITAL']
         user_agent = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'
         headers = {'User-Agent': user_agent}
-        print(f"{BOLD}\n[*] Fetching: {ENDC}{ITAL}{UNDER}{uri}{ENDC}\n")
+        print(f"{BOLD}\n ▿ Fetching: ({ENDC}{ITAL}{UNDER}{uri}{ENDC})\n")
         req_data = requests.get(uri, stream=True)
         code_count = 0
         code_count_color = ""
@@ -70,23 +70,23 @@ def verb_test(cmd,session,prompt_ui):
         ITAL = prompt_ui.bcolors['ITAL']
         user_agent = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'
         headers = {'User-Agent': user_agent}
-        print(f"{BOLD}\n[*] Fetching with HTTP Verbs: {ENDC}{ITAL}{UNDER}{uri}{ENDC}\n")
+        print(f"{BOLD}\n ▿ Fetching with HTTP Verbs: ({ENDC}{ITAL}{UNDER}{uri}{ENDC})\n")
         r = requests.get(uri)
         if r.status_code != 405:
-            print(f"[{BOLD}*{ENDC}] GET: {r.status_code}")
+            print(f" ▹ GET: {r.status_code}")
         r = requests.post(uri)
         if r.status_code != 405:
-            print(f"[{BOLD}*{ENDC}] POST: {r.status_code}")
+            print(f" ▹ POST: {r.status_code}")
         r = requests.put(uri)
         if r.status_code != 405:
-            print(f"[{BOLD}*{ENDC}] PUT: {r.status_code}")
+            print(f" ▹ PUT: {r.status_code}")
         r = requests.patch(uri)
         if r.status_code != 405:
-            print(f"[{BOLD}*{ENDC}] PATCH: {r.status_code}")
+            print(f" ▹ PATCH: {r.status_code}")
         r = requests.head(uri)
         if r.status_code != 405:
-            print(f"[{BOLD}*{ENDC}] HEAD: {r.status_code}")
+            print(f" ▹ HEAD: {r.status_code}")
         r = requests.delete(uri)
         if r.status_code != 405:
-            print(f"[{BOLD}*{ENDC}] DELETE: {r.status_code}")
+            print(f" ▹ DELETE: {r.status_code}")
         print("")

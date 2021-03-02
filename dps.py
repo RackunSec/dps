@@ -13,9 +13,6 @@ import os # for the commands, of course. These will be passed ot the shell.
 import subprocess # for piping commands
 import sys # for exit
 import re # regexps
-import ifaddr # NIC info
-import socket # for HOSTNAME
-import getpass # for logging the username
 import datetime # for logging the datetime
 from prompt_toolkit import prompt, ANSI # for input
 from prompt_toolkit.completion import WordCompleter # completer function (feed a list)
@@ -24,128 +21,11 @@ from prompt_toolkit.completion import Completer, Completion, PathCompleter
 from prompt_toolkit.styles import Style # Style the prompt
 from prompt_toolkit.output.color_depth import ColorDepth # colors for prompt
 
-# GET custom modules from dpsrc:
-    # Add the file
-dps_config_file=os.path.expanduser("~")+"/.dps/config/.dpsrc"
-if not os.path.exists(dps_config_file):
-    with open(dps_config_file,'a') as config_file:
-        ### ADD ALL CONFIG STUFF HERE:
-        ## ADD STYLE:
-        config_file.write("[Style]\n")
-        config_file.write("prompt_theme = 5\n")
-        ## ADD PATHS:
-        config_file.write("\n[Paths]\n")
-        config_file.write("MYPATHS = /usr/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin\n")
-        config_file.write("DPS_bin_path=/cyberpunk/shells/dps/\n")
-        config_file.write("\n[Aliases]\n")
-        config_file.write("grep = grep --color\n")
-        config_file.write("egrep = egrep --color\n")
-        config_file.write("ls = ls --color=auto\n")
-    print(f"[!] Configuration file generated. Please restart shell.")
-    sys.exit(0)
-config=configparser.ConfigParser()
-config.read(dps_config_file) # read the file
-config.sections() # get all sections of the config
-dpsbinpath=config['Paths']['DPS_bin_path']
-
-#dpsbinpath="/tmp/dps/" # DEBUG ### REMOVE ME BEFORE PUSHING AND COMMITTING
-
-sys.path.append(dpsbinpath+"modules/")
-import dps_foreach as foreach
-import dps_run_cmd as run_cmd
-import dps_update as dps_update
-import dps_uid_gen as dps_uid_gen
-import dps_error as error
-import dps_help as help
-import dps_stats as dps_stats
-import dps_alias as dps_alias
-import dps_wifi as dps_wifi
-import dps_self_destruct as dps_self_destruct
-import dps_www as dps_www # all web-related module stuff for pentesting
-
-### SESSION AND USER INFO:
-class Session:
-    def __init__(self):
-        self.ADAPTERS = ifaddr.get_adapters() # get network device info
-        self.NET_DEV = "" # store the network device
-        self.HOSTNAME = socket.gethostname() # hostname for logging
-        self.UID = getpass.getuser() # Get the username
-        self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.3.2 (astronomical Z's)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
-        self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
-        self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/logs/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
-        self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/config/.dpsrc" # config (init) file name
-        self.CONFIG = configparser.ConfigParser() # config object
-        self.OWD=os.getcwd() # historical purposes
-        self.VARIABLES = {} # all user-defined variables.
-        self.prompt_theme=0 # Prompt style setting
-        self.prompt_tail = "# " if self.UID == "root" else "> " # diff root prompt
-        self.ALIASES = {} # all user-defined aliases
-        self.DPSBINPATH = "" # binary path for this (or installaed) dps.py executable
-        self.CUSTPATHS = [] # custom paths in .dpsrc file, dedpuled and link-read
-        self.NEWLOG=False
-        self.help = help
-        # Bash built-ins:
-        self.BASHBI=['bg', 'bind', 'break', 'builtin', 'case', 'cd', 'command', 'compgen', 'complete', 'continue', 'declare',
-            'dirs', 'disown', 'echo', 'enable', 'eval', 'exec', 'exit', 'export', 'fc', 'fg', 'getopts', 'hash', 'if', 'jobs', 'kill',
-            'let', 'local', 'logout', 'popd', 'printf', 'pushd', 'pwd', 'read', 'readonly', 'return', 'set', 'shift', 'shopt', 'source',
-            'suspend', 'test', 'times', 'trap', 'type', 'typeset', 'ulimit', 'umask', 'unalias', 'unset', 'until', 'wait','while']
-        self.IGNOREDUPES = ['ls','which','pwd','cwd','grep','egrep','sed','awk',]
-    def init_config(self): # initialize the configuration:
-        if not os.path.exists(os.path.join(os.path.expanduser("~"),".dps")): # create the directory if it does not exist
-            os.mkdir(os.path.join(os.path.expanduser("~"),".dps")) # mkdir
-            os.mkdir(os.path.join(os.path.expanduser("~"),".dps/config")) # mkdir
-            os.mkdir(os.path.join(os.path.expanduser("~"),".dps/logs")) # mkdir
-        # Set up the log file itself:
-        if not os.path.exists(self.LOG_FILENAME):
-            with open(self.LOG_FILENAME,'a') as log_file:
-                log_file.write("When,Host,Network,Who,Where,What\n")
-            self.NEWLOG=True
-
-        self.CONFIG.read(self.CONFIG_FILENAME) # read the file
-        self.CONFIG.sections() # get all sections of the config
-        # Check for a prompt-style or die:
-        if 'Paths' in self.CONFIG:
-            self.PATHS = self.CONFIG['Paths']['mypaths'].split(":") # ARRAY
-            # check if symlinks in paths. Also, remove dpues:
-            for path in self.PATHS:
-                if path not in self.CUSTPATHS:
-                    if os.path.islink(path): # was it a symlink?
-                        if "/"+os.readlink(path) not in self.CUSTPATHS:
-                            self.CUSTPATHS.append("/"+os.readlink(path))
-                    else:
-                        self.CUSTPATHS.append(path)
-            self.PATHS = self.CUSTPATHS # overwrite it
-            self.DPSBINPATH = self.CONFIG['Paths']['DPS_bin_path']
-            # check if valid
-            if os.path.isdir(self.DPSBINPATH):
-                # check all paths and issue warning:
-                for path in self.PATHS:
-                    if not os.path.isdir(path):
-                        print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']} FATAL: Path defined ({path}) in [Paths] section of .dpsrc file does not exist! {prompt_ui.bcolors['ENDC']}")
-                        sys.exit(1)
-            else:
-                print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']} Error in config file: Ensure 'DPS_bin_path' value is a valid path in [Paths] of "+self.CONFIG_FILENAME+f"{prompt_ui.bcolors['ENDC']}")
-                sys.exit() # die
-        else:
-            print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']} Error in config file: Add [Paths] section to "+self.CONFIG_FILENAME+f"{prompt_ui.bcolors['ENDC']}")
-            sys.exit() # die
-
-        if 'Style' in self.CONFIG:
-            session.prompt_theme = int(self.CONFIG['Style']['prompt_theme']) # grab the value of the style
-        else:
-            print(f"{prompt_ui.bcolors['BOLD']}[!]{prompt_ui.bcolors['FAIL']}{prompt_ui.bcolors['ENDC']} Error in config file: Add [Style] section to "+self.CONFIG_FILENAME)
-            sys.exit() # die
-
-        # check for aliases:
-        if 'Aliases' in self.CONFIG:
-            self.ALIASES = self.CONFIG['Aliases']
-
-### UI STUFF:
+### UI STUFF: (This needs to be here because we don't know the install path yet.)
 class Prompt_UI:
     bcolors = {
-        'OKGREEN' : '\033[3m\033[92m',
-        'FAIL' : '\033[3m\033[91m',
+        'OKGREEN' : '\033[3m\033[92m ✔ ',
+        'FAIL' : '\033[3m\033[91m ✖ ',
         'ENDC' : '\033[0m',
         'BOLD' : '\033[1m',
         'YELL' : '\033[33m',
@@ -163,15 +43,92 @@ class Prompt_UI:
         3 : '1980S',
         5 : 'Nouveau'
     }
-prompt_ui = Prompt_UI() # Object with UI data
-session = Session() # Object with Session data and user config
+prompt_ui = Prompt_UI() # Instantiet the above.
+# Now we get the DPS resource file and instantiate it:
+class DPSrc:
+    def __init__(self):
+        self.dps_config_file = os.path.expanduser("~")+"/.dps/config/.dpsrc"
+        if not os.path.exists(self.dps_config_file):
+            with open(self.dps_config_file,'a') as config_file:
+                ### ADD ALL CONFIG STUFF HERE:
+                ## ADD STYLE:
+                config_file.write("[Style]\n")
+                config_file.write("prompt_theme = 5\n")
+                ## ADD PATHS:
+                config_file.write("\n[Paths]\n")
+                config_file.write("MYPATHS = /usr/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin\n")
+                config_file.write("DPS_bin_path=/cyberpunk/shells/dps/\n")
+                config_file.write("\n[Aliases]\n")
+                config_file.write("grep = grep --color\n")
+                config_file.write("egrep = egrep --color\n")
+                config_file.write("ls = ls --color=auto\n")
+            print(f"[!] Configuration file generated. Please restart shell.")
+            sys.exit(0)
+        else:
+            self.configparser=configparser.ConfigParser()
+            self.configparser.read(self.dps_config_file) # read the file
+            self.configparser.sections() # get all sections of the config
+            self.mypaths = [] # custom mypaths defined in dpsrc
+            self.paths = [] # all good paths (exists, no symlinks, etc)
+            self.prompt_theme = 0 # prompt_theme
+            ###
+            ## PATHS definition: (from dpsrc)
+            ###
+            if 'Paths' in self.configparser:
+                self.mypaths = self.configparser['Paths']['mypaths'].split(":") # Array of all paths defined in dpsrc
+                # check if symlinks in paths. Also, remove dupes:
+                for path in self.mypaths:
+                    if path not in self.paths: # not in good paths list:
+                        if os.path.islink(path): # was it a symlink?
+                            if "/"+os.readlink(path) not in self.paths:
+                                self.paths.append("/"+os.readlink(path))
+                        else:
+                            self.paths.append(path)
+                # DPS installation directory defined?
+                self.dpsbinpath = self.configparser['Paths']['DPS_bin_path']
+                # check all paths and issue warning:
+                for path in self.paths:
+                    if not os.path.isdir(path):
+                        print(f"{prompt_ui.bcolors['FAIL']} FATAL: Path defined ({path}) in [Paths] section of .dpsrc file does not exist! {prompt_ui.bcolors['ENDC']}")
+                        sys.exit(1)
+            else:
+                print(f"{prompt_ui.bcolors['FAIL']} Error in config file: Add [Paths] section to {self.dps_config_file}{prompt_ui.bcolors['ENDC']}")
+                sys.exit() # die
+
+            if 'Style' in self.configparser:
+                self.prompt_theme = int(self.configparser['Style']['prompt_theme']) # grab the value of the style
+            else:
+                print(f"{prompt_ui.bcolors['FAIL']}{prompt_ui.bcolors['ENDC']} Error in config file: Add [Style] section to "+self.CONFIG_FILENAME)
+                sys.exit() # die
+
+            # check for aliases:
+            if 'Aliases' in self.configparser:
+                self.aliases = self.configparser['Aliases']
+            else:
+                print(f"{WARN} No aliases section found in dpsrc config file.\n")
+            self.dpsbinpath = self.configparser['Paths']['DPS_bin_path']
+
+dpsrc=DPSrc() # create  global resource object
+# Now that we have where our installation on disk is, let's get some modules and classes:
+sys.path.append(dpsrc.dpsbinpath+"modules/")
+sys.path.append(dpsrc.dpsbinpath+"classes/")
+import dps_logic as logic
+import dps_run_cmd as run_cmd
+import dps_update as dps_update
+import dps_uid_gen as dps_uid_gen
+import dps_error as error
+import dps_help as help
+import dps_stats as dps_stats
+import dps_env as dps_env
+import dps_wifi as dps_wifi
+import dps_self_destruct as dps_self_destruct
+import dps_www as dps_www # all web-related module stuff for pentesting
+# class files:
+import dps_session
+# instantiate them:
+session = dps_session.Session() # Object with Session data and user config
 session.init_config() # initialize the configuration.
-
-###===========================================
-## PRELIMINARY FILE/DESCRIPTOR WORK:
-###===========================================
-
-
+session.help = help
 # Get the adapter and IP address:
 def get_net_info():
     for adapter in session.ADAPTERS: # loop through adapters
@@ -179,35 +136,45 @@ def get_net_info():
             try:
                 session.NET_DEV = adapter.nice_name+":"+adapter.ips[0].ip
             except:
-                error.msg("No network address is ready. Please get a network address before continuing for logging purposes.","",session,prompt_ui)
-                help.msg("dps_config",session,prompt_ui) # show help for config.
+                print(f"{prompt_ui.bcolors['FAIL']}No network address is ready. Please get a network address before continuing for logging purposes.","",session,prompt_ui)
+                session.help.msg("dps_config",session,prompt_ui) # show help for config.
                 session.NET_DEV = "0.0.0.0" # no address?
 get_net_info()
-
+# The logging method:
 def log_cmd(cmd): # logging a command to the log file:
     with open(session.LOG_FILENAME,'a') as log_file:
         log_file.write(str(datetime.datetime.now())+","+session.HOSTNAME+","+str(session.NET_DEV)+","+session.UID+","+os.getcwd()+","+cmd+"\n")
     return 0
-
-###===========================================
-## CUSTOM HELP DIALOGS:
-###===========================================
-
 ###===========================================
 ## COMMAND HOOKS:
 ###===========================================
-def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit","quit","cd","sudo",etc:
-    cmd_root = re.sub("\s+.*","",cmd) # just the first word of the command (no args)
-    # check our user-defined aliases:
-    if len(session.ALIASES) > 0:
-        for alias in session.ALIASES:
-            cmd = re.sub(alias,session.ALIASES[alias],cmd) # all occurrences
-
-    cmd_delta = cmd # the delta will be mangled user input as we see later:
+def hook_cmd(cmd):
+    ###
+    ## First, set aliases:
+    ###
+    cmd_delta = cmd
+    cmd_count = cmd.split("|") # how many commands were there?
+    if len(cmd_count)>1:
+        new_cmd = []
+        for cmd_count_iter in cmd_count:
+            #print(f"cmd_count_iter:{cmd_count_iter}") # DEBUG
+            if len(dpsrc.aliases) > 0 and cmd_count_iter.split()[0] in dpsrc.aliases: # we will rewrite the command with the alias.
+                cmd_split = cmd_count_iter.split() # split the command up to get the first element
+                cmd_base = re.sub(cmd_split[0],dpsrc.aliases[cmd_split[0]],cmd_split[0]) # set alias
+                cmd_split[0]=cmd_base # overwrite it
+                new_cmd.append(" ".join(cmd_split))
+            else:
+                new_cmd.append(cmd_count_iter) # place it in, untouched.
+        cmd_delta=" | ".join(new_cmd)
+    else:
+        cmd_strip = cmd.rstrip()
+        if len(dpsrc.aliases) > 0 and cmd_strip in dpsrc.aliases:
+            cmd_delta = re.sub(cmd_strip,dpsrc.aliases[cmd_strip],cmd_strip) # set alias
     cmd_delta = re.sub("~",os.path.expanduser("~"),cmd_delta)
     cmd_delta = re.sub("^\s+","",cmd_delta) # remove any prepended spaces
-
-    # interpolate any variables:
+    ###
+    ## Next, interpolate any variables:
+    ###
     if re.match(".*\{[^\}]+\}.*",cmd_delta):
         # I chose a very unique variablename here on purposes to not collide.
         var123_0x031337 = re.sub(r"^[^\{]+{([^\}]+)}.*$","\\1",cmd_delta) # TODO interpolate multiple times! (use a while loop) (wait, can you do global replace?)
@@ -217,8 +184,11 @@ def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit
         else:
             error.msg(f"Variable declared not yet defined: {var123_0x031337}","def",session,prompt_ui)
             return
-
-    log_cmd(cmd_delta) # first, log the command.
+    ###
+    ## Now, we log the command:
+    ###
+    if cmd_delta!="": # do not log enter presses, derp.
+        log_cmd(cmd_delta) # first, log the command.
     # Handle built-in commands:
     if cmd_delta == "exit" or cmd_delta == "quit":
         exit_gracefully()
@@ -229,7 +199,7 @@ def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit
 
     ### Programming logic:
     elif cmd_delta.startswith("foreach"): # foreach (file.txt) as line: echo line
-        foreach.foreach(cmd_delta,session,prompt_ui) #
+        logic.foreach(cmd_delta,session,prompt_ui) #
     elif cmd_delta.startswith("dps_www_commentscrape"):
         dps_www.comment_scrape(cmd_delta,session,prompt_ui)
     elif cmd_delta.startswith("dps_www_verbs"):
@@ -238,40 +208,23 @@ def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit
         dps_self_destruct.self_destruct(session,prompt_ui)
         return
     elif cmd_delta.startswith("dps_wifi"):
-        args = cmd_delta.split()
-        if len(args)>1:
-            dps_wifi.set(args[1]) # should be the device
-        else:
-            error.msg("Not enough arguments.","dps_wifi",session,prompt_ui)
-            return
+        dps_wifi.set(cmd_delta,session,prompt_ui)
     elif cmd_delta.startswith("def "): # def var: val
-        args = re.sub("^def\s+","",cmd_delta) # grab the arguments
-        var = re.sub(":.*","",args)
-        val = re.sub("[^:]+:(\s+)?","",args)
-        if var != "" and val != "":
-            print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Assigning {prompt_ui.bcolors['BOLD']}{prompt_ui.bcolors['ITAL']}{val}{prompt_ui.bcolors['ENDC']} to {prompt_ui.bcolors['BOLD']}{prompt_ui.bcolors['ITAL']}{var}{prompt_ui.bcolors['ENDC']}") # DEBUG
-            session.VARIABLES[var]=val # set it.
-        else:
-            error.msg("Incorrect syntax for defining a value.","def",session,prompt_ui)
-            return
+        dps_env.define_var(cmd,session,prompt_ui)
     elif re.match("^\s?sudo",cmd_delta): # for sudo, we will need the command's full path:
         sudo_regexp = re.compile("sudo ([^ ]+)")
         cmd_delta=re.sub(sudo_regexp,'sudo $(which \\1)',cmd_delta)
-        run_cmd.run(cmd_delta,session,prompt_ui)
+        run_cmd.run(cmd_delta,dpsrc,session,prompt_ui)
         return
     elif cmd_delta.startswith("dps_uid_gen"):
-        args = cmd_delta.split()
-        if len(args)==3:
-            dps_uid_gen.gen_uids(args[1],args[2],session,prompt_ui) # should be "format specifier, filename"
-        else:
-            error.msg("Not enough arguments.","dps_uid_gen",session,prompt_ui)
-            return
+        dps_uid_gen.gen_uids(cmd_delta,session,prompt_ui)
+
     elif(cmd_delta=="dps_stats"):
         dps_stats.show(prompt_ui)
     elif(cmd_delta=="dps_update"):
         dps_update.app(session,prompt_ui)
     elif(cmd_delta=="dps_alias"):
-        dps_alias.show(session,prompt_ui)
+        dps_env.show_alias(session,prompt_ui)
     elif(cmd_delta.startswith("dps_config")):
         args = re.sub("dps_config","",cmd_delta).split() # make an array
         if len(args) > 0:
@@ -281,28 +234,28 @@ def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit
     elif(cmd_delta.startswith("help")):
         args = cmd_delta.split()
         if(len(args)>1):
-            help.msg(args[1],session,prompt_ui)
+            session.help.msg(args[1],session,prompt_ui)
         else:
-            help.msg("",session,prompt_ui)
+            session.help.msg("",session,prompt_ui)
 
     ###---------
     ## VERSION @override:
     ###---------
     elif(cmd_delta=="version"):
-        print(f"{prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['OKGREEN']}Demon Pentest Shell - "+session.VERSION+"{prompt_ui.bcolors['ENDC']}")
+        print(f"{prompt_ui.bcolors['OKGREEN']}Demon Pentest Shell - {session.VERSION} {prompt_ui.bcolors['ENDC']}")
     ###---------
     ### WARN Leaving DPS:
     ###---------
     elif(cmd_delta=="bash"):
         print(f"{prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}[i] WARNING - Leaving DPS for Bash shell (CTRL+D to return to DPS){prompt_ui.bcolors['ENDC']}")
-        run_cmd.run(cmd_delta,session,prompt_ui)
+        run_cmd.run(cmd_delta,dpsrc,session,prompt_ui)
 
     ###---------
     ## LS @override:
     ###---------
     elif(re.match("^ls",cmd_delta)):
         cmd_delta = re.sub("^ls","ls --color=auto",cmd)
-        run_cmd.run(cmd_delta,session,prompt_ui)
+        run_cmd.run(cmd_delta,dpsrc,session,prompt_ui)
     ###---------
     ## CLEAR @override:
     ###---------
@@ -332,7 +285,7 @@ def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit
         else:
             error.msg("Path does not exist: "+where_to,"",session,prompt_ui)
     else: # Any OTHER command:
-        run_cmd.run(cmd_delta,session,prompt_ui)
+        run_cmd.run(cmd_delta,dpsrc,session,prompt_ui)
     return
 
 ###===========================================
@@ -342,13 +295,13 @@ def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
     sys.exit(0);
 
 def dps_config(args): # configure the shell
-    session.prompt_theme # this is the prompt color setting
+    dpsrc.prompt_theme # this is the prompt color setting
     if args[0] == "prompt" and args[1] != "":
-        session.prompt_theme = int(args[1])
+        dpsrc.prompt_theme = int(args[1])
         # Now set it for session / preference in the .dpsrc file:
         dps_update.config(args)
     elif args[0] == "--show":
-        print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Current DPS Prompt Theme: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+prompt_ui.dps_themes[session.prompt_theme]+f"{prompt_ui.bcolors['ENDC'] }")
+        print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Current DPS Prompt Theme: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+prompt_ui.dps_themes[dpsrc.prompt_theme]+f"{prompt_ui.bcolors['ENDC'] }")
     elif args[0] == "--update-net":
         print(f"{prompt_ui.bcolors['BOLD']}{prompt_ui.bcolors['OKGREEN']}[i] Obtaining IP address via dhclient... {prompt_ui.bcolors['ENDC']}")
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", "dhclient -v"])
@@ -486,7 +439,7 @@ class DPSCompleter(Completer):
                         for builtin in help.modules_list:
                             options.append(builtin)
                         options += session.BASHBI # append Bash built-ins as they don't live in $PATH
-                        for path in session.PATHS:
+                        for path in dpsrc.paths:
                             for binary in os.listdir(path):
                                 if binary.startswith(current_str):
                                     if binary not in options:
@@ -506,7 +459,7 @@ class DPS:
         self.path = os.getcwd()+"/"
 
 
-        if session.prompt_theme == 0: # DEFAULT SHELL
+        if dpsrc.prompt_theme == 0: # DEFAULT SHELL
             self.message = [
                 ('class:username', session.UID),
                 ('class:at','@'),
@@ -516,7 +469,7 @@ class DPS:
                 ('class:dps','(dps)'),
                 ('class:pound',session.prompt_tail),
             ]
-        elif session.prompt_theme == 1: # MINIMAL SKULL
+        elif dpsrc.prompt_theme == 1: # MINIMAL SKULL
             self.message = [
                 ('class:parens_open_outer','('),
                 ('class:parens_open','('),
@@ -525,7 +478,7 @@ class DPS:
                 ('class:parens_close_outer',')'),
                 ('class:skull','☠️  '),
             ]
-        elif session.prompt_theme == 2 or session.prompt_theme == 3 or session.prompt_theme == 4: # MINIMAL
+        elif dpsrc.prompt_theme == 2 or dpsrc.prompt_theme == 3 or dpsrc.prompt_theme == 4: # MINIMAL
             self.message = [
                 ('class:parens_open_outer','('),
                 ('class:parens_open','('),
@@ -538,7 +491,7 @@ class DPS:
                 ('class:parens_close_outer',')'),
                 ('class:prompt',session.prompt_tail),
             ]
-        elif session.prompt_theme == 5: # MINIMAL
+        elif dpsrc.prompt_theme == 5: # MINIMAL
             if session.UID == "root":
                 uid = "#"
             else:
@@ -571,7 +524,7 @@ class DPS:
         ###===========================================
         #####
         ### THIS THEME WILL BE DEFAULT WITH .DPSRC:
-        if session.prompt_theme == 0:
+        if dpsrc.prompt_theme == 0:
                 self.style = Style.from_dict({
                     # User input (default text).
                     '':          '#fff',
@@ -586,7 +539,7 @@ class DPS:
                 })
         #####
         ### MINIMAL SKULL THEME
-        elif session.prompt_theme == 1:
+        elif dpsrc.prompt_theme == 1:
                 self.style = Style.from_dict({
                     # User input (default text).
                     '':          'italic #af5f00',
@@ -598,7 +551,7 @@ class DPS:
                     'parens_close':    '#af0000',
                     'skull':    '#8e8e8e',
                 })
-        elif session.prompt_theme == 2:
+        elif dpsrc.prompt_theme == 2:
             #####
             ### BONEYARD:
             self.style = Style.from_dict({
@@ -613,7 +566,7 @@ class DPS:
                 'pound':    'bold #aaa',
 		        'path': 'italic #ffffd7'
             })
-        elif session.prompt_theme == 3:
+        elif dpsrc.prompt_theme == 3:
             #####
             ### 1980s THEME:
             self.style = Style.from_dict({
@@ -629,7 +582,7 @@ class DPS:
                 'parens_close':    '#d7ff00',
                 'pound':    '#00aa00',
             })
-        elif session.prompt_theme == 5:
+        elif dpsrc.prompt_theme == 5:
             #####
             ### Nouveau: THEME:
             self.style = Style.from_dict({

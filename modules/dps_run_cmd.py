@@ -13,7 +13,7 @@ import os
 import subprocess
 
 ## Method: Run Commands.
-def run(cmd,session,prompt_ui):
+def run(cmd,dpsrc,session,prompt_ui):
     if cmd=="":
         return
     if cmd.startswith("./") or cmd.startswith("/") or re.match("^[^/]+/",cmd):
@@ -26,7 +26,7 @@ def run(cmd,session,prompt_ui):
         # Is the binary in any of our defined paths?
         # get path contents:
         bin_paths = [] # could be more than one instance in paths (python envs, etc)
-        all_paths = session.PATHS # this could change since we also have cwd (.)
+        all_paths = dpsrc.paths # this could change since we also have cwd (.)
         if os.getcwd() not in all_paths:
             all_paths.append(os.getcwd())
         for path in all_paths:
