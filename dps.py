@@ -148,7 +148,7 @@ class Prompt_UI:
         'BLUE' : '\033[34m',
         'BUNDER': '\033[1m\033[4m',
         'WARN': '\033[33m\033[3m',
-        'COMMENT': '\033[90m\033[3m',
+        'COMMENT': '\033[37m\033[3m',
     }
     dps_themes = {
         0 : 'DPS',
