@@ -102,24 +102,28 @@ def msg(cmd_name,session,prompt_ui):
     BOLD=prompt_ui.bcolors['BOLD']
     CMT=prompt_ui.bcolors['COMMENT']
     if cmd_name != "":
-        dialog=modules_list[cmd_name]
-        print(f"\n{BOLD}▾ {dialog['title']} ▾ {ENDC}")
-        print(f"{dialog['desc']}\n")
-        print(f"{BUNDER}Command Arguments{ENDC}\n ▹ {WARN}{cmd_name}{ENDC}",end=" ")
-        for arg in dialog['args']:
-            print(f"{arg}",end=" ")
-        print(f"\n\n{BUNDER}Command Syntax{ENDC}")
-        for syntax in dialog['syntax_examples']:
-            syntax_cmd = syntax.split(" ",1)[0] # drop off any args
-            if len(syntax.split())>1:
-                syntax_args = syntax.split(" ",1)[1] # drop off command
-                syntax_comment = syntax_args.split("#")
-                if len(syntax_comment)>1:
-                    syntax_args = syntax_comment[0]+CMT+"#"+syntax_comment[1]+ENDC
-            else:
-                syntax_args = ""
-            print(f" ▹ {WARN}{syntax_cmd}{ENDC} {syntax_args}")
-        print(f"\n{BUNDER}Author{ENDC}\n ▹ {dialog['author']['name']} ({dialog['author']['url']})\n")
+        if cmd_name in modules_list:
+            dialog=modules_list[cmd_name]
+            print(f"\n{BOLD}▾ {dialog['title']} ▾ {ENDC}")
+            print(f"{dialog['desc']}\n")
+            print(f"{BUNDER}Command Arguments{ENDC}\n ▹ {WARN}{cmd_name}{ENDC}",end=" ")
+            for arg in dialog['args']:
+                print(f"{arg}",end=" ")
+            print(f"\n\n{BUNDER}Command Syntax{ENDC}")
+            for syntax in dialog['syntax_examples']:
+                syntax_cmd = syntax.split(" ",1)[0] # drop off any args
+                if len(syntax.split())>1:
+                    syntax_args = syntax.split(" ",1)[1] # drop off command
+                    syntax_comment = syntax_args.split("#")
+                    if len(syntax_comment)>1:
+                        syntax_args = syntax_comment[0]+CMT+"#"+syntax_comment[1]+ENDC
+                else:
+                    syntax_args = ""
+                print(f" ▹ {WARN}{syntax_cmd}{ENDC} {syntax_args}")
+            print(f"\n{BUNDER}Author{ENDC}\n ▹ {dialog['author']['name']} ({dialog['author']['url']})\n")
+        else:
+            print(f"{WARN}[{BOLD}?{ENDC}{WARN}] No help dialog for {BOLD}\"{cmd_name}\"{ENDC}{WARN} yet.\n    Please create one in the dps_help Python module.{ENDC}")
+            return
         return
     else:
         print(f"\n{prompt_ui.bcolors['BOLD']}The Demon Pentest Shell (Version: {session.VERSION}){prompt_ui.bcolors['ENDC']}")
