@@ -146,20 +146,20 @@ def msg(cmd_name,session,prompt_ui):
         return
     else:
         print(f"\n{BOLD}The Demon Pentest Shell (Version: {session.VERSION}){ENDC}")
-        print(f"\n{BUNDER}Built In Commands{ENDC}")
-        print (f" ▹ {WARN}help{ENDC} - this cruft.")
-        print (f" ▹ {WARN}exit/quit/CTRL+D{ENDC} - return to terminal OS shell.")
+        print(f"\n ▿ {BOLD}[ Built In Commands ]{ENDC} ▿ ")
+        print (f"  ◦ {WARN}help{ENDC} - this cruft.")
+        print (f"  ◦ {WARN}exit/quit/CTRL+D{ENDC} - return to terminal OS shell.")
         for cat in modules_categories:
             print(f"\n ▿ {BOLD}[{cat}]{ENDC} ▿ ")
             for module in modules_list:
                 if(modules_list[module]['category'] == cat):
                     #dialog=modules_list[module]
-                    print (f"    ▹ {WARN}{module}{ENDC} - {modules_list[module]['title']}")
+                    print (f"  ◦ {WARN}{module}{ENDC} - {modules_list[module]['title']}")
 
-        print(f"\n{BUNDER}Keyboard Shortcuts{ENDC}")
-        print(f" ▹ {WARN}CTRL+R{ENDC} - Search command history.")
-        print(f" ▹ {WARN}CTRL+A{ENDC} - Move cursor to beginning of line (similar to \"HOME\" key).")
-        print(f" ▹ {WARN}CTRL+P{ENDC} - Place the previously ran command into the command line.")
-        print(f" ▹ {WARN}CTRL+B{ENDC} - Move one character before cursor.")
-        print(f" ▹ {WARN}ALT+F{ENDC} -  Move one character forward.")
-        print(f" ▹ {WARN}CTRL+C{ENDC} - Kill current process.\n")
+        print(f"\n ▿ {BOLD}[ Keyboard Shortcuts ] {ENDC} ▿ ")
+        print(f"  ◦ {WARN}CTRL+R{ENDC} - Search command history.")
+        print(f"  ◦ {WARN}CTRL+A{ENDC} - Move cursor to beginning of line (similar to \"HOME\" key).")
+        print(f"  ◦ {WARN}CTRL+P{ENDC} - Place the previously ran command into the command line.")
+        print(f"  ◦ {WARN}CTRL+B{ENDC} - Move one character before cursor.")
+        print(f"  ◦ {WARN}ALT+F{ENDC} -  Move one character forward.")
+        print(f"  ◦ {WARN}CTRL+C{ENDC} - Kill current process.\n")
