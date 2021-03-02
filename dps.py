@@ -71,7 +71,7 @@ class Session:
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.3.2 (what a day)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = "v1.3.2 (astronomical Z's)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/logs/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.CONFIG_FILENAME = os.path.expanduser("~")+"/.dps/config/.dpsrc" # config (init) file name
@@ -84,6 +84,7 @@ class Session:
         self.DPSBINPATH = "" # binary path for this (or installaed) dps.py executable
         self.CUSTPATHS = [] # custom paths in .dpsrc file, dedpuled and link-read
         self.NEWLOG=False
+        self.help = help
         # Bash built-ins:
         self.BASHBI=['bg', 'bind', 'break', 'builtin', 'case', 'cd', 'command', 'compgen', 'complete', 'continue', 'declare',
             'dirs', 'disown', 'echo', 'enable', 'eval', 'exec', 'exit', 'export', 'fc', 'fg', 'getopts', 'hash', 'if', 'jobs', 'kill',
@@ -228,19 +229,11 @@ def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit
 
     ### Programming logic:
     elif cmd_delta.startswith("foreach"): # foreach (file.txt) as line: echo line
-        foreach.foreach(cmd_delta,session) #
+        foreach.foreach(cmd_delta,session,prompt_ui) #
     elif cmd_delta.startswith("dps_www_commentscrape"):
-        # dps_www has this command:
-        if len(cmd_delta.split())>1:
-            dps_www.comment_scrape(session,prompt_ui,cmd_delta.split()[1])
-        else:
-            help.msg("dps_www_commentscrape",session,prompt_ui)
+        dps_www.comment_scrape(cmd_delta,session,prompt_ui)
     elif cmd_delta.startswith("dps_www_verbs"):
-        # dps_www has this command:
-        if len(cmd_delta.split())>1:
-            dps_www.verb_test(session,prompt_ui,cmd_delta.split()[1])
-        else:
-            help.msg("dps_www_verbs",session,prompt_ui)
+        dps_www.verb_test(cmd_delta,session,prompt_ui)
     elif cmd_delta.startswith("dps_self_destruct"):
         dps_self_destruct.self_destruct(session,prompt_ui)
         return

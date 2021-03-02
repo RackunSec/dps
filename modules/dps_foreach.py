@@ -12,10 +12,10 @@ import re
 import dps_run_cmd as run_cmd
 
 ## Method: Foreach() programming logic:
-def foreach(cmd_delta,session): # FOREACH
+def foreach(cmd_delta,session,prompt_ui): # FOREACH
     cmd_args = re.sub("^foreach(\s+)?","",cmd_delta)
     if cmd_args == "":
-        help("foreach")
+        session.help.msg("foreach",session,prompt_ui)
     else:
         object = re.sub(".*\(([^\)]+)\).*","\\1",cmd_args)
         if object != "":
