@@ -60,6 +60,13 @@ modules_list={
             'syntax_examples':['dps_uid_gen %f%l@acme.corp acme.corp.employees.txt # first and last initial','dps_uid_gen %F%l@acme.corp acme.corp.employees.txt # first name and last initial','dps_uid_gen %f%L@acme.corp acme.corp.employees.txt # first initial and last name'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
+    'dps_www_commentscrape':
+        {'title':'DPS->WWW->Comment Scrape',
+            'desc':'Scrape a Web Page for HTML and JS Comments.',
+            'args':['(URL)'],
+            'syntax_examples':['dps_www_commentscrape https://www.rackunsec.org/'],
+            'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
+        },
     'dps_wifi':
         {'title':'DPS Wi-Fi Monitor Mode',
             'desc':'Set a wireless device into RFMON mode with a single command.',
