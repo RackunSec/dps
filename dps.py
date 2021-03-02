@@ -47,7 +47,9 @@ config=configparser.ConfigParser()
 config.read(dps_config_file) # read the file
 config.sections() # get all sections of the config
 dpsbinpath=config['Paths']['DPS_bin_path']
+
 #dpsbinpath="/tmp/dps/" # DEBUG
+
 sys.path.append(dpsbinpath+"modules/")
 import dps_foreach as foreach
 import dps_run_cmd as run_cmd
@@ -409,6 +411,15 @@ class DPSCompleter(Completer):
                 else:
                     # TAB Autocompleting arguments? :
                     if len(cmd_line) > 1:
+                        if cmd_line[0] == "help": # capture help
+                            tab_com = current_str.split("/")[-1]
+                            options = []
+                            for builtin in help.modules_list:
+                                options.append(builtin)
+                            for opt in options:
+                                if opt.startswith(tab_com):
+                                    yield Completion(opt, -len(current_str),style='italic')
+                            return
                         if "/" in cmd_line[-1]: # directory traversal?
                             if re.match("^[A-Za-z0-9\.]",cmd_line[-1]) and cmd_line[-1].endswith("/"): # e.g.: cd Documents/{TAB TAB}
                                 dir = os.getcwd()+"/"+cmd_line[-1]
