@@ -47,7 +47,7 @@ config=configparser.ConfigParser()
 config.read(dps_config_file) # read the file
 config.sections() # get all sections of the config
 dpsbinpath=config['Paths']['DPS_bin_path']
-dpsbinpath="/tmp/dps/" # DEBUG
+#dpsbinpath="/tmp/dps/" # DEBUG
 sys.path.append(dpsbinpath+"modules/")
 import dps_foreach as foreach
 import dps_run_cmd as run_cmd
