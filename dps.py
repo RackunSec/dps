@@ -230,6 +230,12 @@ def hook_cmd(cmd): # run a command. We capture a few and handle them, like "exit
             dps_www.comment_scrape(session,prompt_ui,cmd_delta.split()[1])
         else:
             help.msg("dps_www_commentscrape",session,prompt_ui)
+    elif cmd_delta.startswith("dps_www_verbs"):
+        # dps_www has this command:
+        if len(cmd_delta.split())>1:
+            dps_www.verb_test(session,prompt_ui,cmd_delta.split()[1])
+        else:
+            help.msg("dps_www_verbs",session,prompt_ui)
     elif cmd_delta.startswith("dps_self_destruct"):
         dps_self_destruct.self_destruct(session,prompt_ui)
         return

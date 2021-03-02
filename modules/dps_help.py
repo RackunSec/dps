@@ -67,6 +67,13 @@ modules_list={
             'syntax_examples':['dps_www_commentscrape https://www.rackunsec.org/'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
+    'dps_www_verbs':
+        {'title':'DPS->WWW->Verb Test',
+            'desc':'Test web service for acceptable HTTP Verbs.',
+            'args':['(URL)'],
+            'syntax_examples':['dps_www_verbs https://www.rackunsec.org/'],
+            'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
+        },
     'dps_wifi':
         {'title':'DPS Wi-Fi Monitor Mode',
             'desc':'Set a wireless device into RFMON mode with a single command.',

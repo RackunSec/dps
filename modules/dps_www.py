@@ -48,3 +48,34 @@ def comment_scrape(session,prompt_ui,uri):
         code_count += 1
         code_count_color = CMNT+str(code_count)+ENDC
     print("\n") # done
+
+## Method: do the scrape! we do the web page (FOR COMMENTS) scrape!
+def verb_test(session,prompt_ui,uri):
+    GRN = prompt_ui.bcolors['OKGREEN']
+    BOLD = prompt_ui.bcolors['BOLD']
+    CMNT = prompt_ui.bcolors['COMMENT']
+    ENDC = prompt_ui.bcolors['ENDC']
+    UNDER = prompt_ui.bcolors['UNDER']
+    ITAL = prompt_ui.bcolors['ITAL']
+    user_agent = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'
+    headers = {'User-Agent': user_agent}
+    print(f"{BOLD}\n[*] Fetching with HTTP Verbs: {ENDC}{ITAL}{UNDER}{uri}{ENDC}\n")
+    r = requests.get(uri)
+    if r.status_code != 405:
+        print(f"[{BOLD}*{ENDC}] GET: {r.status_code}")
+    r = requests.post(uri)
+    if r.status_code != 405:
+        print(f"[{BOLD}*{ENDC}] POST: {r.status_code}")
+    r = requests.put(uri)
+    if r.status_code != 405:
+        print(f"[{BOLD}*{ENDC}] PUT: {r.status_code}")
+    r = requests.patch(uri)
+    if r.status_code != 405:
+        print(f"[{BOLD}*{ENDC}] PATCH: {r.status_code}")
+    r = requests.head(uri)
+    if r.status_code != 405:
+        print(f"[{BOLD}*{ENDC}] HEAD: {r.status_code}")
+    r = requests.delete(uri)
+    if r.status_code != 405:
+        print(f"[{BOLD}*{ENDC}] DELETE: {r.status_code}")
+    print("")
