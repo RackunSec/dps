@@ -102,7 +102,7 @@ def hook(cmd,dpsrc,session,prompt_ui):
     ###
     ## Next, interpolate any variables:
     ###
-    if re.match(".*\{[^\}]+\}.*",cmd_delta):
+    if re.match(".*\{[^\}]+\}.*",cmd_delta) and not re.match("awk\s",cmd_delta): # AWK actually uses this syntax too.
         # I chose a very unique variablename here on purposes to not collide.
         var123_0x031337 = re.sub(r"^[^\{]+{([^\}]+)}.*$","\\1",cmd_delta) # TODO interpolate multiple times! (use a while loop) (wait, can you do global replace?)
         var_re = re.compile("{"+var123_0x031337+"}")
