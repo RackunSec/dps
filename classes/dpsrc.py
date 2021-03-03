@@ -6,7 +6,7 @@ from sys import exit
 
 class DPSrc:
     def __init__(self,dps_install_dir):
-        self.dps_config_file = os.path.expanduser("~")+"/.dps/config/.dpsrc"
+        self.dps_config_file = os.path.expanduser("~")+"/.dps/config/dpsrc"
         if not os.path.exists(self.dps_config_file):
             try:
                 if not os.path.exists(os.path.expanduser("~")+"/.dps/"):
@@ -22,7 +22,7 @@ class DPSrc:
             print(dps_install_dir)
             copyfile(dps_install_dir+"/examples/dpsrc.example",os.path.expanduser("~")+"/.dps/config/dpsrc")
             self.configparser=configparser.ConfigParser()
-            self.configparser.read(os.path.expanduser("~")+"/.dps/config/.dpsrc") # read the file
+            self.configparser.read(os.path.expanduser("~")+"/.dps/config/dpsrc") # read the file
             self.configparser.sections() # get all sections of the config
             self.configparser.set('Paths','dps_bin_path',dps_install_dir) # TODO int() ?
             with open(self.dps_config_file, 'w') as config_file:
@@ -54,7 +54,7 @@ class DPSrc:
                 # check all paths and issue warning:
                 for path in self.paths:
                     if not os.path.isdir(path):
-                        print(f"{prompt_ui.bcolors['FAIL']} FATAL: Path defined ({path}) in [Paths] section of .dpsrc file does not exist! {prompt_ui.bcolors['ENDC']}")
+                        print(f"{prompt_ui.bcolors['FAIL']} FATAL: Path defined ({path}) in [Paths] section of dpsrc file does not exist! {prompt_ui.bcolors['ENDC']}")
                         exit(1)
             else:
                 print(f"{prompt_ui.bcolors['FAIL']} Error in config file: Add [Paths] section to {self.dps_config_file}{prompt_ui.bcolors['ENDC']}")
