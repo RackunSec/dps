@@ -62,9 +62,10 @@ class DPSCompleter(Completer):
     def __init__(self, cli_menu):
         self.path_completer = PathCompleter()
     def get_completions(self, document, complete_event):
+
         word_before_cursor = document.get_word_before_cursor()
         try:
-            cmd_line = document.current_line.split() # make an array
+            cmd_line = document.current_line.split() # get the real deal here.
         except ValueError:
             pass
         else: # code runs ONLY if no exceptions occurred.
@@ -172,12 +173,34 @@ class DPSCompleter(Completer):
                         return
                     # Run from cwd? :
                     elif cmd_line[0].startswith("./"):
-                        cmd = re.sub("./","",cmd_line[0])
-                        options = os.listdir(os.getcwd())
+                        #print("dot slash!") # DEBUG
+                        cmd = re.sub(".+/","",cmd_line[0]) # remove [./this/that/]foo
+                        curr_dir_in_path = re.sub("[^/]+$","",cmd_line[0])
+                        options = os.listdir(curr_dir_in_path)
+                        final_options = [] # what we yield.
                         for opt in options:
-                            if opt.startswith(cmd): # that after the ./
-                                yield Completion("./"+opt, -len(current_str),style='italic')
-                        return
+                            if opt.startswith(cmd):
+                                final_options.append(opt) # just get rid of it.
+                        for opt in final_options:
+                            if os.path.isdir(curr_dir_in_path+opt):
+                                yield Completion(curr_dir_in_path+opt+"/", -len(current_str),style='italic')
+                            else:
+                                yield Completion(curr_dir_in_path+opt, -len(current_str),style='italic')
+                        return # goodbye!
+                    elif cmd_line[0].startswith("/"): # defining full path, eh?
+                        cmd = re.sub(".*/","",cmd_line[0]) # remove [./this/that/]foo
+                        curr_dir_in_path = re.sub("[^/]+$","",cmd_line[0])
+                        options = os.listdir(curr_dir_in_path)
+                        final_options = [] # what we yield.
+                        for opt in options:
+                            if opt.startswith(cmd):
+                                final_options.append(opt) # just get rid of it.
+                        for opt in final_options:
+                            if os.path.isdir(curr_dir_in_path+opt):
+                                yield Completion(curr_dir_in_path+opt+"/", -len(current_str),style='italic')
+                            else:
+                                yield Completion(curr_dir_in_path+opt, -len(current_str),style='italic')
+                        return # goodbye!
                     # Run from PATH:
                     else: # just pull in what we need - not everything:
                         options = []
