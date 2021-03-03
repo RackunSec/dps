@@ -22,17 +22,8 @@ from prompt_toolkit.output.color_depth import ColorDepth # colors for prompt
 dps_install_dir=os.path.dirname(os.path.realpath(__file__)) # where am I installed on your FS?
 sys.path.append(dps_install_dir+"/modules/")
 sys.path.append(dps_install_dir+"/classes/")
-import dps_logic as logic
 import dps_cmd as dps_cmd
-import dps_update as dps_update
-import dps_uid_gen as dps_uid_gen
-import dps_error as error
 import dps_help as help
-import dps_stats as dps_stats
-import dps_env as dps_env
-import dps_wifi as dps_wifi
-import dps_self_destruct as dps_self_destruct
-import dps_www as dps_www # all web-related module stuff for pentesting
 # class files:
 import dps_session
 import dpsrc as dpsrc

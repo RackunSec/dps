@@ -11,8 +11,16 @@
 import re
 import os
 import subprocess
+## DPS REQUIREMENTS:
 import dps_log
 import dps_env
+import dps_stats
+import dps_uid_gen
+import dps_www
+import dps_wifi
+import dps_update
+import dps_self_destruct
+import dps_logic as logic
 
 ## Method: Run Commands.
 def run(cmd,dpsrc,session,prompt_ui):
