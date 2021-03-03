@@ -19,7 +19,8 @@ class DPSrc:
                 print(f"{prompt_ui.bcolors['FAIL']}Could not write directories in {os.path.expanduser('~')}")
                 exit(1)
             # copy the dpsrc.example file into ~/.dps/config/
-            copyfile(dps_install_dir+"/examples/dpsrc.example",os.path.expanduser("~")+"/.dps/config/.dpsrc")
+            print(dps_install_dir)
+            copyfile(dps_install_dir+"/examples/dpsrc.example",os.path.expanduser("~")+"/.dps/config/dpsrc")
             self.configparser=configparser.ConfigParser()
             self.configparser.read(os.path.expanduser("~")+"/.dps/config/.dpsrc") # read the file
             self.configparser.sections() # get all sections of the config
