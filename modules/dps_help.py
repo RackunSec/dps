@@ -20,6 +20,14 @@ modules_list={
             'syntax_examples':['dps_stats'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
+    'dps_env':
+        {'title':'DPS Session and Environment Information',
+            'desc':'Displays all session and environment information.',
+            'category':'system',
+            'args':['var (optional)'],
+            'syntax_examples':['dps_env'],
+            'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
+        },
     'dps_self_destruct':
         {'title':'DPS Log Shredding',
             'desc':'After penetration test, shred all logs located in the local DPS ~/.dps/logs/ directory. Ensure that a backup was made beforehand!',
@@ -115,7 +123,7 @@ modules_list={
 
 ## Method: Show help dialog:
 def msg(cmd_name,session,prompt_ui):
-    WARN=prompt_ui.bcolors['WARN']
+    WARN=prompt_ui.bcolors['YELL']
     BUNDER=prompt_ui.bcolors['BUNDER']
     ENDC=prompt_ui.bcolors['ENDC']
     BOLD=prompt_ui.bcolors['BOLD']

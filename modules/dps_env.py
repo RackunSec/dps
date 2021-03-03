@@ -9,6 +9,7 @@
 
 ## REQUIREMENTS:
 import re
+import os
 
 ## Method: show your aliases set in .dpsrc:
 def show_alias(session,prompt_ui):
@@ -16,6 +17,24 @@ def show_alias(session,prompt_ui):
     for alias in session.ALIASES:
         print(f"  ◦ Alias found for {prompt_ui.bcolors['OKGREEN']}{alias}{prompt_ui.bcolors['ENDC']} as '{prompt_ui.bcolors['OKGREEN']}{session.ALIASES[alias]}{prompt_ui.bcolors['ENDC']}'")
     print("")
+    return
+
+## Method show environment
+def env(session,prompt_ui,dpsrc):
+    # Show all sesstings in session object:
+    print(f"\n[Networking]")
+    print(f"{session.ADAPTERS}")
+    print(f"\n[Aliases]")
+    for alias in dpsrc.aliases:
+        print(f"{alias}: {dpsrc.aliases[alias]}")
+    print(f"\n[Variables]")
+    for var in session.VARIABLES:
+        print(f"{var}: {session.VARIABLES[var]}")
+    print(f"\n[Logs]")
+    print(f"Current: {session.LOG_FILENAME}")
+    print(f"\n[File System]")
+    print(f"Old working directory: {session.OWD}")
+    print(f"Current working directory: {os.getcwd()}")
     return
 
 ## Method: define a session variable:

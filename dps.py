@@ -28,12 +28,12 @@ class Prompt_UI:
         'FAIL' : '\033[3m\033[91m ✖ ',
         'ENDC' : '\033[0m',
         'BOLD' : '\033[1m',
-        'YELL' : '\033[33m',
+        'YELL' : '\033[33m\033[3m',
         'ITAL' : '\033[3m',
         'UNDER' : '\033[4m',
         'BLUE' : '\033[34m',
         'BUNDER': '\033[1m\033[4m',
-        'WARN': '\033[33m\033[3m',
+        'WARN': '\033[33m\033[3m ⚑ ',
         'COMMENT': '\033[37m\033[3m',
     }
     dps_themes = {
@@ -200,6 +200,8 @@ def hook_cmd(cmd):
     ### Programming logic:
     elif cmd_delta.startswith("foreach"): # foreach (file.txt) as line: echo line
         logic.foreach(cmd_delta,session,prompt_ui,dpsrc) #
+    elif cmd_delta.startswith("dps_env"): # foreach (file.txt) as line: echo line
+        dps_env.env(session,prompt_ui,dpsrc) #
     elif cmd_delta.startswith("dps_www_commentscrape"):
         dps_www.comment_scrape(cmd_delta,session,prompt_ui)
     elif cmd_delta.startswith("dps_www_verbs"):

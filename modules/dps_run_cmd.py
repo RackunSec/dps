@@ -14,6 +14,11 @@ import subprocess
 
 ## Method: Run Commands.
 def run(cmd,dpsrc,session,prompt_ui):
+    WARN=prompt_ui.bcolors['WARN']
+    FAIL=prompt_ui.bcolors['FAIL']
+    BOLD=prompt_ui.bcolors['BOLD']
+    OKGREEN=prompt_ui.bcolors['OKGREEN']
+    ENDC=prompt_ui.bcolors['ENDC']
     if cmd=="":
         return
     if cmd.startswith("./") or cmd.startswith("/") or re.match("^[^/]+/",cmd):
@@ -36,12 +41,12 @@ def run(cmd,dpsrc,session,prompt_ui):
             subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
             return
         if len(bin_paths)>1:
-            print(f"{prompt_ui.bcolors['YELL']}[?] WARNING: binary file ({bin}) discovered in multiple paths:\n--------------------------------{prompt_ui.bcolors['ENDC']}")
+            print(f"{WARN}WARNING: binary file ({bin}) discovered in multiple paths:\n--------------------------------{ENDC}")
             count = 0;
             for path in bin_paths:
-                print(f"{prompt_ui.bcolors['BOLD']}[{prompt_ui.bcolors['OKGREEN']}{count}{prompt_ui.bcolors['ENDC']}{prompt_ui.bcolors['BOLD']}]{prompt_ui.bcolors['ENDC']} {prompt_ui.bcolors['OKGREEN']}{path}{prompt_ui.bcolors['ENDC']}")
+                print(f"{BOLD}[{OKGREEN}{count}{prompt_ui.bcolors['ENDC']}{BOLD}]{ENDC} {OKGREEN}{path}{ENDC}")
                 count+=1
-            print(f"\n{prompt_ui.bcolors['BOLD']}[?]{prompt_ui.bcolors['ENDC']} Please choose one:",end=" ")
+            print(f"\n{BOLD}[?]{ENDC} Please choose one:",end=" ")
             ans=int(input())
             try:
                 if bin_paths[ans]:
@@ -49,12 +54,12 @@ def run(cmd,dpsrc,session,prompt_ui):
                     subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
                     return
             except:
-                print(f"{prompt_ui.bcolors['FAIL']} INDEX: {str(ans)} out of range of list provided to you.{prompt_ui.bcolors['ENDC']}")
+                print(f"{FAIL}INDEX: {str(ans)} out of range of list provided to you.{ENDC}")
                 return
         elif len(bin_paths)==1: # we found the command (binary):
             subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
             return
         else:
-            print(f"{prompt_ui.bcolors['FAIL']}[!] Binary: {bin} not found in paths.\n  Check your [Paths] within the DPS configuration file.")
+            print(f"{prompt_ui.bcolors['FAIL']}Binary \"{bin}\" not found in paths.\n  Check your [Paths] within the DPS configuration file.")
             return
     return
