@@ -17,7 +17,7 @@ def gen_uids(cmd,session,prompt_ui): # take a CSV and generate UIDs using a form
     ENDC=prompt_ui.bcolors['ENDC']
     args = cmd.split()
     if len(args)!=3:
-        print(f"\n{FAIL}Not enough arguments for dps_uid_gen. See below.")
+        print(f"\n{FAIL}Not enough arguments for dps_uid_gen. See below.{ENDC}")
         session.help.msg("dps_uid_gen",session,prompt_ui)
     else:
         csv_file=cmd.split()[2]
