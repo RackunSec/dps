@@ -1,0 +1,15 @@
+[Style]
+prompt_theme = 7
+
+[Paths]
+mypaths = /usr/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin
+dps_bin_path=/cyberpunk/shells/dps/
+
+[Aliases]
+grep = grep --color
+egrep = egrep --color
+
+[Secrets]
+wpsan_api = 00000000000000000000000000000
+nessus_license = 0000-0000-0000-0000
+log_backup_key = 000000000000000000000000000

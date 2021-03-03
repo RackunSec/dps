@@ -9,7 +9,7 @@
 
 ## REQUIREMENTS:
 import re
-import dps_run_cmd as run_cmd
+import dps_cmd as run_cmd
 
 ## Method: Foreach() programming logic:
 def foreach(cmd_delta,session,prompt_ui,dpsrc): # FOREACH
