@@ -12,7 +12,7 @@ import re
 import dps_run_cmd as run_cmd
 
 ## Method: Foreach() programming logic:
-def foreach(cmd_delta,session,prompt_ui): # FOREACH
+def foreach(cmd_delta,session,prompt_ui,dpsrc): # FOREACH
     cmd_args = re.sub("^foreach(\s+)?","",cmd_delta)
     if cmd_args == "":
         session.help.msg("foreach",session,prompt_ui)
@@ -39,7 +39,7 @@ def foreach(cmd_delta,session,prompt_ui): # FOREACH
                         do_re = re.compile("\$"+var)
                         do_cmd = re.sub(do_re,str(i),do)
                         #print(f"[pl] cmd: "+do_cmd+" var: "+var)
-                        run_cmd.run_cmd(do_cmd,session)
+                        run_cmd.run(do_cmd,dpsrc,session,prompt_ui)
                 elif os.path.exists(object): # this is a file
                     # pull out what to do with the entry:
                     do = re.sub("^[^:]+:","",cmd_delta)
@@ -48,7 +48,7 @@ def foreach(cmd_delta,session,prompt_ui): # FOREACH
                             # replace entry with $var in do:
                             do_re = re.compile("\$"+var)
                             do_cmd = re.sub(do_re,entry.strip(),do)
-                            run_cmd.run_cmd(do_cmd,session)
+                            run_cmd.run(do_cmd,dpsrc,session,prompt_ui)
                 else:
                     error("Could not access object: "+object,"")
         else:

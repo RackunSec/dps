@@ -199,7 +199,7 @@ def hook_cmd(cmd):
 
     ### Programming logic:
     elif cmd_delta.startswith("foreach"): # foreach (file.txt) as line: echo line
-        logic.foreach(cmd_delta,session,prompt_ui) #
+        logic.foreach(cmd_delta,session,prompt_ui,dpsrc) #
     elif cmd_delta.startswith("dps_www_commentscrape"):
         dps_www.comment_scrape(cmd_delta,session,prompt_ui)
     elif cmd_delta.startswith("dps_www_verbs"):
