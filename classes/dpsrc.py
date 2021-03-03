@@ -24,7 +24,7 @@ class DPSrc:
             self.configparser.read(os.path.expanduser("~")+"/.dps/config/.dpsrc") # read the file
             self.configparser.sections() # get all sections of the config
             self.configparser.set('Paths','dps_bin_path',dps_install_dir) # TODO int() ?
-            with open(dpsrc.dps_config_file, 'w') as config_file:
+            with open(self.dps_config_file, 'w') as config_file:
                 self.configparser.write(config_file)
             print(f"[!] Configuration file generated. Please restart shell.")
             exit(0)
