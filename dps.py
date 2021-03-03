@@ -8,6 +8,7 @@
 # (dps) dberdeaux@schneiderdowns.com
 #
 ### IMPORT LIBRARIES:
+version = "v1.3.3 (Toss a Wrench)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
 import os # for the commands, of course. These will be passed ot the shell.
 import subprocess # for piping commands
 import sys # for exit
@@ -43,7 +44,7 @@ prompt_ui = prompt_ui.prompt_ui() # Instantiet the above.
 dpsrc=dpsrc.DPSrc(dps_install_dir) # create  global resource object
 
 # instantiate them:
-session = dps_session.Session() # Object with Session data and user config
+session = dps_session.Session(version) # Object with Session data and user config
 session.init_config() # initialize the configuration.
 session.help = help
 

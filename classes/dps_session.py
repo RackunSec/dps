@@ -6,13 +6,13 @@ import datetime # for logging the datetime
 import os # for the commands, of course. These will be passed ot the shell.
 
 class Session:
-    def __init__(self):
+    def __init__(self,version):
         self.ADAPTERS = ifaddr.get_adapters() # get network device info
         self.NET_DEV = "" # store the network device
         self.HOSTNAME = socket.gethostname() # hostname for logging
         self.UID = getpass.getuser() # Get the username
         self.REDIRECTION_PIPE = '_' # TODO not needed?
-        self.VERSION = "v1.3.3 (The Queen of All Everything)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+        self.VERSION = version
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/logs/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.OWD=os.getcwd() # historical purposes
