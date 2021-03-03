@@ -10,12 +10,12 @@
 ## REQUIREMENTS:
 
 ## Entire Help Object (must be updated when a module is added to DPS):
-modules_categories=['system','pentest','pentest-www','pentest-wi-fi','logic']
+modules_categories=['System','Pentest','Pentest-WWW','Pentest-Wi-Fi','Logic']
 modules_list={
     'dps_stats':
         {'title':'DPS Statistics Information',
             'desc':'Statistics for all log files and session data. This is produced from the local DPS ~/.dps/ directory.',
-            'category':'system',
+            'category':'System',
             'args':[],
             'syntax_examples':['dps_stats'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
@@ -23,7 +23,7 @@ modules_list={
     'dps_env':
         {'title':'DPS Session and Environment Information',
             'desc':'Displays all session and environment information.',
-            'category':'system',
+            'category':'System',
             'args':['var (optional)'],
             'syntax_examples':['dps_env'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
@@ -31,7 +31,7 @@ modules_list={
     'dps_self_destruct':
         {'title':'DPS Log Shredding',
             'desc':'After penetration test, shred all logs located in the local DPS ~/.dps/logs/ directory. Ensure that a backup was made beforehand!',
-            'category':'system',
+            'category':'System',
             'args':[],
             'syntax_examples':['dps_self_destruct'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
@@ -39,7 +39,7 @@ modules_list={
     'dps_alias':
         {'title':'DPS Aliases Configuration',
             'desc':'Aliases for commands and binaries (including arguments).',
-            'category':'system',
+            'category':'System',
             'args':[''],
             'syntax_examples':['dps_alias'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
@@ -48,7 +48,7 @@ modules_list={
         {'title':'Update the Demon Pentest Shell to Latest Version',
             'desc':'Update the Demon Pentest Shell to Latest Version from RackunSec\'s GitHUB repository. This must be done as root user if updating for all users.',
             'args':[''],
-            'category':'system',
+            'category':'System',
             'syntax_examples':['dps_update'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -56,7 +56,7 @@ modules_list={
         {'title':'DPS Foreach Loop Iterator',
             'desc':'Loop over a range or file and perform actions on each entry.',
             'args':['(path to file)','as (entry variable)',': (stuff to do per entry)'],
-            'category':'logic',
+            'category':'Logic',
             'syntax_examples':['foreach(/path/to/file.txt) as line: echo $line','foreach(m..n) as int: nmap 192.168.1.$int'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -64,7 +64,7 @@ modules_list={
         {'title':'DPS Variable Definitions',
             'desc':'Define variables and use them in commands.',
             'args':['(Variable Name)','(Variable Value)'],
-            'category':'system',
+            'category':'System',
             'syntax_examples':['def TARGET 192.168.1.1','nmap {TARGET}'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -72,7 +72,7 @@ modules_list={
         {'title':'User ID Generation Tool',
             'desc':'Provide a CSV File with: First, Last fields to generate user IDs, Emails, etc. used for penetration testing.',
             'args':['(format specifier)','(csv file)'],
-            'category':'pentest',
+            'category':'Pentest',
             'syntax_examples':['dps_uid_gen %f%l@acme.corp acme.corp.employees.txt # first and last initial','dps_uid_gen %F%l@acme.corp acme.corp.employees.txt # first name and last initial','dps_uid_gen %f%L@acme.corp acme.corp.employees.txt # first initial and last name'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -80,7 +80,7 @@ modules_list={
         {'title':'DPS->WWW->Comment Scrape',
             'desc':'Scrape a Web Page for HTML and JS Comments.',
             'args':['(URL)'],
-            'category':'pentest-www',
+            'category':'Pentest-WWW',
             'syntax_examples':['dps_www_commentscrape https://www.rackunsec.org/'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -88,7 +88,7 @@ modules_list={
         {'title':'DPS->WWW->Verb Test',
             'desc':'Test web service for acceptable HTTP Verbs.',
             'args':['(URL)'],
-            'category':'pentest-www',
+            'category':'Pentest-WWW',
             'syntax_examples':['dps_www_verbs https://www.rackunsec.org/'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -96,7 +96,7 @@ modules_list={
         {'title':'DPS Wi-Fi Monitor Mode',
             'desc':'Set a wireless device into RFMON mode with a single command.',
             'args':['(Wi-Fi device name)'],
-            'category':'pentest-wi-fi',
+            'category':'Pentest-Wi-Fi',
             'syntax_examples':['dps_wifi --monitor wlan0','dps_wifi --mac 00:11:22:33:44:55','dps_wifi --managed wlan0'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -104,7 +104,7 @@ modules_list={
         {'title':'DPS Configuration Settings',
             'desc':'Set configuration settings for your own sessions. This will update the local ~/.dps/config/dps.ini file with your arguments.',
             'args':['prompt (0-9)','--show','--update-net'],
-            'category':'system',
+            'category':'System',
             'syntax_examples':['dps_config prompt 5 # set current theme to 5', 'dps_config --show # show current theme', 'dps_config --update-net # get an ip address'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -158,7 +158,7 @@ def msg(cmd_name,session,prompt_ui):
         print (f"  ◦ {WARN}help{ENDC} - this cruft.")
         print (f"  ◦ {WARN}exit/quit/CTRL+D{ENDC} - return to terminal OS shell.")
         for cat in modules_categories:
-            print(f"\n ▿ {BOLD}[{cat}]{ENDC} ▿ ")
+            print(f"\n ▿ {BOLD}[ {cat} ]{ENDC} ▿ ")
             for module in modules_list:
                 if(modules_list[module]['category'] == cat):
                     #dialog=modules_list[module]
