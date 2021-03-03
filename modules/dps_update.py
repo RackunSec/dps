@@ -24,15 +24,3 @@ def app(session,prompt_ui):
         print(f"\n{BOLD} ▹ {ENDC} {OKGREEN}Successfully pulled changes to local repository: {session.DPSBINPATH} {ENDC}\n")
     except:
         print(f"{FAIL} ✖ Something went wrong when trying to perform git operations. {ENDC}")
-
-## Method config() -- update the configuration file
-def config(args,session,prompt_ui):
-    if len(args) > 1:
-        if args[0] == "prompt": # set it in the config file:
-            #try:
-            print(f"{OKGREEN} ▹ {ENDC} Adding "+str(args[1])+" as prompt_theme in "+session.CONFIG_FILENAME)
-            session.CONFIG.read(session.CONFIG_FILENAME)
-            session.CONFIG.sections()
-            session.CONFIG.set('Style','prompt_theme',args[1]) # TODO int() ?
-            with open(session.CONFIG_FILENAME, 'w') as config_file:
-                session.CONFIG.write(config_file)

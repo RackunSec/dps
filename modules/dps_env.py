@@ -57,3 +57,22 @@ def define_var(cmd,session,prompt_ui):
             session.help.msg("def",session,prompt_ui)
     else:
         session.help.msg("def",session,prompt_ui)
+
+
+## Method prompt() -- update the configuration file's prompt setting.
+def prompt(args,dpsrc,prompt_ui):
+    WARN=prompt_ui.bcolors['WARN']
+    ENDC=prompt_ui.bcolors['ENDC']
+    BOLD=prompt_ui.bcolors['BOLD']
+    OKGREEN=prompt_ui.bcolors['OKGREEN']
+    FAIL=prompt_ui.bcolors['FAIL']
+    if len(args) > 1:
+        if args[0] == "prompt": # set it in the config file:
+            #try:
+            print(f"{OKGREEN} ▹ {ENDC} Adding {str(args[1])} as prompt_theme in {dpsrc.dps_config_file}")
+            dpsrc.configparser.read(dpsrc.dps_config_file)
+            dpsrc.configparser.sections()
+            dpsrc.configparser.set('Style','prompt_theme',args[1]) # TODO int() ?
+            with open(dpsrc.dps_config_file, 'w') as config_file:
+                dpsrc.configparser.write(config_file)
+            print(f"{OKGREEN}Prompt setting updated. Restart DPS to take effect.")

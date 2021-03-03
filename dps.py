@@ -49,6 +49,13 @@ class DPSrc:
     def __init__(self):
         self.dps_config_file = os.path.expanduser("~")+"/.dps/config/.dpsrc"
         if not os.path.exists(self.dps_config_file):
+            try:
+                os.mkdir(os.path.expanduser("~")+"/.dps")
+                os.mkdir(os.path.expanduser("~")+"/.dps/config")
+                os.mkdir(os.path.expanduser("~")+"/.dps/logs")
+            except:
+                print(f"{prompt_ui.bcolors['FAIL']}Could not write directories in {os.path.expanduser('~')}")
+                sys.exit(1)
             with open(self.dps_config_file,'a') as config_file:
                 ### ADD ALL CONFIG STUFF HERE:
                 ## ADD STYLE:
@@ -230,7 +237,7 @@ def hook_cmd(cmd):
     elif(cmd_delta.startswith("dps_config")):
         args = re.sub("dps_config","",cmd_delta).split() # make an array
         if len(args) > 0:
-            dps_update.config(args,session,prompt_ui)
+            dps_env.prompt(args,dpsrc,prompt_ui)
         else:
             error.msg("Not enough arguments.","dps_config",session,prompt_ui)
     elif(cmd_delta.startswith("help")):
@@ -301,7 +308,7 @@ def dps_config(args): # configure the shell
     if args[0] == "prompt" and args[1] != "":
         dpsrc.prompt_theme = int(args[1])
         # Now set it for session / preference in the .dpsrc file:
-        dps_update.config(args)
+        dps_update.prompt(args,dpsrc,prompt_ui)
     elif args[0] == "--show":
         print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Current DPS Prompt Theme: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+prompt_ui.dps_themes[dpsrc.prompt_theme]+f"{prompt_ui.bcolors['ENDC'] }")
     elif args[0] == "--update-net":
@@ -493,7 +500,7 @@ class DPS:
                 ('class:parens_close_outer',')'),
                 ('class:prompt',session.prompt_tail),
             ]
-        elif dpsrc.prompt_theme == 5: # MINIMAL
+        elif dpsrc.prompt_theme == 5: # Nouveau
             if session.UID == "root":
                 uid = "#"
             else:
@@ -514,10 +521,30 @@ class DPS:
                     self.message.append(("class:text_path",path)) # add the name
                     self.message.append(("class:text_path_slash","/")) # add the slash
             self.message.append(('class:text_path_colon',"]"))
-            #self.message.append(('class:prompt_tail_sep',"▛"))
             self.message.append(('class:prompt_tail'," ▸ "))
-            #print(self.message)
-            #sys.exit(1)
+
+        elif dpsrc.prompt_theme == 6: # Daemo
+            if session.UID == "root":
+                uid = "#"
+            else:
+                uid = session.UID
+            # break up the path:
+            path_array = self.path.split("/")
+
+            self.message = [
+                ('class:text_uid'," "+uid+" "),
+                ('class:sep',"▸ "),
+                ('class:text_host',session.HOSTNAME+" "),
+                ('class:sep',"▸"),
+                ('class:text_path_brackets'," ["),
+            ]
+            self.message.append(('class:text_path_slash',"/"))
+            for path in path_array:
+                if path != "":
+                    self.message.append(("class:text_path",path)) # add the name
+                    self.message.append(("class:text_path_slash","/")) # add the slash
+            self.message.append(('class:text_path_brackets',"]"))
+            self.message.append(('class:prompt'," ▸ "))
 
     def __init__(self):
         self.path = os.getcwd()
@@ -602,13 +629,27 @@ class DPS:
                 'prompt_tail_sep':  'fg:#2e2e2e bg:'
             })
 
+        elif dpsrc.prompt_theme == 6:
+            #####
+            ### DAEMO: THEME:
+            self.style = Style.from_dict({
+                # User input (default text).
+                '':'', #italic #329da8',
+                # Prompt.
+                'text_uid': 'fg:#fff9e6 bg:#222',
+                'sep': 'fg:#aaa bg:#222',
+                'prompt': 'fg:#aaa bg:',
+                'text_host': 'italic bold fg:#fff9e6 bg:#222',
+                'text_path': 'italic fg:#7d7d7d bg:#222',
+                'text_path_brackets': 'bold fg:#7d7d7d bg:#222',
+                'text_path_slash': 'italic bold fg:#555 bg:#222',
+            })
         else:
             #####
             ### DEFAULT THEME:
             self.style = Style.from_dict({
                 # User input (default text).
                 '':          '#ff0066',
-
                 # Prompt.
                 'username': '#884444',
                 'at':       '#00aa00',
