@@ -31,12 +31,16 @@ def gen_uids(cmd,session,prompt_ui): # take a CSV and generate UIDs using a form
                     for line in nfh: # loop over each line
                         name = line.split(',') # split up the line
                         if name[0] == "First": continue # we don't need the first line
-                        f_init = re.sub("^([A-Za-z]).*","\\1",name[0]).rstrip()
-                        l_init = re.sub("^([A-Za-z]).*","\\1",name[1]).rstrip()
+                        f_init = re.sub("^\s*","",name[0]).rstrip()
+                        l_init = re.sub("^\s*","",name[1]).rstrip()
+                        f_init = re.sub("^([A-Za-z]).*","\\1",f_init)
+                        l_init = re.sub("^([A-Za-z]).*","\\1",l_init)
+                        f_full = re.sub(r"\s+","",name[0]).rstrip()
+                        l_full = re.sub(r"\s+","",name[1]).rstrip()
                         formatted = re.sub("%f",f_init,fs)
                         formatted = re.sub("%l",l_init,formatted)
-                        formatted = re.sub("%F",name[0].rstrip(),formatted)
-                        formatted = re.sub("%L",name[1].rstrip(),formatted)
+                        formatted = re.sub("%F",f_full,formatted)
+                        formatted = re.sub("%L",l_full,formatted)
                         print(formatted)
             except:
                 print(f"\n{FAIL}Could not open file, or file is not a CSV: {csv_file} for reading.{ENDC}")
