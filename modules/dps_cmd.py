@@ -12,6 +12,7 @@ import re
 import os
 import subprocess
 import dps_log
+import dps_env
 
 ## Method: Run Commands.
 def run(cmd,dpsrc,session,prompt_ui):

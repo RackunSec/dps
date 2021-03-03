@@ -10,10 +10,8 @@
 ### IMPORT LIBRARIES:
 version = "v1.3.3 (Toss a Wrench)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
 import os # for the commands, of course. These will be passed ot the shell.
-import subprocess # for piping commands
 import sys # for exit
 import re # regexps
-import datetime # for logging the datetime
 from prompt_toolkit import prompt, ANSI # for input
 from prompt_toolkit.completion import WordCompleter # completer function (feed a list)
 from prompt_toolkit import PromptSession
@@ -65,22 +63,6 @@ get_net_info()
 ###===========================================
 def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
     sys.exit(0);
-
-def dps_config(args): # configure the shell
-    dpsrc.prompt_theme # this is the prompt color setting
-    if args[0] == "prompt" and args[1] != "":
-        dpsrc.prompt_theme = int(args[1])
-        # Now set it for session / preference in the .dpsrc file:
-        dps_update.prompt(args,dpsrc,prompt_ui)
-    elif args[0] == "--show":
-        print(f"{prompt_ui.bcolors['BOLD']}[i]{prompt_ui.bcolors['ENDC']} Current DPS Prompt Theme: {prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}"+prompt_ui.dps_themes[dpsrc.prompt_theme]+f"{prompt_ui.bcolors['ENDC'] }")
-    elif args[0] == "--update-net":
-        print(f"{prompt_ui.bcolors['BOLD']}{prompt_ui.bcolors['OKGREEN']}[i] Obtaining IP address via dhclient... {prompt_ui.bcolors['ENDC']}")
-        subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", "dhclient -v"])
-        get_net_info(session.NET_DEV)
-        return
-    else:
-        print("Usage: dps_config prompt [0-9] for new prompt.")
 
 ###=======================================
 ## OUR CUSTOM COMPLETER: (a nightmare)
