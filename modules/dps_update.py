@@ -21,6 +21,6 @@ def app(session,prompt_ui):
         g = git.cmd.Git(session.dps_install_dir)
         g.stash('save')
         g.pull(force=True)
-        print(f"\n{BOLD} ▹ {ENDC} {OKGREEN}Successfully pulled changes to local repository: {session.dps_install_dir} {ENDC}\n")
+        print(f"\n{OKGREEN}Successfully pulled changes to local repository: {session.dps_install_dir} {ENDC}\n")
     except:
         print(f"{FAIL} ✖ Something went wrong when trying to perform git operations. {ENDC}")
