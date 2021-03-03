@@ -447,7 +447,7 @@ class DPS:
 def shell(dps):
     with open(session.LOG_FILENAME) as file:
         for entry in file:
-            cmd = entry.split(",")[5]
+            cmd = re.split(r'[^\\],',entry)[5]
             if cmd != "":
                 dps.prompt_session.history.append_string(cmd.rstrip())
     try:
@@ -464,7 +464,7 @@ def shell(dps):
 if __name__ == "__main__":
     print(prompt_ui.bcolors['BOLD']+"\n ▹▹▹ Welcome to the Demon Pentest Shell ("+session.VERSION+")\n ▹▹▹ Type \"exit\" to return to standard shell.\n"+prompt_ui.bcolors['ENDC'])
     if session.NEWLOG==True:
-        print(f" ▹ New log file created for today's sessions ({session.LOG_FILENAME})\n")
+        print(f"{prompt_ui.bcolors['OKGREEN']}New log file created for today's sessions ({session.LOG_FILENAME})\n")
     dps = DPS() # Prompt-toolkit class instance
     while True:
         shell(dps) #start the app
