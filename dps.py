@@ -33,7 +33,7 @@ prompt_ui = prompt_ui.prompt_ui() # Instantiet the above.
 dpsrc=dpsrc.DPSrc(dps_install_dir) # create  global resource object
 
 # instantiate them:
-session = dps_session.Session(version) # Object with Session data and user config
+session = dps_session.Session(version,dps_install_dir) # Object with Session data and user config
 session.init_config() # initialize the configuration.
 session.help = help
 

@@ -6,7 +6,7 @@ import datetime # for logging the datetime
 import os # for the commands, of course. These will be passed ot the shell.
 
 class Session:
-    def __init__(self,version):
+    def __init__(self,version,dps_install_dir):
         self.ADAPTERS = ifaddr.get_adapters() # get network device info
         self.NET_DEV = "" # store the network device
         self.HOSTNAME = socket.gethostname() # hostname for logging
@@ -19,6 +19,7 @@ class Session:
         self.VARIABLES = {} # all user-defined variables.
         self.prompt_tail = "# " if self.UID == "root" else "> " # diff root prompt
         self.NEWLOG=False
+        self.dps_install_dir = dps_install_dir
         # Bash built-ins:
         self.BASHBI=['bg', 'bind', 'break', 'builtin', 'case', 'cd', 'command', 'compgen', 'complete', 'continue', 'declare',
             'dirs', 'disown', 'echo', 'enable', 'eval', 'exec', 'exit', 'export', 'fc', 'fg', 'getopts', 'hash', 'if', 'jobs', 'kill',

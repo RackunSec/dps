@@ -18,9 +18,9 @@ def app(session,prompt_ui):
     OKGREEN=prompt_ui.bcolors['OKGREEN']
     BOLD=prompt_ui.bcolors['BOLD']
     try:
-        g = git.cmd.Git(session.DPSBINPATH)
+        g = git.cmd.Git(session.dps_install_dir)
         g.stash('save')
         g.pull(force=True)
-        print(f"\n{BOLD} ▹ {ENDC} {OKGREEN}Successfully pulled changes to local repository: {session.DPSBINPATH} {ENDC}\n")
+        print(f"\n{BOLD} ▹ {ENDC} {OKGREEN}Successfully pulled changes to local repository: {session.dps_install_dir} {ENDC}\n")
     except:
         print(f"{FAIL} ✖ Something went wrong when trying to perform git operations. {ENDC}")
