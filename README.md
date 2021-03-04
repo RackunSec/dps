@@ -90,5 +90,8 @@ This project requires Python3 and the following Python modules,
 * **datetime** - for dates and times.
 * **GitPython** - updates the DPS using this very repository!
 * **shutil** - for file copying during initial setup.
+
 ## UPDATING DPS
 To update DPS, simply use the `dps_update` command. This will pull the latest version down to your repository that is defined in the `~/.dps/config/dpsrc` file that gets generated upon first run of the shell.
+
+![DPS Update Screenshot](images/screenshots/dpsupdate.PNG)
