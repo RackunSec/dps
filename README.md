@@ -3,13 +3,16 @@ A simple shell wrapper for superior logging capabilities. All commands are logge
 ***When, Host, Network, Who, Where, What*** The shell also has built-in configuration commands for customizations.
 # The Shell
 ## CONFIGURATION
-The `~/.dps/config/dps.ini` file contains the user-defined settings and variables. See the ![dps.ini.example](dps.ini.example) example config file for syntax. This file and all directories used by DPS are automatically generated in the effective user's home directory within `~/.dps/`.
+The `~/.dps/config/dpsrc` file contains the user-defined settings and variables. See the ![dps.ini.example](dps.ini.example) example config file for syntax. This file and all directories used by DPS are automatically generated in the effective user's home directory within `~/.dps/`.
 ### Autocomplete Feature
 ![Screenshot of auto-complete text](images/screenshots/autocomplete.png)
 ### Built-In Programming Logic
 ![foreach() function screenshot](images/screenshots/foreach.png)
+### Aliases
+You can now define command aliases into the `dpsrc` file:
+![DPS Aliases](images/screenshots/aliases.png)
 ### Shell Themes
-These are set with PRMPT_STYL in the `~/.dps/dps.ini` file or with the `dps_config prompt (0-9)` built-in command.
+These are set with PRMPT_STYL in the `~/.dps/config/dpsrc` file or with the `dps_config prompt (0-9)` built-in command.
 #### DPS Default Theme:
 `PRMPT_STYL` value of `0` or `DPS` using `dps_config`
 
@@ -65,15 +68,16 @@ The following are built-in commands,
 * **history** - view your command history for your current session file (ALL HISTORY)
 
 ## INSTALLATION
-To install DPS, simply install the requirements using pip3 and copy the ```dps.py``` into your ```$PATH``` like ```/usr/local/bin```, etc:
+To install DPS, simply install the requirements using pip3 and clone the repository anywhere on your filesystem (root access required if installing for all users):
 ```
-root@kali:~# cd /tmp
-root@kali:/tmp# git clone https://github.com/weaknetlabs/dps.git
-root@kali:/tmp# cd dps
-root@kali:/tmp/dps# pip3 install -r requirements.txt
-root@kali:/tmp/dps# cp dps.py /usr/local/bin/
-root@kali:/tmp/dps# dps.py
+root@kali:~# git clone https://github.com/weaknetlabs/dps.git
+root@kali:~# cd dps
+root@kali:/dps# pip3 install -r requirements.txt
+root@kali:/dps# ./dps.py
 ```
+## UPDATING DPS
+To update DPS, simply use the `dps_update` command. This will pull the latest version down to your repository that is defined in the `~/.dps/config/dpsrc` file that gets generated upon first run of the shell.
+
 ### DEPENDENCIES
 This project requires Python3 and the following Python modules,
 * **prompt_toolkit** - for TAB autocompletion of $PATH and built-in commands
