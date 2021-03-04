@@ -5,7 +5,7 @@
 # requires Python 3+
 #
 # 2021 - Douglas Berdeaux, Matthew Creel
-# (dps) dberdeaux@schneiderdowns.com
+# 
 #
 ### IMPORT LIBRARIES:
 version = "v1.3.4(Real Bout 2)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
