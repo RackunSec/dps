@@ -77,17 +77,17 @@ root@kali:/dps# ./dps.py
 ```
 ### DEPENDENCIES
 This project requires Python3 and the following Python modules,
-* **prompt_toolkit** - for TAB autocompletion of $PATH and built-in commands
-* **os** - for path object
-* **sys** - for exit
-* **re** - regular expressions
-* **ifaddr** - NIC info
-* **socket** - for hostname
-* **getpass** - for username
-* **subprocess** - executes cmds by passing them to `/bin/bash`
+* **prompt_toolkit** - for TAB autocompletion of $PATH and built-in commands.
+* **os** - for path object.
+* **sys** - for exit.
+* **re** - regular expressions.
+* **ifaddr** - NIC info.
+* **socket** - for hostname.
+* **getpass** - for username.
+* **subprocess** - executes cmds by passing them to `/bin/bash`.
 * **configparser** - parses dps.ini file
-* **datetime** - for dates and times
+* **datetime** - for dates and times.
 * **GitPython** - updates the DPS using this very repository!
-* 
+* **shutil** - for file copying during initial setup.
 ## UPDATING DPS
 To update DPS, simply use the `dps_update` command. This will pull the latest version down to your repository that is defined in the `~/.dps/config/dpsrc` file that gets generated upon first run of the shell.
