@@ -5,7 +5,7 @@ A simple shell wrapper for superior logging capabilities. All commands are logge
 ## CONFIGURATION
 The `~/.dps/config/dps.ini` file contains the user-defined settings and variables. See the ![dps.ini.example](dps.ini.example) example config file for syntax. This file and all directories used by DPS are automatically generated in the effective user's home directory within `~/.dps/`.
 ### Autocomplete Feature
-![Screenshot of auto-complete text](images/screenshots/dps-autocomplete.PNG)
+![Screenshot of auto-complete text](images/screenshots/autocomplete.png)
 ### Built-In Programming Logic
 ![foreach() function screenshot](images/screenshots/dps_foreach.png)
 ### Shell Themes
