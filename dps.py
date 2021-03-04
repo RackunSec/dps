@@ -8,7 +8,7 @@
 # (dps) dberdeaux@schneiderdowns.com
 #
 ### IMPORT LIBRARIES:
-version = "v1.3.4 (Ghost Brigade)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+version = "v1.3.4 (Real Bout 2)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
 import os # for the commands, of course. These will be passed ot the shell.
 import sys # for exit
 import re # regexps

@@ -12,10 +12,13 @@ import re
 import os
 
 ## Method: show your aliases set in .dpsrc:
-def show_alias(session,prompt_ui):
-    print(prompt_ui.bcolors['BOLD']+"\n ▿ DPS.ini Defined [ALIASES] ▿ "+prompt_ui.bcolors['ENDC'])
-    for alias in session.ALIASES:
-        print(f"  ◦ Alias found for {prompt_ui.bcolors['OKGREEN']}{alias}{prompt_ui.bcolors['ENDC']} as '{prompt_ui.bcolors['OKGREEN']}{session.ALIASES[alias]}{prompt_ui.bcolors['ENDC']}'")
+def show_alias(dpsrc,prompt_ui):
+    ENDC=prompt_ui.bcolors['ENDC']
+    BOLD=prompt_ui.bcolors['BOLD']
+    OKGREEN=prompt_ui.bcolors['OKGREEN']
+    print(f"{BOLD}\n ▿ DPS.ini Defined [ALIASES] ▿ {ENDC}")
+    for alias in dpsrc.aliases:
+        print(f"  ◦ Alias found for {OKGREEN}{alias}{ENDC} as '{OKGREEN}{dpsrc.aliases[alias]}{ENDC}'")
     print("")
     return
 
