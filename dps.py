@@ -8,7 +8,7 @@
 #
 #
 ### IMPORT LIBRARIES:
-version = "v1.3.4(Real Bout 2)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+version = "v1.3.4(Brewlong Tea)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
 import os # for the commands, of course. These will be passed ot the shell.
 import sys # for exit
 import re # regexps
@@ -28,6 +28,7 @@ import dps_help as help
 import dps_session
 import dpsrc as dpsrc
 import dps_prompt_ui as prompt_ui
+from datetime import datetime
 
 prompt_ui = prompt_ui.prompt_ui() # Instantiet the above.
 dpsrc=dpsrc.DPSrc(dps_install_dir) # create  global resource object
@@ -327,7 +328,7 @@ class DPS:
             self.message.append(('class:text_path_brackets',"]"))
             self.message.append(('class:prompt'," ▸ "))
 
-        elif dpsrc.prompt_theme == 7: # Daemo
+        elif dpsrc.prompt_theme == 7: # Dropped
             # break up the path:
             path_array = self.path.split("/")
 
@@ -343,6 +344,23 @@ class DPS:
                     self.message.append(("class:text_path_slash","/")) # add the slash
             self.message.append(('class:text_path_brackets',"]"))
             self.message.append(('class:prompt',"\n┗▸ "))
+
+        elif dpsrc.prompt_theme == 8: # Brew
+            # break up the path:
+            self.message = [
+                ('class:dark',"   "),
+                ('class:light',"Pentest"),
+            ]
+            if "TARGET" in session.VARIABLES:
+                target = f"{session.VARIABLES['TARGET']}"
+                self.message.append(('class:khaki',"(")),
+                self.message.append(('class:light',target)),
+                self.message.append(('class:khaki',")")),
+
+            self.message.append(('class:dark'," "))
+            self.message.append(('class:khaki',""))
+            self.message.append(('class:light'," "))
+
 
     def __init__(self):
         self.path = os.getcwd()
@@ -459,6 +477,18 @@ class DPS:
                 'text_path_slash': 'italic bold fg:#555 bg:',
             })
 
+        elif dpsrc.prompt_theme == 8:
+            #####
+            ### BREW: THEME:
+            self.style = Style.from_dict({
+                # User input (default text).
+                '':'fg:#777777 italic bold',
+                'mug':'noitalic nobold fg:#4f3218',
+                'dark':'noitalic nobold fg:#423826',
+                'khaki':'noitalic nobold fg:#6b5c43',
+                'light':'noitalic nobold fg:#96815d'
+            })
+
         else:
             #####
             ### DEFAULT THEME:
@@ -466,7 +496,7 @@ class DPS:
                 # User input (default text).
                 '':          '#ff0066',
                 # Prompt.
-                'username': '#884444',
+                'tree': 'fg: green bg: brown',
                 'at':       '#00aa00',
                 'colon':    '#0000aa',
                 'pound':    '#00aa00',
