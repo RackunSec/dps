@@ -94,4 +94,4 @@ This project requires Python3 and the following Python modules,
 ## UPDATING DPS
 To update DPS, simply use the `dps_update` command. This will pull the latest version down to your repository that is defined in the `~/.dps/config/dpsrc` file that gets generated upon first run of the shell.
 
-![DPS Update Screenshot](images/screenshots/dpsupdate.PNG)
+![DPS Update Screenshot](images/screenshots/dpsupdate2.PNG)
