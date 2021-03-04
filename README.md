@@ -7,7 +7,7 @@ The `~/.dps/config/dps.ini` file contains the user-defined settings and variable
 ### Autocomplete Feature
 ![Screenshot of auto-complete text](images/screenshots/autocomplete.png)
 ### Built-In Programming Logic
-![foreach() function screenshot](images/screenshots/dps_foreach.png)
+![foreach() function screenshot](images/screenshots/foreach.png)
 ### Shell Themes
 These are set with PRMPT_STYL in the `~/.dps/dps.ini` file or with the `dps_config prompt (0-9)` built-in command.
 #### DPS Default Theme:
