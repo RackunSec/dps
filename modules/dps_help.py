@@ -18,6 +18,7 @@ modules_list={
             'category':'System',
             'args':[],
             'syntax_examples':['dps_stats'],
+            'file': 'dps_stats.py',
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
     'dps_env':
@@ -26,6 +27,7 @@ modules_list={
             'category':'System',
             'args':['var (optional)'],
             'syntax_examples':['dps_env'],
+            'file': 'dps_env.py',
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
     'dps_self_destruct':
@@ -33,6 +35,7 @@ modules_list={
             'desc':'After penetration test, shred all logs located in the local DPS ~/.dps/logs/ directory. Ensure that a backup was made beforehand!',
             'category':'System',
             'args':[],
+            'file': 'dps_self_destruct.py',
             'syntax_examples':['dps_self_destruct'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -41,14 +44,16 @@ modules_list={
             'desc':'Aliases for commands and binaries (including arguments).',
             'category':'System',
             'args':[''],
+            'file': 'dps_env.py',
             'syntax_examples':['dps_alias'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
     'dps_update':
         {'title':'Update the Demon Pentest Shell to Latest Version',
-            'desc':'Update the Demon Pentest Shell to Latest Version from RackunSec\'s GitHUB repository. This must be done as root user if updating for all users.',
+            'desc':'Update the Demon Pentest Shell to Latest Version from RackunSec\'s GitHUB repository.\nThis must be done as root user if updating for all users.',
             'args':[''],
             'category':'System',
+            'file': 'dps_update.py',
             'syntax_examples':['dps_update'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -57,6 +62,7 @@ modules_list={
             'desc':'Loop over a range or file and perform actions on each entry.',
             'args':['(path to file)','as (entry variable)',': (stuff to do per entry)'],
             'category':'Logic',
+            'file': 'dps_logic.py',
             'syntax_examples':['foreach(/path/to/file.txt) as line: echo $line','foreach(m..n) as int: nmap 192.168.1.$int'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -65,6 +71,7 @@ modules_list={
             'desc':'Define variables and use them in commands.',
             'args':['(Variable Name)','(Variable Value)'],
             'category':'System',
+            'file': 'dps_env.py',
             'syntax_examples':['def TARGET 192.168.1.1','nmap {TARGET}'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -73,6 +80,7 @@ modules_list={
             'desc':'Provide a CSV File with: First, Last fields to generate user IDs, Emails, etc. used for penetration testing.',
             'args':['(format specifier)','(csv file)'],
             'category':'Pentest',
+            'file': 'dps_uid_gen.py',
             'syntax_examples':['dps_uid_gen %f%l@acme.corp acme.corp.employees.txt # first and last initial','dps_uid_gen %F%l@acme.corp acme.corp.employees.txt # first name and last initial','dps_uid_gen %f%L@acme.corp acme.corp.employees.txt # first initial and last name'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -81,6 +89,7 @@ modules_list={
             'desc':'Scrape a Web Page for HTML and JS Comments.',
             'args':['(URL)'],
             'category':'Pentest-WWW',
+            'file': 'dps_www.py',
             'syntax_examples':['dps_www_commentscrape https://www.rackunsec.org/'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -89,6 +98,7 @@ modules_list={
             'desc':'Test web service for acceptable HTTP Verbs.',
             'args':['(URL)'],
             'category':'Pentest-WWW',
+            'file': 'dps_www.py',
             'syntax_examples':['dps_www_verbs https://www.rackunsec.org/'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -97,6 +107,7 @@ modules_list={
             'desc':'Set a wireless device into RFMON mode with a single command.',
             'args':['(Wi-Fi device name)'],
             'category':'Pentest-Wi-Fi',
+            'file': 'dps_wifi.py',
             'syntax_examples':['dps_wifi --monitor wlan0','dps_wifi --mac 00:11:22:33:44:55','dps_wifi --managed wlan0'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -105,6 +116,7 @@ modules_list={
             'desc':'Set configuration settings for your own sessions. This will update the local ~/.dps/config/dps.ini file with your arguments.',
             'args':['prompt (0-9)','--show','--update-net'],
             'category':'System',
+            'file': 'dps_env.py',
             'syntax_examples':['dps_config prompt 5 # set current theme to 5', 'dps_config --show # show current theme', 'dps_config --update-net # get an ip address'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
@@ -132,12 +144,12 @@ def msg(cmd_name,session,prompt_ui):
     if cmd_name != "":
         if cmd_name in modules_list:
             dialog=modules_list[cmd_name]
-            print(f"\n{BOLD}▾ {dialog['title']} ▾ {ENDC}")
+            print(f"\n  {BUNDER} {dialog['title']} {ENDC}")
             print(f"{dialog['desc']}\n")
-            print(f"{BUNDER}Command Arguments{ENDC}\n ▹ {WARN}{cmd_name}{ENDC}",end=" ")
+            print(f"{BUNDER}Command Arguments {ENDC}\n ▹ {WARN}{cmd_name}{ENDC}",end=" ")
             for arg in dialog['args']:
                 print(f"{arg}",end=" ")
-            print(f"\n\n{BUNDER}Command Syntax{ENDC}")
+            print(f"\n\n{BUNDER}Command Syntax {ENDC}")
             for syntax in dialog['syntax_examples']:
                 syntax_cmd = syntax.split(" ",1)[0] # drop off any args
                 if len(syntax.split())>1:
@@ -148,7 +160,8 @@ def msg(cmd_name,session,prompt_ui):
                 else:
                     syntax_args = ""
                 print(f" ▹ {BITAL}{syntax_cmd}{ENDC} {syntax_args}")
-            print(f"\n{BUNDER}Author{ENDC}\n ▹ {dialog['author']['name']} ({dialog['author']['url']})\n")
+            print(f"\n{BUNDER}File {ENDC}\n ▹ {BOLD}{dialog['file']}{ENDC}")
+            print(f"\n{BUNDER}Author {ENDC}\n ▹ {dialog['author']['name']} ({dialog['author']['url']})\n")
         else:
             print(f"{WARN}[{BOLD}?{ENDC}{WARN}] No help dialog for {BOLD}\"{cmd_name}\"{ENDC}{WARN} yet.\n    Please create one in the dps_help Python module.{ENDC}")
             return

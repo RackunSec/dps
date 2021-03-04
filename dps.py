@@ -5,7 +5,7 @@
 # requires Python 3+
 #
 # 2021 - Douglas Berdeaux, Matthew Creel
-# 
+#
 #
 ### IMPORT LIBRARIES:
 version = "v1.3.4(Real Bout 2)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
@@ -450,7 +450,7 @@ class DPS:
                 # User input (default text).
                 '':'#fff bold italic', #italic #329da8',
                 # Prompt.
-                'text_uid': 'bold fg:#fff9e6 bg:#333',
+                'text_uid': 'fg:#fff9e6 bg:#333',
                 'sep': 'fg:#aaa bg:',
                 'prompt': 'fg:#333 bg:',
                 'text_host': 'italic bold fg:#fff9e6 bg:',
@@ -503,7 +503,7 @@ def shell(dps):
 
 # standard boilerplate
 if __name__ == "__main__":
-    print(prompt_ui.bcolors['BOLD']+"\n ▹▹▹ Welcome to the Demon Pentest Shell ("+session.VERSION+")\n ▹▹▹ Type \"exit\" to return to standard shell.\n"+prompt_ui.bcolors['ENDC'])
+    print(prompt_ui.bcolors['BOLD']+"\n ▹▹▹ Welcome to the Demon Pentest Shell ("+session.VERSION+")\n ▹▹▹ Type \"exit\" to return to standard shell.\n"+prompt_ui.bcolors['ENDC'])
     if session.NEWLOG==True:
         print(f"{prompt_ui.bcolors['OKGREEN']}New log file created for today's sessions ({session.LOG_FILENAME})\n")
     dps = DPS() # Prompt-toolkit class instance

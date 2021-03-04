@@ -26,7 +26,7 @@ def comment_scrape(cmd,session,prompt_ui):
         ITAL = prompt_ui.bcolors['ITAL']
         user_agent = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'
         headers = {'User-Agent': user_agent}
-        print(f"{BOLD}\n ▿ Fetching: ({ENDC}{ITAL}{UNDER}{uri}{ENDC})\n")
+        print(f"{BOLD}\n   Fetching: ({ENDC}{ITAL}{UNDER}{uri}{ENDC})\n")
         req_data = requests.get(uri, stream=True)
         code_count = 0
         code_count_color = ""
@@ -70,7 +70,7 @@ def verb_test(cmd,session,prompt_ui):
         ITAL = prompt_ui.bcolors['ITAL']
         user_agent = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'
         headers = {'User-Agent': user_agent}
-        print(f"{BOLD}\n ▿ Fetching with HTTP Verbs: ({ENDC}{ITAL}{UNDER}{uri}{ENDC})\n")
+        print(f"{BOLD}\n   Fetching with HTTP Verbs: ({ENDC}{ITAL}{UNDER}{uri}{ENDC})\n")
         r = requests.get(uri)
         if r.status_code != 405:
             print(f" ▹ GET: {r.status_code}")

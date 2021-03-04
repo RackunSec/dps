@@ -56,7 +56,7 @@ def define_var(cmd,session,prompt_ui):
             session.VARIABLES[key]=val
             return
         else:
-            print(f"\n{FAIL} ✖ Syntax for \"def\" incorrect. See Below.{ENDC}")
+            print(f"\n{FAIL}Syntax for \"def\" incorrect. See Below.{ENDC}")
             session.help.msg("def",session,prompt_ui)
     else:
         session.help.msg("def",session,prompt_ui)
