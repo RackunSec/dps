@@ -22,6 +22,7 @@ import dps_wifi
 import dps_update
 import dps_self_destruct
 import dps_logic as logic
+import dps_error as error
 
 ## Exit gracefully to default shell:
 def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
