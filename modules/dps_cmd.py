@@ -10,6 +10,7 @@
 ## REQUIREMENTS:
 import re
 import os
+import sys # for exit
 import subprocess
 ## DPS REQUIREMENTS:
 import dps_log
@@ -21,6 +22,10 @@ import dps_wifi
 import dps_update
 import dps_self_destruct
 import dps_logic as logic
+
+## Exit gracefully to default shell:
+def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
+    sys.exit(0);
 
 ## Method: Run Commands.
 def run(cmd,dpsrc,session,prompt_ui):
