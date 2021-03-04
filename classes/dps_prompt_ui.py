@@ -10,8 +10,10 @@ class prompt_ui:
         'UNDER' : '\033[4m',
         'BLUE' : '\033[34m',
         'BUNDER': '\033[1m\033[4m',
-        'WARN': '\033[33m\033[3m ⚑ ',
+        'WARN': '\033[33m\033[3m   ',
         'COMMENT': '\033[37m\033[3m',
+        'QUESTION': '\033[3m ',
+        'INFO': ' '
     }
     dps_themes = {
         0 : 'DPS',

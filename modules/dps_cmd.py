@@ -115,7 +115,7 @@ def hook(cmd,dpsrc,session,prompt_ui):
     ## Now, we log the command:
     ###
     if cmd_delta!="": # do not log enter presses, derp.
-        dps_log.cmd(cmd_delta,session) # first, log the command.
+        dps_log.cmd(cmd_delta,session,prompt_ui) # first, log the command.
     # Handle built-in commands:
     if cmd_delta == "exit" or cmd_delta == "quit":
         exit_gracefully()
@@ -176,7 +176,7 @@ def hook(cmd,dpsrc,session,prompt_ui):
     ### WARN Leaving DPS:
     ###---------
     elif(cmd_delta=="bash"):
-        print(f"{prompt_ui.bcolors['ITAL']}{prompt_ui.bcolors['YELL']}[i] WARNING - Leaving DPS for Bash shell (CTRL+D to return to DPS){prompt_ui.bcolors['ENDC']}")
+        print(f"{prompt_ui.bcolors['WARN']}WARNING - Leaving DPS for Bash shell (CTRL+D to return to DPS){prompt_ui.bcolors['ENDC']}")
         run(cmd_delta,dpsrc,session,prompt_ui)
 
     ###---------

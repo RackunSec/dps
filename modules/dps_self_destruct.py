@@ -14,8 +14,14 @@ import time # for timestamp
 
 ## Method: overwrite every byte in file with garbage byte, rename and unlink from FS:
 def self_destruct(session,prompt_ui):
-    print(f"{prompt_ui.bcolors['YELL']}[!] WARNING - This will destroy all log files in ~/.dps/logs/ !! {prompt_ui.bcolors['ENDC']}")
-    ans = input("[?] Continue? (y/N): ")
+    ENDC=prompt_ui.bcolors['ENDC']
+    BOLD=prompt_ui.bcolors['BOLD']
+    OKGREEN=prompt_ui.bcolors['OKGREEN']
+    WARN=prompt_ui.bcolors['WARN']
+    INFO=prompt_ui.bcolors['INFO']
+    QUESTION=prompt_ui.bcolors['QUESTION']
+    print(f"{WARN}WARNING - THIS WILL DESTROY ALL LOG FILES: ~/.dps/logs/* !! {ENDC}")
+    ans = input(f"{QUESTION} Continue? (y/N): {ENDC}")
     if ans=="y" or ans=="Y":
         # destroy em:
         ENDC=prompt_ui.bcolors['ENDC']
@@ -38,7 +44,7 @@ def self_destruct(session,prompt_ui):
             os.rename(file_path,new_file_name) # rename it to garbage
             os.unlink(new_file_name) # unlink it from FS
             print(f"{ENDC}{BOLD}[ {OKGREEN}OK{ENDC}{BOLD} ]{ENDC}")
-        print(f"[*] All log files have been shredded. Logging out.")
+        print(f"{INFO} All log files have been shredded. Logging out.{ENDC}")
         os.sys.exit()
         return
     else:

@@ -8,7 +8,7 @@
 # (dps) dberdeaux@schneiderdowns.com
 #
 ### IMPORT LIBRARIES:
-version = "v1.3.4 (Real Bout 2)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+version = "v1.3.4(Real Bout 2)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
 import os # for the commands, of course. These will be passed ot the shell.
 import sys # for exit
 import re # regexps
@@ -88,7 +88,10 @@ class DPSCompleter(Completer):
                     if path.startswith("/"):
                         path_to=re.sub("[^/]+$","",path) # chop off end text
                         match = re.sub(".*/","",path) # greedily remove path
-                        options = os.listdir(path_to)
+                        try:
+                            options = os.listdir(path_to)
+                        except:
+                            options = []
                         for opt in options:
                             if opt.startswith(match):
                                 yield Completion("foreach("+path_to+opt,-len(current_str),style='italic')
@@ -115,7 +118,10 @@ class DPSCompleter(Completer):
                         if "/" in cmd_line[-1]: # directory traversal?
                             if re.match("^[A-Za-z0-9\.]",cmd_line[-1]) and cmd_line[-1].endswith("/"): # e.g.: cd Documents/{TAB TAB}
                                 dir = os.getcwd()+"/"+cmd_line[-1]
-                                options = os.listdir(dir)
+                                try:
+                                    options = os.listdir(dir)
+                                except:
+                                    options = []
                                 for opt in options:
                                     opt2 = dir+opt
                                     if os.path.isdir(opt2):
@@ -125,7 +131,10 @@ class DPSCompleter(Completer):
                             elif re.match("^[A-Za-z0-9\.]",cmd_line[-1]) and (not cmd_line[-1].endswith("/")): # e.g.: cd Documents/Te{TAB TAB}
                                 tab_com = current_str.split("/")[-1]
                                 dir = os.getcwd()+"/"+re.sub("[^/]+$","",current_str)
-                                options = os.listdir(dir)
+                                try:
+                                    options = os.listdir(dir)
+                                except:
+                                    options = []
                                 for opt in options:
                                     if opt.startswith(tab_com):
                                         yield Completion(dir+opt, -len(current_str),style='italic')
@@ -134,7 +143,10 @@ class DPSCompleter(Completer):
                                 # get path:
                                 path_to = re.sub("[^/]+$","",cmd_line[-1])
                                 what_try = cmd_line[-1].split("/")[-1]
-                                options = os.listdir(path_to)
+                                try:
+                                    options = os.listdir(path_to)
+                                except:
+                                    options = []
                                 for opt in options:
                                     if opt.startswith(what_try):
                                         if(os.path.isdir(path_to+opt+"/")): # is a directory - append a slash to "keep going" with TAB:
@@ -156,7 +168,10 @@ class DPSCompleter(Completer):
                             dir = os.getcwd()
 
                         # now that we have defined "dir" let's get the contents:
-                        options = list(set(os.listdir(dir))) # this will only sshow unique values.
+                        try:
+                            options = list(set(os.listdir(dir))) # this will only sshow unique values.
+                        except:
+                            options = []
                         for opt in options:
                             auto_path = "" # use this as starting point.
                             if opt.startswith(object):
@@ -176,7 +191,10 @@ class DPSCompleter(Completer):
                         #print("dot slash!") # DEBUG
                         cmd = re.sub(".+/","",cmd_line[0]) # remove [./this/that/]foo
                         curr_dir_in_path = re.sub("[^/]+$","",cmd_line[0])
-                        options = os.listdir(curr_dir_in_path)
+                        try:
+                            options = os.listdir(curr_dir_in_path)
+                        except:
+                            options = []
                         final_options = [] # what we yield.
                         for opt in options:
                             if opt.startswith(cmd):
@@ -190,15 +208,19 @@ class DPSCompleter(Completer):
                     elif cmd_line[0].startswith("/"): # defining full path, eh?
                         cmd = re.sub(".*/","",cmd_line[0]) # remove [./this/that/]foo
                         curr_dir_in_path = re.sub("[^/]+$","",cmd_line[0])
-                        options = os.listdir(curr_dir_in_path)
+                        try:
+                            options = os.listdir(curr_dir_in_path)
+                        except:
+                            options = []
                         final_options = [] # what we yield.
                         for opt in options:
                             if opt.startswith(cmd):
                                 final_options.append(opt) # just get rid of it.
                         for opt in final_options:
-                            if os.path.isdir(curr_dir_in_path+opt):
-                                yield Completion(curr_dir_in_path+opt+"/", -len(current_str),style='italic')
-                            else:
+                            try:
+                                if os.path.isdir(curr_dir_in_path+opt):
+                                    yield Completion(curr_dir_in_path+opt+"/", -len(current_str),style='italic')
+                            except:
                                 yield Completion(curr_dir_in_path+opt, -len(current_str),style='italic')
                         return # goodbye!
                     # Run from PATH:
@@ -306,15 +328,11 @@ class DPS:
             self.message.append(('class:prompt'," ▸ "))
 
         elif dpsrc.prompt_theme == 7: # Daemo
-            if session.UID == "root":
-                uid = "#"
-            else:
-                uid = session.UID
             # break up the path:
             path_array = self.path.split("/")
 
             self.message = [
-                ('class:text_uid'," "+uid+" "),
+                ('class:text_uid'," "+session.UID+" "),
                 ('class:text_host'," "+session.HOSTNAME+" "),
                 ('class:text_path_brackets',"["),
             ]
@@ -432,7 +450,7 @@ class DPS:
                 # User input (default text).
                 '':'#fff bold italic', #italic #329da8',
                 # Prompt.
-                'text_uid': 'fg:#fff9e6 bg:#333',
+                'text_uid': 'bold fg:#fff9e6 bg:#333',
                 'sep': 'fg:#aaa bg:',
                 'prompt': 'fg:#333 bg:',
                 'text_host': 'italic bold fg:#fff9e6 bg:',

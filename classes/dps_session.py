@@ -10,14 +10,14 @@ class Session:
         self.ADAPTERS = ifaddr.get_adapters() # get network device info
         self.NET_DEV = "" # store the network device
         self.HOSTNAME = socket.gethostname() # hostname for logging
-        self.UID = getpass.getuser() # Get the username
+        self.UID = "#" if getpass.getuser() == "root" else getpass.getuser() # diff root prompt
         self.REDIRECTION_PIPE = '_' # TODO not needed?
         self.VERSION = version
         self.LOG_DAY = datetime.datetime.today().strftime('%Y-%m-%d') # get he date for logging purposes
         self.LOG_FILENAME = os.path.expanduser("~")+"/.dps/logs/"+self.LOG_DAY+"_dps_log.csv" # the log file is based on the date
         self.OWD=os.getcwd() # historical purposes
         self.VARIABLES = {} # all user-defined variables.
-        self.prompt_tail = "# " if self.UID == "root" else "> " # diff root prompt
+        self.prompt_tail = "" if self.UID == "root" else "> " # diff root prompt
         self.NEWLOG=False
         self.dps_install_dir = dps_install_dir
         # Bash built-ins:
