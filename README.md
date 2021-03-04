@@ -49,14 +49,14 @@ root@demon2.9:/tmp/dps/(dps)#
 ## SHINY FEATURES
 Because this is built with prompt_toolkit, the shell has a lot of great built-in features.
 * Use pipes for stdout, stderr just like you would in a native shell
-### KEYBOARD SHORTCUTS
+### Keyboard Shortcuts
 The following keyboard shortcuts are available,
 * **CTRL+A** - move the cursor to the beginning of the line
 * **CTRL+P** - enter the previous command into the temrinal
 * **CTRL+C** - exit the current subprocess gracefully
 * **CTRL+R** - search history
 * **Up and Down arrows** - flip through command history
-### BUILT-IN COMMANDS
+### Custom Modules
 The following are built-in commands,
 * **dps_uid_gen** - generate a list of UIDs from a CSV file
 * **dps_alias** - display all user-defined aliases in the dps.ini file
@@ -76,7 +76,7 @@ root@kali:~# cd dps
 root@kali:/dps# pip3 install -r requirements.txt
 root@kali:/dps# ./dps.py
 ```
-### DEPENDENCIES
+### Dependencies
 This project requires Python3 and the following Python modules,
 * **prompt_toolkit** - for TAB autocompletion of $PATH and built-in commands.
 * **os** - for path object.
