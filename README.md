@@ -10,6 +10,7 @@ The `~/.dps/config/dpsrc` file contains the user-defined settings and variables.
 ![foreach() function screenshot](images/screenshots/foreach.png)
 ### Aliases
 You can now define command aliases into the `dpsrc` file:
+
 ![DPS Aliases](images/screenshots/aliases.png)
 ### Shell Themes
 These are set with PRMPT_STYL in the `~/.dps/config/dpsrc` file or with the `dps_config prompt (0-9)` built-in command.
