@@ -121,12 +121,14 @@ modules_list={
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
     ## Do not delete below, that is a template for adding commands:
-    #'name':
-    #    {'title':'',
-    #        'desc':'',
-    #        'args':[],
-    #        'syntax_examples':[]
-    #    },
+        #{'title':'',
+        #    'desc':'',
+        #    'args':['','',''],
+        #    'category':'',
+        #    'file': '',
+        #    'syntax_examples':['', ''],
+        #    'author':{'name':'','url':''}
+        #},
 }
 
 ## ------------------------------------------------
