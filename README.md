@@ -45,17 +45,17 @@ When,Host,Network,Who,Where,What
 2020-10-18 11:32:40.805349,demon2.9,ens33:192.168.159.132,root,/tmp/dps,ifconfig
 root@demon2.9:/tmp/dps/(dps)#                                                                           
 ```
-### SHINY FEATURES
+## SHINY FEATURES
 Because this is built with prompt_toolkit, the shell has a lot of great built-in features.
 * Use pipes for stdout, stderr just like you would in a native shell
-#### KEYBOARD SHORTCUTS
+### KEYBOARD SHORTCUTS
 The following keyboard shortcuts are available,
 * **CTRL+A** - move the cursor to the beginning of the line
 * **CTRL+P** - enter the previous command into the temrinal
 * **CTRL+C** - exit the current subprocess gracefully
 * **CTRL+R** - search history
 * **Up and Down arrows** - flip through command history
-#### BUILT-IN COMMANDS
+### BUILT-IN COMMANDS
 The following are built-in commands,
 * **dps_uid_gen** - generate a list of UIDs from a CSV file
 * **dps_alias** - display all user-defined aliases in the dps.ini file
@@ -75,9 +75,6 @@ root@kali:~# cd dps
 root@kali:/dps# pip3 install -r requirements.txt
 root@kali:/dps# ./dps.py
 ```
-## UPDATING DPS
-To update DPS, simply use the `dps_update` command. This will pull the latest version down to your repository that is defined in the `~/.dps/config/dpsrc` file that gets generated upon first run of the shell.
-
 ### DEPENDENCIES
 This project requires Python3 and the following Python modules,
 * **prompt_toolkit** - for TAB autocompletion of $PATH and built-in commands
@@ -91,3 +88,6 @@ This project requires Python3 and the following Python modules,
 * **configparser** - parses dps.ini file
 * **datetime** - for dates and times
 * **GitPython** - updates the DPS using this very repository!
+* 
+## UPDATING DPS
+To update DPS, simply use the `dps_update` command. This will pull the latest version down to your repository that is defined in the `~/.dps/config/dpsrc` file that gets generated upon first run of the shell.
