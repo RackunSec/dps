@@ -84,6 +84,7 @@ def foreach(cmd_delta,session,prompt_ui,dpsrc): # FOREACH
                             do_re = re.compile("\$"+var)
                             do_cmd = re.sub(do_re,entry.strip(),do)
                             if file_output == True:
+                                do_cmd=re.sub(">.*","",do_cmd) # drop off the overwrite thing from Bash and make tee:
                                 run_cmd.run(do_cmd+"| tee -a "+file_name,dpsrc,session,prompt_ui)
                             else:
                                 run_cmd.run(do_cmd,dpsrc,session,prompt_ui)
