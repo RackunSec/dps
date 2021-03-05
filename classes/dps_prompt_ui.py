@@ -2,6 +2,7 @@
 class prompt_ui:
     bcolors = {
         'OKGREEN' : '\033[3m\033[92m ✔ ',
+        'GREEN' : '\033[92m',
         'FAIL' : '\033[3m\033[91m ✖ ',
         'ENDC' : '\033[0m',
         'BOLD' : '\033[1m',

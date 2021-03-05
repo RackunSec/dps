@@ -35,6 +35,8 @@ def run(cmd,dpsrc,session,prompt_ui):
     BOLD=prompt_ui.bcolors['BOLD']
     OKGREEN=prompt_ui.bcolors['OKGREEN']
     ENDC=prompt_ui.bcolors['ENDC']
+    GREEN=prompt_ui.bcolors['GREEN']
+
     if cmd=="":
         return
     if cmd.startswith("./") or cmd.startswith("/") or re.match("^[^/]+/",cmd):
@@ -56,25 +58,29 @@ def run(cmd,dpsrc,session,prompt_ui):
         if bin in session.BASHBI: # pass to Bash:
             subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
             return
-        if len(bin_paths)>1:
-            print(f"{WARN}WARNING: binary file ({bin}) discovered in multiple paths:\n--------------------------------{ENDC}")
-            count = 0;
-            for path in bin_paths:
-                print(f"{BOLD}[{OKGREEN}{count}{prompt_ui.bcolors['ENDC']}{BOLD}]{ENDC} {OKGREEN}{path}{ENDC}")
-                count+=1
-            print(f"\n{BOLD}[?]{ENDC} Please choose one:",end=" ")
-            ans=int(input())
-            try:
-                if bin_paths[ans]:
-                    #print(f"You chose: {ans} which is {bin_paths[ans]}")
-                    subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
+        if dpsrc.warn_dupes == "True":
+            if len(bin_paths)>1:
+                print(f"{WARN}WARNING: binary file ({bin}) discovered in multiple paths:\n--------------------------------{ENDC}")
+                count = 0;
+                for path in bin_paths:
+                    print(f"{BOLD}[{GREEN}{count}{prompt_ui.bcolors['ENDC']}{BOLD}]{ENDC} {path}")
+                    count+=1
+                print(f"\n{BOLD}[?]{ENDC} Please choose one:",end=" ")
+                ans=int(input())
+                try:
+                    if bin_paths[ans]:
+                        #print(f"You chose: {ans} which is {bin_paths[ans]}")
+                        subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
+                        return
+                except:
+                    print(f"{FAIL}INDEX: {str(ans)} out of range of list provided to you.{ENDC}")
                     return
-            except:
-                print(f"{FAIL}INDEX: {str(ans)} out of range of list provided to you.{ENDC}")
-                return
-        elif len(bin_paths)==1: # we found the command (binary):
+        elif len(bin_paths)>0: # run whatever is first, I guess? Hate this option...
             subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
             return
+        #if len(bin_paths)==1: # we found the command (binary):
+        #    subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
+        #    return
         else:
             print(f"{prompt_ui.bcolors['FAIL']}Binary \"{bin}\" not found in paths.\n  Check your [Paths] within the DPS configuration file.")
             return

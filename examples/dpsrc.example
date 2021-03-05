@@ -4,6 +4,7 @@ prompt_theme = 7
 [Paths]
 mypaths = /usr/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin
 dps_bin_path=/cyberpunk/shells/dps/
+warn_dupes=False
 
 [Aliases]
 grep = grep --color
