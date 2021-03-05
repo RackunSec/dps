@@ -67,7 +67,7 @@ class DPSrc:
                     if not os.path.isdir(path):
                         print(f"{FAIL}Path defined ({path}) in [Paths] section of dpsrc file does not exist! {ENDC}")
                         exit(1)
-                print(self.paths)
+                #print(self.paths)
             else:
                 print(f"{FAIL} Error in config file: Add [Paths] section to {self.dps_config_file}{ENDC}")
                 exit() # die
