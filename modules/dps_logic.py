@@ -11,6 +11,7 @@
 import re
 import dps_cmd as run_cmd
 import os
+import dps_error as error
 
 ## Method: Foreach() programming logic:
 def foreach(cmd_delta,session,prompt_ui,dpsrc): # FOREACH
@@ -26,10 +27,10 @@ def foreach(cmd_delta,session,prompt_ui,dpsrc): # FOREACH
             var = re.sub(".*as\s+([^:]+).*","\\1",cmd_args)
             cmd_do = re.sub("[^:]+:","",cmd_args)
             if var == "":
-                error("Programming logic syntax error. Please check the documentation.","")
+                error.msg("Programming logic syntax error. Please check the documentation.","foreach",session,prompt_ui)
             elif var not in cmd_do:
                 # the wrong varname was used in the do{} portion:
-                error("Programming logic syntax error. Did you mean to use: $"+var+"?","")
+                error.msg("Programming logic syntax error. Did you mean to use: $"+var+"?","foreach",session,prompt_ui)
             else:
                 if re.search("[0-9]+\.\.[0-9]+",object):
                     # we have integers:
@@ -88,6 +89,6 @@ def foreach(cmd_delta,session,prompt_ui,dpsrc): # FOREACH
                                 run_cmd.run(do_cmd,dpsrc,session,prompt_ui)
 
                 else:
-                    error("Could not access object: "+object,"")
+                    error.msg("Could not access object: "+object,"foreach",session,prompt_ui)
         else:
-            error("Programming logic syntax error. Please check the documentation.","")
+            error.msg("Programming logic syntax error. Please check the documentation.","foreach",session,prompt_ui)
