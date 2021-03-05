@@ -75,7 +75,7 @@ def run(cmd,dpsrc,session,prompt_ui):
                 except:
                     print(f"{FAIL}INDEX: {str(ans)} out of range of list provided to you.{ENDC}")
                     return
-        elif len(bin_paths)>0: # run whatever is first, I guess? Hate this option...
+        if len(bin_paths)>0: # run whatever is first, I guess? Hate this option...
             subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
             return
         #if len(bin_paths)==1: # we found the command (binary):
