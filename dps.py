@@ -370,23 +370,8 @@ class DPS:
         ## BUILD THEMES HERE, TEST COLORS THOROUGHLY (256bit):
         ###===========================================
         #####
-        ### THIS THEME WILL BE DEFAULT WITH .DPSRC:
-        if dpsrc.prompt_theme == 0:
-                self.style = Style.from_dict({
-                    # User input (default text).
-                    '':          '#fff',
-                    # Prompt.
-                    'username': 'italic #acacac',
-                    'at':       'italic #aaaaaa',
-                    'colon':    'italic #aaaaaa',
-                    'pound':    '#aaaaaa',
-                    'host':     'italic #c2c2c2',
-                    'path':     'italic #ff321f',
-                    'dps':      '#acacac'
-                })
-        #####
         ### MINIMAL SKULL THEME
-        elif dpsrc.prompt_theme == 1:
+        if dpsrc.prompt_theme == 1:
                 self.style = Style.from_dict({
                     # User input (default text).
                     '':          'italic #af5f00',
@@ -494,17 +479,20 @@ class DPS:
 
         else:
             #####
-            ### DEFAULT THEME:
+            ### PROMPT_THEME IS EITHER 0 OR OUT OF RANGE
+            ### THIS THEME WILL BE DEFAULT WITH .DPSRC:
+            dpsrc.prompt_theme = 0
             self.style = Style.from_dict({
                 # User input (default text).
-                '':          '#ff0066',
+                '':          '#fff',
                 # Prompt.
-                'tree': 'fg: green bg: brown',
-                'at':       '#00aa00',
-                'colon':    '#0000aa',
-                'pound':    '#00aa00',
-                'host':     '#00ffff bg:#444400',
-                'path':     'ansicyan underline',
+                'username': 'italic #acacac',
+                'at':       'italic #aaaaaa',
+                'colon':    'italic #aaaaaa',
+                'pound':    '#aaaaaa',
+                'host':     'italic #c2c2c2',
+                'path':     'italic #ff321f',
+                'dps':      '#acacac'
             })
         self.set_message()
         self.prompt_session = PromptSession(
