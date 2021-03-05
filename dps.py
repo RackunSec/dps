@@ -348,13 +348,13 @@ class DPS:
         elif dpsrc.prompt_theme == 8: # Brew
             # break up the path:
             self.message = [
-                ('class:dark',"   "),
+                ('class:khaki',"   "),
                 ('class:light',"Pentest"),
             ]
             if "TARGET" in session.VARIABLES:
                 target = f"{session.VARIABLES['TARGET']}"
                 self.message.append(('class:khaki',"(")),
-                self.message.append(('class:light',target)),
+                self.message.append(('class:target',target)),
                 self.message.append(('class:khaki',")")),
 
             self.message.append(('class:dark'," "))
@@ -486,7 +486,8 @@ class DPS:
                 'mug':'noitalic nobold fg:#4f3218',
                 'dark':'noitalic nobold fg:#423826',
                 'khaki':'noitalic nobold fg:#6b5c43',
-                'light':'noitalic nobold fg:#96815d'
+                'light':'noitalic nobold fg:#96815d',
+                'target':'nobold fg:#96815d'
             })
 
         else:
