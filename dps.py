@@ -170,7 +170,7 @@ class DPSCompleter(Completer):
 
                         # now that we have defined "dir" let's get the contents:
                         try:
-                            options = list(set(os.listdir(dir))) # this will only sshow unique values.
+                            options = list(set(os.listdir(dir))) # this will only show unique values.
                         except:
                             options = []
                         for opt in options:
@@ -221,6 +221,8 @@ class DPSCompleter(Completer):
                             try:
                                 if os.path.isdir(curr_dir_in_path+opt):
                                     yield Completion(curr_dir_in_path+opt+"/", -len(current_str),style='italic')
+                                else:
+                                    yield Completion(curr_dir_in_path+opt, -len(current_str),style='italic')
                             except:
                                 yield Completion(curr_dir_in_path+opt, -len(current_str),style='italic')
                         return # goodbye!
