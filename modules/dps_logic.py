@@ -75,8 +75,6 @@ def foreach(cmd_delta,session,prompt_ui,dpsrc): # FOREACH
                             pass
                     else:
                         file_output = False
-                    if not re.search("/",file_name): # current directory?
-                        file_name = os.getcwd()+"/"+file_name
                     # pull out what to do with the entry:
                     do = re.sub("^[^:]+:","",cmd_delta)
                     with open(object) as object_file:
