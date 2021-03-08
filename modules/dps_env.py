@@ -42,24 +42,32 @@ def env(session,prompt_ui,dpsrc):
 
 ## Method: define a session variable:
 def define_var(cmd,session,prompt_ui):
-    if len(cmd.split())==3:
-        WARN=prompt_ui.bcolors['WARN']
-        ENDC=prompt_ui.bcolors['ENDC']
-        BOLD=prompt_ui.bcolors['BOLD']
-        OKGREEN=prompt_ui.bcolors['OKGREEN']
-        FAIL=prompt_ui.bcolors['FAIL']
-        if re.match("^[^:]+:\s+[^\s]+$",cmd): # syntax [ OK ]
-            key=cmd.split()[1]
-            key=re.sub(":$","",key) # drop the colon
-            val=cmd.split()[2]
-            print(f"\n ▹ Defining variable {BOLD}{OKGREEN}{key}{ENDC} value {BOLD}{OKGREEN}{val}{ENDC} for this DPS session.\n")
-            session.VARIABLES[key]=val
-            return
-        else:
-            print(f"\n{FAIL}Syntax for \"def\" incorrect. See Below.{ENDC}")
-            session.help.msg("def",session,prompt_ui)
+    WARN=prompt_ui.bcolors['WARN']
+    ENDC=prompt_ui.bcolors['ENDC']
+    BOLD=prompt_ui.bcolors['BOLD']
+    OKGREEN=prompt_ui.bcolors['OKGREEN']
+    FAIL=prompt_ui.bcolors['FAIL']
+    if re.search('"[^"]+"',cmd): # defining a variable that is in quotes
+        val = re.sub('[^"]+"([^"]+)".*','\\1',cmd)
+        key = cmd.split()[1]
+        key=re.sub(":","",key)
+        session.VARIABLES[key]=val
+        print(f"\n ▹ Defining variable {BOLD}{OKGREEN}{key}{ENDC} value {BOLD}{OKGREEN}{val}{ENDC} for this DPS session.\n")
+        return
     else:
-        session.help.msg("def",session,prompt_ui)
+        if len(cmd.split())==3:
+            if re.match("^[^:]+:\s+[^\s]+$",cmd): # syntax [ OK ]
+                key=cmd.split()[1]
+                key=re.sub(":$","",key) # drop the colon
+                val=cmd.split()[2]
+                print(f"\n ▹ Defining variable {BOLD}{OKGREEN}{key}{ENDC} value {BOLD}{OKGREEN}{val}{ENDC} for this DPS session.\n")
+                session.VARIABLES[key]=val
+                return
+            else:
+                print(f"\n{FAIL}Syntax for \"def\" incorrect. See Below.{ENDC}")
+                session.help.msg("def",session,prompt_ui)
+        else:
+            session.help.msg("def",session,prompt_ui)
 
 
 ## Method prompt() -- update the configuration file's prompt setting.
