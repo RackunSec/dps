@@ -363,7 +363,39 @@ class DPS:
             self.message.append(('class:khaki',""))
             self.message.append(('class:light'," "))
 
+        elif dpsrc.prompt_theme == 9: # Athens
+            # break up the path:
+            path_array = self.path.split("/")
 
+            self.message = [
+                ('class:whitebg', f" {session.UID} "),
+                ('class:text_host_sep',"▛ "),
+                ('class:bluebg', f"{session.HOSTNAME} "),
+                ('class:text_path_sep',"▛"),
+                ('class:yellow', " ⚡"),
+                ('class:blue', "[")
+            ]
+            self.message.append(('class:blue',"/"))
+            for path in path_array:
+                if path != "":
+                    self.message.append(("class:white",path)) # add the name
+                    self.message.append(("class:blue","/")) # add the slash
+            self.message.append(('class:blue', "]\n"))
+            self.message.append(('class:white', "λ "))
+        
+        elif dpsrc.prompt_theme == 10: # Japan
+            # break up the path:
+            current_dir = self.path.rsplit("/", 2)[1]
+
+            self.message = [
+                ('class:whitebg', f" {session.UID} "),
+                ('class:char', " ※ "),
+                ('class:redfg', "("),
+                ('class:whitefg', f"{current_dir}"),
+                ('class:redfg', ")"),
+                ('class:char', "⥤  ")
+            ]
+            
     def __init__(self):
         self.path = os.getcwd()
         ###===========================================
@@ -475,6 +507,31 @@ class DPS:
                 'khaki':'noitalic nobold fg:#6b5c43',
                 'light':'noitalic nobold fg:#96815d',
                 'target':'nobold fg:#96815d'
+            })
+
+        elif dpsrc.prompt_theme == 9:
+            #####
+            ### ATHENS: THEME:
+            self.style = Style.from_dict({
+                '':'fg:#ffffff italic ',
+                'white':'noitalic nobold fg:#ffffff',
+                'blue':'noitalic nobold fg:#00b3eb',
+                'yellow':'noitalic fg:#ffff00',
+                'whitebg':'noitalic  fg:#00b3eb  bg:#ffffff',
+                'bluebg':'noitalic  bg:#00b3eb fg:#ffffff',
+                'text_host_sep':'italic bold fg:#ffffff bg:#00b3eb',
+                'text_path_sep':'italic bold fg:#00b3eb'
+            })
+
+        elif dpsrc.prompt_theme == 10:
+            #####
+            ### JAPAN: THEME:
+            self.style = Style.from_dict({
+                '':'fg:#F80623',
+                'whitebg':'bg:#ffffff',
+                'whitefg':'italic fg:#ffffff',
+                'redfg':'italic fg:#F80623',
+                'char':'fg:#ffffff'
             })
 
         else:
