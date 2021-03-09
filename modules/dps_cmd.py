@@ -109,6 +109,7 @@ def hook(cmd,dpsrc,session,prompt_ui):
                 new_cmd.append(cmd_count_iter) # place it in, untouched.
         cmd_delta=" | ".join(new_cmd)
         cmd_delta = re.sub("\s+"," ",cmd_delta)
+        cmd_delta = re.sub("\s+\|\s+","|",cmd_delta) # clean up pipes.
     else:
         cmd_strip = cmd.rstrip()
         if len(dpsrc.aliases) > 0 and cmd_strip in dpsrc.aliases:
