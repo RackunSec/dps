@@ -99,12 +99,16 @@ def hook(cmd,dpsrc,session,prompt_ui):
             #print(f"cmd_count_iter:{cmd_count_iter}") # DEBUG
             if len(dpsrc.aliases) > 0 and cmd_count_iter.split()[0] in dpsrc.aliases: # we will rewrite the command with the alias.
                 cmd_split = cmd_count_iter.split() # split the command up to get the first element
-                cmd_base = re.sub(cmd_split[0],dpsrc.aliases[cmd_split[0]],cmd_split[0]) # set alias
-                cmd_split[0]=cmd_base # overwrite it
-                new_cmd.append(" ".join(cmd_split))
+                if dpsrc.aliases[cmd_split[0]] not in cmd: # it's not already there:
+                    cmd_base = re.sub(cmd_split[0],dpsrc.aliases[cmd_split[0]],cmd_split[0]) # set alias
+                    cmd_split[0]=cmd_base # overwrite it
+                    new_cmd.append(" ".join(cmd_split))
+                else:
+                    new_cmd.append(" ".join(cmd_split)) # put it all back.
             else:
                 new_cmd.append(cmd_count_iter) # place it in, untouched.
         cmd_delta=" | ".join(new_cmd)
+        cmd_delta = re.sub("\s+"," ",cmd_delta)
     else:
         cmd_strip = cmd.rstrip()
         if len(dpsrc.aliases) > 0 and cmd_strip in dpsrc.aliases:

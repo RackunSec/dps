@@ -8,7 +8,7 @@
 #
 #
 ### IMPORT LIBRARIES:
-version = "v1.3.8(Honey Green Tea)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+version = "v1.3.9(Polar Mint)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
 import os # for the commands, of course. These will be passed ot the shell.
 import sys # for exit
 import re # regexps
