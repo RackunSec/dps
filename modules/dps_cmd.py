@@ -200,7 +200,7 @@ def hook(cmd,dpsrc,session,prompt_ui):
     ## LS @override:
     ###---------
     elif(re.match("^ls",cmd_delta)):
-        cmd_delta = re.sub("^ls","ls --color=auto",cmd)
+        cmd_delta = re.sub("^ls\s+","ls --color=auto",cmd)
         run(cmd_delta,dpsrc,session,prompt_ui)
     ###---------
     ## CLEAR @override:
