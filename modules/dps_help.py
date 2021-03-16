@@ -114,10 +114,10 @@ modules_list={
     'dps_config':
         {'title':'DPS Configuration Settings',
             'desc':'Set configuration settings for your own sessions. This will update the local ~/.dps/config/dps.ini file with your arguments.',
-            'args':['prompt (0-9)','--show','--update-net'],
+            'args':['prompt (0-9)','--show','--show-all'],
             'category':'System',
             'file': 'dps_env.py',
-            'syntax_examples':['dps_config prompt 5 # set current theme to 5', 'dps_config --show # show current theme', 'dps_config --update-net # get an ip address'],
+            'syntax_examples':['dps_config --show-all # set the prompt theme','dps_config prompt 5 # set current theme to 5', 'dps_config --show # show current theme', 'dps_config --update-net # get an ip address'],
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
     ## Do not delete below, that is a template for adding commands:
