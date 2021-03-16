@@ -22,7 +22,7 @@ class Session:
         self.dps_install_dir = dps_install_dir
         # Bash built-ins:
         self.BASHBI=['bg', 'bind', 'break', 'builtin', 'case', 'cd', 'command', 'compgen', 'complete', 'continue', 'declare',
-            'dirs', 'disown', 'echo', 'enable', 'eval', 'exec', 'exit', 'export', 'fc', 'fg', 'getopts', 'hash', 'if', 'jobs', 'kill',
+            'dirs', 'disown', 'echo', 'enable', 'eval', 'exec', 'exit', 'export', 'fc', 'fg', 'for', 'getopts', 'hash', 'if', 'jobs', 'kill',
             'let', 'local', 'logout', 'popd', 'printf', 'pushd', 'pwd', 'read', 'readonly', 'return', 'set', 'shift', 'shopt', 'source',
             'suspend', 'test', 'times', 'trap', 'type', 'typeset', 'ulimit', 'umask', 'unalias', 'unset', 'until', 'wait','while']
         self.IGNOREDUPES = ['ls','which','pwd','cwd','grep','egrep','sed','awk',]

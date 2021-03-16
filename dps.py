@@ -8,7 +8,7 @@
 #
 #
 ### IMPORT LIBRARIES:
-version = "v1.3.9(Polar Mint)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+version = "v1.3.16(póg mo thóin)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
 import os # for the commands, of course. These will be passed ot the shell.
 import sys # for exit
 import re # regexps
@@ -396,6 +396,23 @@ class DPS:
                 ('class:char', "⥤  ")
             ]
 
+
+        elif dpsrc.prompt_theme == 11: # Polar Mint
+            # break up the path:
+            self.message = [
+                ('class:dark',"   "),
+                ('class:light',"Pentest"),
+            ]
+            if "TARGET" in session.VARIABLES:
+                target = f"{session.VARIABLES['TARGET']}"
+                self.message.append(('class:khaki',"(")),
+                self.message.append(('class:dark',target)),
+                self.message.append(('class:khaki',")")),
+
+            self.message.append(('class:dark'," "))
+            self.message.append(('class:khaki',""))
+            self.message.append(('class:light'," "))
+
     def __init__(self):
         self.path = os.getcwd()
         ###===========================================
@@ -532,6 +549,19 @@ class DPS:
                 'whitefg':'italic fg:#ffffff',
                 'redfg':'italic fg:#F80623',
                 'char':'fg:#ffffff'
+            })
+
+        elif dpsrc.prompt_theme == 11:
+            #####
+            ### POLAR MINT: THEME:
+            self.style = Style.from_dict({
+                # User input (default text).
+                '':'fg:#b1fad8 italic bold',
+                'leaf':'noitalic nobold fg:#b1fad8',
+                'dark':'noitalic nobold fg:#00ff88',
+                'khaki':'noitalic nobold fg:#66ffb8',
+                'light':'noitalic nobold fg:#b1fad8',
+                'target':'nobold fg:#96815d'
             })
 
         else:

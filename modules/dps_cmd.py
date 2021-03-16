@@ -46,6 +46,8 @@ def run(cmd,dpsrc,session,prompt_ui):
     else:
         # get the actual binary called:
         bin = cmd.split()[0] # get the first arg which is the command
+        if "|" in bin:
+            bin = re.sub("\|.*","",bin) # just get the command
         # Is the binary in any of our defined paths?
         # get path contents:
         bin_paths = [] # could be more than one instance in paths (python envs, etc)
