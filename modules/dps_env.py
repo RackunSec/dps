@@ -81,7 +81,7 @@ def prompt(args,dpsrc,prompt_ui):
     if len(args) > 1:
         if args[0] == "prompt": # set it in the config file:
             #try:
-            print(f"{OKGREEN} ▹ {ENDC} Adding {str(args[1])} as prompt_theme in {dpsrc.dps_config_file}")
+            print(f"{OKGREEN}Adding \"{theme_names(str(args[1]))}\" as prompt_theme in {dpsrc.dps_config_file}")
             dpsrc.configparser.read(dpsrc.dps_config_file)
             dpsrc.configparser.sections()
             dpsrc.configparser.set('Style','prompt_theme',args[1]) # TODO int() ?
