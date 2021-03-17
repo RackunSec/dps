@@ -77,12 +77,11 @@ def run(cmd,dpsrc,session,prompt_ui):
                     print(f"{FAIL}INDEX: {str(ans)} out of range of list provided to you. Please try again.{ENDC}")
                     return
         if len(bin_paths)>0: # Run it by calling it if no pipes are involved:
-            if not re.search("\|",cmd):
+            if not re.search("(\||>|<)",cmd): # pipes
                 cmd_args = cmd.split()
                 cmd_args[0] = bin_paths[0]
                 subprocess.run(cmd_args)
             else:
-                # we found a pipe, pass it to bash to handle the streams. (TODO)
                 subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
             return
         else:
