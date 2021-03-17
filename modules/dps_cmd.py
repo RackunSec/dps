@@ -57,7 +57,7 @@ def run(cmd,dpsrc,session,prompt_ui):
         for path in all_paths:
             if bin in os.listdir(path):
                 bin_paths.append(path+"/"+bin)
-        if bin in session.BASHBI: # pass to Bash:
+        if bin in session.BASHBI: # pass to Bash, This is a Bash built-in:
             subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
             return
         if dpsrc.warn_dupes == "True":
@@ -71,18 +71,17 @@ def run(cmd,dpsrc,session,prompt_ui):
                 ans=int(input())
                 try:
                     if bin_paths[ans]:
-                        #print(f"You chose: {ans} which is {bin_paths[ans]}")
                         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
                         return
                 except:
-                    print(f"{FAIL}INDEX: {str(ans)} out of range of list provided to you.{ENDC}")
+                    print(f"{FAIL}INDEX: {str(ans)} out of range of list provided to you. Please try again.{ENDC}")
                     return
         if len(bin_paths)>0: # run whatever is first, I guess? Hate this option...
-            subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
+            #subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", bin_paths[0]])
+            cmd_args = cmd.split()
+            cmd_args[0] = bin_paths[0]
+            subprocess.run(cmd_args)
             return
-        #if len(bin_paths)==1: # we found the command (binary):
-        #    subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
-        #    return
         else:
             print(f"{prompt_ui.bcolors['FAIL']}Binary \"{bin}\" not found in paths.\n  Check your [Paths] within the DPS configuration file.")
             return
@@ -121,7 +120,7 @@ def hook(cmd,dpsrc,session,prompt_ui):
     ###
     ## Next, interpolate any variables:
     ###
-    if re.match(".*\{[^\}]+\}.*",cmd_delta) and not re.match("awk\s",cmd_delta): # AWK actually uses this syntax too.
+    if re.match(".*\{[^\}]+\}.*",cmd_delta) and not re.match("awk\s",cmd_delta) and cmd_delta.split()[0] not in session.BASHBI: # AWK actually uses this syntax too.
         # I chose a very unique variablename here on purposes to not collide.
         var123_0x031337 = re.sub(r"^[^\{]+{([^\}]+)}.*$","\\1",cmd_delta) # TODO interpolate multiple times! (use a while loop) (wait, can you do global replace?)
         var_re = re.compile("{"+var123_0x031337+"}")
