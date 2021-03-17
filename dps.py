@@ -10,8 +10,11 @@
 ### IMPORT LIBRARIES:
 version = "v1.3.17(póg mo thóin)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
 import os # for the commands, of course. These will be passed ot the shell.
-import sys # for exit
-import re # regexps
+from sys import exit as exit # for exit.
+from sys import path as path # for reading files.
+from re import sub as sub # regexp substitutions
+from re import split as resplit # regexp splitting
+from re import match as match # regexp match
 from prompt_toolkit import prompt, ANSI # for input
 from prompt_toolkit.completion import WordCompleter # completer function (feed a list)
 from prompt_toolkit import PromptSession
@@ -20,8 +23,8 @@ from prompt_toolkit.styles import Style # Style the prompt
 from prompt_toolkit.output.color_depth import ColorDepth # colors for prompt
 ## My own classes:
 dps_install_dir=os.path.dirname(os.path.realpath(__file__)) # where am I installed on your FS?
-sys.path.append(dps_install_dir+"/modules/")
-sys.path.append(dps_install_dir+"/classes/")
+path.append(dps_install_dir+"/modules/")
+path.append(dps_install_dir+"/classes/")
 import dps_cmd as dps_cmd
 import dps_help as help
 # class files:
@@ -41,7 +44,7 @@ session.help = help
 # Get the adapter and IP address:
 def get_net_info():
     for adapter in session.ADAPTERS: # loop through adapters
-        if re.match("^e..[0-9]+",adapter.nice_name):
+        if match("^e..[0-9]+",adapter.nice_name):
             try:
                 session.NET_DEV = adapter.nice_name+":"+adapter.ips[0].ip
             except:
@@ -54,7 +57,7 @@ get_net_info()
 ## GENERAL METHODS FOR HANDLING THINGS:
 ###===========================================
 def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
-    sys.exit(0);
+    exit(0);
 
 ###=======================================
 ## OUR CUSTOM COMPLETER: (a nightmare)
@@ -85,10 +88,10 @@ class DPSCompleter(Completer):
             if len(cmd_line): # at least 1 value
                 current_str = cmd_line[len(cmd_line)-1]
                 if current_str.startswith("foreach"):
-                    path=re.sub("foreach.","",current_str)
+                    path=sub("foreach.","",current_str)
                     if path.startswith("/"):
-                        path_to=re.sub("[^/]+$","",path) # chop off end text
-                        match = re.sub(".*/","",path) # greedily remove path
+                        path_to=sub("[^/]+$","",path) # chop off end text
+                        match = sub(".*/","",path) # greedily remove path
                         try:
                             options = os.listdir(path_to)
                         except:
@@ -117,7 +120,7 @@ class DPSCompleter(Completer):
                                     yield Completion(opt, -len(current_str),style='italic')
                             return
                         if "/" in cmd_line[-1]: # directory traversal?
-                            if re.match("^[A-Za-z0-9\.]",cmd_line[-1]) and cmd_line[-1].endswith("/"): # e.g.: cd Documents/{TAB TAB}
+                            if match("^[A-Za-z0-9\.]",cmd_line[-1]) and cmd_line[-1].endswith("/"): # e.g.: cd Documents/{TAB TAB}
                                 dir = os.getcwd()+"/"+cmd_line[-1]
                                 try:
                                     options = os.listdir(dir)
@@ -129,9 +132,9 @@ class DPSCompleter(Completer):
                                         opt2 += "/" # this is a directory
                                     yield Completion(opt2, -len(current_str),style='italic')
                                 return
-                            elif re.match("^[A-Za-z0-9\.]",cmd_line[-1]) and (not cmd_line[-1].endswith("/")): # e.g.: cd Documents/Te{TAB TAB}
+                            elif match("^[A-Za-z0-9\.]",cmd_line[-1]) and (not cmd_line[-1].endswith("/")): # e.g.: cd Documents/Te{TAB TAB}
                                 tab_com = current_str.split("/")[-1]
-                                dir = os.getcwd()+"/"+re.sub("[^/]+$","",current_str)
+                                dir = os.getcwd()+"/"+sub("[^/]+$","",current_str)
                                 try:
                                     options = os.listdir(dir)
                                 except:
@@ -140,9 +143,9 @@ class DPSCompleter(Completer):
                                     if opt.startswith(tab_com):
                                         yield Completion(dir+opt, -len(current_str),style='italic')
                                 return
-                            elif re.match("^/",cmd_line[-1]):
+                            elif match("^/",cmd_line[-1]):
                                 # get path:
-                                path_to = re.sub("[^/]+$","",cmd_line[-1])
+                                path_to = sub("[^/]+$","",cmd_line[-1])
                                 what_try = cmd_line[-1].split("/")[-1]
                                 try:
                                     options = os.listdir(path_to)
@@ -158,7 +161,7 @@ class DPSCompleter(Completer):
 
                         # Get the path off of the document.current_line object:
                         current_str = cmd_line[len(cmd_line)-1]
-                        path_to = re.sub("(.*)/[^/]+$","\\1/",cmd_line[1])
+                        path_to = sub("(.*)/[^/]+$","\\1/",cmd_line[1])
                         object = cmd_line[-1].split("/")[-1] # last element, of course.
 
                         if path_to.startswith("~/"):
@@ -190,8 +193,8 @@ class DPSCompleter(Completer):
                     # Run from cwd? :
                     elif cmd_line[0].startswith("./"):
                         #print("dot slash!") # DEBUG
-                        cmd = re.sub(".+/","",cmd_line[0]) # remove [./this/that/]foo
-                        curr_dir_in_path = re.sub("[^/]+$","",cmd_line[0])
+                        cmd = sub(".+/","",cmd_line[0]) # remove [./this/that/]foo
+                        curr_dir_in_path = sub("[^/]+$","",cmd_line[0])
                         try:
                             options = os.listdir(curr_dir_in_path)
                         except:
@@ -207,8 +210,8 @@ class DPSCompleter(Completer):
                                 yield Completion(curr_dir_in_path+opt, -len(current_str),style='italic')
                         return # goodbye!
                     elif cmd_line[0].startswith("/"): # defining full path, eh?
-                        cmd = re.sub(".*/","",cmd_line[0]) # remove [./this/that/]foo
-                        curr_dir_in_path = re.sub("[^/]+$","",cmd_line[0])
+                        cmd = sub(".*/","",cmd_line[0]) # remove [./this/that/]foo
+                        curr_dir_in_path = sub("[^/]+$","",cmd_line[0])
                         try:
                             options = os.listdir(curr_dir_in_path)
                         except:
@@ -596,7 +599,7 @@ class DPS:
 def shell(dps):
     with open(session.LOG_FILENAME) as file:
         for entry in file:
-            cmd = re.split(r'[^\\],',entry)[5]
+            cmd = resplit(r'[^\\],',entry)[5]
             if cmd != "":
                 dps.prompt_session.history.append_string(cmd.rstrip())
     try:
