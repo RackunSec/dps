@@ -94,6 +94,12 @@ def hook(cmd,dpsrc,session,prompt_ui):
     ###
     ## First, set aliases:
     ###
+    WARN=prompt_ui.bcolors['WARN']
+    FAIL=prompt_ui.bcolors['FAIL']
+    BOLD=prompt_ui.bcolors['BOLD']
+    OKGREEN=prompt_ui.bcolors['OKGREEN']
+    ENDC=prompt_ui.bcolors['ENDC']
+    GREEN=prompt_ui.bcolors['GREEN']
     cmd_delta = cmd
     cmd_count = cmd.split("|") # how many commands were there?
     if len(cmd_count)>1:
@@ -229,8 +235,12 @@ def hook(cmd,dpsrc,session,prompt_ui):
             OWD = os.getcwd()
         # Finally, we change directory:
         if os.path.exists(where_to):
-            os.chdir(where_to)
-            return
+            if os.path.isdir(where_to):
+                os.chdir(where_to)
+                return
+            else:
+                print(f"{FAIL}\"{where_to}\" is not a directory.")
+                return
         else:
             error.msg("Path does not exist: "+where_to,"",session,prompt_ui)
     else: # Any OTHER command:
