@@ -23,6 +23,7 @@ import dps_update
 import dps_self_destruct
 import dps_logic as logic
 import dps_error as error
+from datetime import datetime
 
 ## Exit gracefully to default shell:
 def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
@@ -39,6 +40,9 @@ def run(cmd,dpsrc,session,prompt_ui):
 
     if cmd=="":
         return
+    if dpsrc.timestamps==True:
+        now = datetime.now()
+        print(f"{GREEN}{now.strftime('%d-%m-%Y-%H-%M-%S')}{ENDC}")
     if cmd.startswith("./") or cmd.startswith("/") or re.match("^[^/]+/",cmd):
         # user specified a path, just try it: TODO ensure binary in path before executing.
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])

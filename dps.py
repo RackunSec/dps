@@ -8,7 +8,7 @@
 #
 #
 ### IMPORT LIBRARIES:
-version = "v1.3.18(Second South)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+version = "v1.4.26(Streamliner)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
 import os # for the commands, of course. These will be passed ot the shell.
 from sys import exit as exit # for exit.
 from sys import path as path # for reading files.

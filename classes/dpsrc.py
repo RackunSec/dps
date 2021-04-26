@@ -46,6 +46,15 @@ class DPSrc:
             ###
             ## PATHS definition: (from dpsrc)
             ###
+
+            if 'Options' in self.configparser:
+                self.options = self.configparser['Options']
+                for option in self.options:
+                    if option == "obsidian_timeline":
+                        if self.options['obsidian_timeline']=="True":
+                            self.timestamps = True
+            else:
+                self.timestamps = False
             if 'Paths' in self.configparser:
                 self.mypaths = self.configparser['Paths']['mypaths'].split(":") # Array of all paths defined in dpsrc
                 # check if symlinks in paths. Also, remove dupes:
