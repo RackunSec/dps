@@ -44,17 +44,22 @@ class DPSrc:
             self.paths = [] # all good paths (exists, no symlinks, etc)
             self.prompt_theme = 0 # prompt_theme
             ###
-            ## PATHS definition: (from dpsrc)
+            ## Timestamps?
             ###
-
             if 'Options' in self.configparser:
                 self.options = self.configparser['Options']
                 for option in self.options:
-                    if option == "obsidian_timeline":
-                        if self.options['obsidian_timeline']=="True":
+                    if option == "timestamps":
+                        if self.options['timestamps']=="True":
                             self.timestamps = True
-            else:
-                self.timestamps = False
+                        else:
+                            self.timestamps = False
+            try: self.timestamps # it was not defined in [Options]
+            except:
+                self.timestamps=False
+            ###
+            ## PATHS definition: (from dpsrc)
+            ###
             if 'Paths' in self.configparser:
                 self.mypaths = self.configparser['Paths']['mypaths'].split(":") # Array of all paths defined in dpsrc
                 # check if symlinks in paths. Also, remove dupes:
