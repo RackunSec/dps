@@ -8,7 +8,7 @@
 #
 #
 ### IMPORT LIBRARIES:
-version = "v1.4.26(Streamliner)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+version = "v1.6.2(New Spice)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
 import os # for the commands, of course. These will be passed ot the shell.
 from sys import exit as exit # for exit.
 from sys import path as path # for reading files.
@@ -21,6 +21,7 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import Completer, Completion, PathCompleter
 from prompt_toolkit.styles import Style # Style the prompt
 from prompt_toolkit.output.color_depth import ColorDepth # colors for prompt
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 ## My own classes:
 dps_install_dir=os.path.dirname(os.path.realpath(__file__)) # where am I installed on your FS?
 path.append(dps_install_dir+"/modules/")
@@ -67,7 +68,8 @@ class DPSCompleter(Completer):
         self.path_completer = PathCompleter()
     def get_completions(self, document, complete_event):
 
-        word_before_cursor = document.get_word_before_cursor()
+        word_before_cursor = document.get_word_before_cursor()  # Co
+        #print(f"word_before_cursor: {word_before_cursor}")
         try:
             cmd_line = document.current_line.split() # get the real deal here.
         except ValueError:
@@ -399,6 +401,23 @@ class DPS:
                 ('class:char', "⥤  ")
             ]
 
+        elif dpsrc.prompt_theme == 12: # Flight
+            # break up the path:
+            path_array = self.path.split("/")
+            self.message = [
+                ('class:char', "  "),
+                ('class:parens', f"("),
+                ('class:uid', f"{session.UID}"),
+                ('class:parens', f")"),
+            ]
+            self.message.append(('class:text_path_brackets',"["))
+            self.message.append(('class:text_path_slash',"/"))
+            for path in path_array:
+                if path != "":
+                    self.message.append(("class:text_path",path)) # add the name
+                    self.message.append(("class:text_path_slash","/")) # add the slash
+            self.message.append(('class:text_path_brackets',"]"))
+            self.message.append(('class:prompt',"➤ "))
 
         elif dpsrc.prompt_theme == 11: # Polar Mint
             # break up the path:
@@ -567,6 +586,24 @@ class DPS:
                 'target':'nobold fg:#96815d'
             })
 
+        #  
+        elif dpsrc.prompt_theme == 12:
+            #####
+            ### FLIGHT: THEME:
+            self.style = Style.from_dict({
+                # User input (default text).
+                '':'fg:#aaa italic bold',
+                'uid':'italic fg:#aee7f2',
+                'char':'noitalic nobold fg:#326d99',
+                'text_path_slash':'noitalic bold fg:#0daaff',
+                'khaki':'noitalic nobold fg:#66ffb8',
+                'light':'noitalic nobold fg:#b1fad8',
+                'target':'nobold fg:#96815d',
+                'text_path_brackets':'bold fg:#326d99',
+                'text_path':'underline italic fg:#aee7f2',
+                'parens':'bold fg:#324e99',
+                'prompt':'noitalic nobold fg:#326d99'
+            })
         else:
             #####
             ### PROMPT_THEME IS EITHER 0 OR OUT OF RANGE
@@ -599,12 +636,13 @@ class DPS:
 def shell(dps):
     with open(session.LOG_FILENAME) as file:
         for entry in file:
+            entry = entry.rstrip()
             cmd = resplit(r'[^\\],',entry)[5]
-            if cmd != "":
+            if cmd != "" and cmd != "What": # remove CSV line head
                 dps.prompt_session.history.append_string(cmd.rstrip())
     try:
-        last_string = dps.prompt_session.prompt()
-        dps_cmd.hook(last_string,dpsrc,session,prompt_ui)
+        last_string = dps.prompt_session.prompt(auto_suggest=AutoSuggestFromHistory())
+        dps_cmd.hook(last_string,dpsrc,session,prompt_ui,dps)
         dps.update_prompt()
     except KeyboardInterrupt:
         #exit_gracefully()
@@ -614,7 +652,7 @@ def shell(dps):
 
 # standard boilerplate
 if __name__ == "__main__":
-    print(prompt_ui.bcolors['BOLD']+"\n ▹▹▹ Welcome to the Demon Pentest Shell ("+session.VERSION+")\n ▹▹▹ Type \"exit\" to return to standard shell.\n"+prompt_ui.bcolors['ENDC'])
+    print(prompt_ui.bcolors['BOLD']+prompt_ui.bcolors['ITAL']+"\n ┏ Welcome to the Demon Pentest Shell ("+prompt_ui.bcolors['YELL']+session.VERSION+prompt_ui.bcolors['ENDC']+prompt_ui.bcolors['BOLD']+prompt_ui.bcolors['ITAL']+")\n ┗ Type \"exit\" to return to standard shell.\n"+prompt_ui.bcolors['ENDC'])
     if session.NEWLOG==True:
         print(f"{prompt_ui.bcolors['OKGREEN']}New log file created for today's sessions ({session.LOG_FILENAME})\n")
     dps = DPS() # Prompt-toolkit class instance

@@ -33,6 +33,7 @@ def exit_gracefully(): # handle CTRL+C or CTRL+D, or quit, or exit gracefully:
 def run(cmd,dpsrc,session,prompt_ui):
     WARN=prompt_ui.bcolors['WARN']
     FAIL=prompt_ui.bcolors['FAIL']
+    ITAL=prompt_ui.bcolors['ITAL']
     BOLD=prompt_ui.bcolors['BOLD']
     OKGREEN=prompt_ui.bcolors['OKGREEN']
     ENDC=prompt_ui.bcolors['ENDC']
@@ -42,7 +43,7 @@ def run(cmd,dpsrc,session,prompt_ui):
         return
     if dpsrc.timestamps==True:
         now = datetime.now()
-        print(f"{GREEN}{now.strftime('%d-%m-%Y-%H-%M-%S')}{ENDC}")
+        print(f"{ITAL}{OKGREEN}(timestamp: {now.strftime('%d-%m-%Y-%H-%M-%S')}){ENDC}")
     if cmd.startswith("./") or cmd.startswith("/") or re.match("^[^/]+/",cmd):
         # user specified a path, just try it: TODO ensure binary in path before executing.
         subprocess.call(["/bin/bash", "--init-file","/root/.bashrc", "-c", cmd])
@@ -94,10 +95,15 @@ def run(cmd,dpsrc,session,prompt_ui):
     return
 
 ## Method: hook the command entered for built-in's etc:
-def hook(cmd,dpsrc,session,prompt_ui):
+def hook(cmd,dpsrc,session,prompt_ui,dps):
     ###
     ## First, set aliases:
     ###
+
+    ## Cannot deduplicate recent history - The Python Docs for Prompt_toolkit are unreadable garbage.
+    #if cmd == dps.prompt_session.history.get_strings()[-1]:
+    #    dps.prompt_session.history.current_buffer.history_backward(count=1)
+
     WARN=prompt_ui.bcolors['WARN']
     FAIL=prompt_ui.bcolors['FAIL']
     BOLD=prompt_ui.bcolors['BOLD']
@@ -110,15 +116,19 @@ def hook(cmd,dpsrc,session,prompt_ui):
         new_cmd = []
         for cmd_count_iter in cmd_count:
             #print(f"cmd_count_iter:{cmd_count_iter}") # DEBUG
+            #print(cmd_count_iter.split()[0])
+            #print(f"processing: {cmd_count_iter} and cmd_count_iter.split()[0]:{cmd_count_iter.split()[0]}")
             if len(dpsrc.aliases) > 0 and cmd_count_iter.split()[0] in dpsrc.aliases: # we will rewrite the command with the alias.
                 cmd_split = cmd_count_iter.split() # split the command up to get the first element
-                if dpsrc.aliases[cmd_split[0]] not in cmd: # it's not already there:
+                if dpsrc.aliases[cmd_split[0]] not in cmd_count_iter: # it's not already there:
                     cmd_base = re.sub(cmd_split[0],dpsrc.aliases[cmd_split[0]],cmd_split[0]) # set alias
                     cmd_split[0]=cmd_base # overwrite it
                     new_cmd.append(" ".join(cmd_split))
                 else:
+                    #print(f"{dpsrc.aliases[cmd_split[0]]} is already in {cmd_count_iter}") # DEBUG
                     new_cmd.append(" ".join(cmd_split)) # put it all back.
             else:
+                #print(f"{cmd_count_iter.split()[0]} not in aliases.")
                 new_cmd.append(cmd_count_iter) # place it in, untouched.
         cmd_delta=" | ".join(new_cmd)
         cmd_delta = re.sub("\s+"," ",cmd_delta)
@@ -126,7 +136,7 @@ def hook(cmd,dpsrc,session,prompt_ui):
     else:
         cmd_strip = cmd.rstrip()
         if len(dpsrc.aliases) > 0 and cmd_strip in dpsrc.aliases:
-            cmd_delta = re.sub(cmd_strip,dpsrc.aliases[cmd_strip],cmd_strip) # set alias
+            cmd_delta = re.sub(cmd_strip,dpsrc.aliases[cmd_strip],cmd_strip,s) # set alias
     cmd_delta = re.sub("~",os.path.expanduser("~"),cmd_delta)
     cmd_delta = re.sub("^\s+","",cmd_delta) # remove any prepended spaces
     ###

@@ -7,10 +7,13 @@ dps_bin_path=/cyberpunk/shells/dps/
 warn_dupes=False
 
 [Aliases]
-grep = grep --color
-egrep = egrep --color
+grep = GREP_COLOR='01;94' grep --color
+egrep = GREP_COLOR='01;94' egrep --color
 
 [Secrets]
 wpsan_api = 00000000000000000000000000000
 nessus_license = 0000-0000-0000-0000
 log_backup_key = 000000000000000000000000000
+
+[Options]
+timestamps = True
