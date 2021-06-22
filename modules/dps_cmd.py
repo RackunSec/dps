@@ -192,8 +192,11 @@ def hook(cmd,dpsrc,session,prompt_ui,dps):
                     #print(f"[dbg] my_sudo_cmd: {my_sudo_cmd}") # DEBUG
                     sudo_cmd_list[0] = my_sudo_cmd # overwrite the command with the full path
                     cmd_delta_fixed_path = " ".join(sudo_cmd_list)
-                    print(f"[!] Running SUDO command: sudo {cmd_delta_fixed_path}") # DEBUG
+                    print(f"{prompt_ui.bcolors['WARN']}{prompt_ui.bcolors['ENDC']} Running {prompt_ui.bcolors['BOLD']}sudo{prompt_ui.bcolors['ENDC']} command: {prompt_ui.bcolors['ITAL']}{cmd_delta_fixed_path}{prompt_ui.bcolors['ENDC']}") # DEBUG
                     run("sudo "+cmd_delta_fixed_path,dpsrc,session,prompt_ui)
+            # We did not find the command provided:
+            print(f"{prompt_ui.bcolors['FAIL']}{prompt_ui.bcolors['ENDC']} Command: {prompt_ui.bcolors['ITAL']}{sudo_cmd.split()[0]}{prompt_ui.bcolors['ENDC']} Not found in paths defined in .dpsrc file.")
+            return
         else:
             run(cmd_delta,dpsrc,session,prompt_ui)
         return
