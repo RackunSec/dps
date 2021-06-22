@@ -186,13 +186,13 @@ def hook(cmd,dpsrc,session,prompt_ui,dps):
         # Get path for command:
         if not re.search("/",sudo_cmd_list[0]): # no full path provided:
             for path in dpsrc.paths:
-                print(f"[dbg] checking path: {path}/{sudo_cmd_list[0]}") # DEBUG
+                #print(f"[dbg] checking path: {path}/{sudo_cmd_list[0]}") # DEBUG
                 if os.path.exists(path+"/"+sudo_cmd_list[0]):
                     my_sudo_cmd=path+"/"+sudo_cmd_list[0]
-                    print(f"[dbg] my_sudo_cmd: {my_sudo_cmd}") # DEBUG
+                    #print(f"[dbg] my_sudo_cmd: {my_sudo_cmd}") # DEBUG
                     sudo_cmd_list[0] = my_sudo_cmd # overwrite the command with the full path
                     cmd_delta_fixed_path = " ".join(sudo_cmd_list)
-                    print(f"[dbg] Running cmd: sudo {cmd_delta_fixed_path}") # DEBUG
+                    print(f"[!] Running SUDO command: sudo {cmd_delta_fixed_path}") # DEBUG
                     run("sudo "+cmd_delta_fixed_path,dpsrc,session,prompt_ui)
         else:
             run(cmd_delta,dpsrc,session,prompt_ui)
