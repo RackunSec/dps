@@ -435,6 +435,44 @@ class DPS:
             self.message.append(('class:khaki',""))
             self.message.append(('class:light'," "))
 
+
+        elif dpsrc.prompt_theme == 13: # CYBERPUNK THEME
+            net_device = str(session.NET_DEV)
+            net_device = re.sub("[^:]+:","",net_device)
+            path_list = self.path.split("/")
+            if session.UID == "#":
+                session.UID = "root"
+            string_0 = session.UID + "@" + session.HOSTNAME + "@" + net_device
+            string_1 = self.path
+            line_len = len(string_0) - len(string_1) - 2
+            self.message = [
+                ("class:line","\n┌─┬"),
+                ("class:grey_no","["),
+                ("class:red",session.UID),
+                ("class:grey","@"),
+                ("class:text",session.HOSTNAME),
+                ("class:grey","@"),
+                ("class:text",net_device),
+                ("class:grey_no","]\n"),
+                ("class:line","│▒└"),
+                ("class:grey_no","[")
+            ]
+            self.message.append(("class:char","/"))
+            for text in path_list:
+                if text != "":
+                    self.message.append(("class:text",text))
+                    self.message.append(("class:grey","/"))
+            self.message.append(("class:grey_no","]"))
+            self.message.append(("class:red","┈"*line_len))
+            if line_len > 0:
+                self.message.append(("class:red","╯"))
+            self.message.append(("class:line","\n└─"))
+            self.message.append(("class:keyb","⌨"))
+            self.message.append(("class:line","   "))
+            self.message.append(("class:arrw_0","▹"))
+            self.message.append(("class:arrw_1","▹"))
+            self.message.append(("class:arrw_2","▹ "))
+
     def __init__(self):
         self.path = os.getcwd()
         ###===========================================
@@ -584,6 +622,24 @@ class DPS:
                 'khaki':'noitalic nobold fg:#66ffb8',
                 'light':'noitalic nobold fg:#b1fad8',
                 'target':'nobold fg:#96815d'
+            })
+
+        elif dpsrc.prompt_theme == 13:
+            #####
+            ### RetroMotion: THEME:
+            self.style = Style.from_dict({
+                # User input (default text).
+                '':'fg:#fff italic',
+                'text':'italic underline nobold fg:#b8af9e',
+                'red':'noitalic bold fg:#bf3000',
+                'char':'italic nobold fg:#82806d',
+                'line':'noitalic nobold fg:#82806d',
+                'keyb':'noitalic nobold fg:#737063',
+                'arrw_0':'noitalic nobold fg:#615e51',
+                'arrw_1':'noitalic nobold fg:#737063',
+                'arrw_2':'noitalic nobold fg:#8a8675',
+                'grey':'italic nobold fg:#737063',
+                'grey_no':'noitalic nobold fg:#737063'
             })
 
         #  
