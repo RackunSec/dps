@@ -198,6 +198,7 @@ def hook(cmd,dpsrc,session,prompt_ui,dps):
             print(f"{prompt_ui.bcolors['FAIL']}{prompt_ui.bcolors['ENDC']} Command: {prompt_ui.bcolors['ITAL']}{sudo_cmd.split()[0]}{prompt_ui.bcolors['ENDC']} Not found in paths defined in .dpsrc file.")
             return
         else:
+            print(f"{prompt_ui.bcolors['WARN']}{prompt_ui.bcolors['ENDC']} Running {prompt_ui.bcolors['BOLD']}sudo{prompt_ui.bcolors['ENDC']} command: {prompt_ui.bcolors['ITAL']}{cmd_delta}{prompt_ui.bcolors['ENDC']}") # DEBUG
             run(cmd_delta,dpsrc,session,prompt_ui)
         return
     elif cmd_delta.startswith("dps_uid_gen"):
