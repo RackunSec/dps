@@ -185,7 +185,11 @@ def hook(cmd,dpsrc,session,prompt_ui,dps):
         sudo_cmd_list = sudo_cmd.split()
         # Get path for command:
         if not re.search("/",sudo_cmd_list[0]): # no full path provided:
-            for path in dpsrc.paths:
+            all_paths_standard = dpsrc.paths # let's add all super-user paths:
+            all_paths_standard.append("/usr/local/sbin")
+            all_paths_standard.append("/usr/sbin")
+            all_paths_standard.append("/sbin")
+            for path in all_paths_standard:
                 #print(f"[dbg] checking path: {path}/{sudo_cmd_list[0]}") # DEBUG
                 if os.path.exists(path+"/"+sudo_cmd_list[0]):
                     my_sudo_cmd=path+"/"+sudo_cmd_list[0]
