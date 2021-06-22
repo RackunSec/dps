@@ -181,9 +181,21 @@ def hook(cmd,dpsrc,session,prompt_ui,dps):
     elif cmd_delta.startswith("def "): # def var: val
         dps_env.define_var(cmd,session,prompt_ui)
     elif re.match("^\s?sudo",cmd_delta): # for sudo, we will need the command's full path:
-        sudo_regexp = re.compile("sudo ([^ ]+)")
-        cmd_delta=re.sub(sudo_regexp,'sudo $(which \\1)',cmd_delta)
-        run(cmd_delta,dpsrc,session,prompt_ui)
+        sudo_cmd = re.sub(".*sudo(\s+)?","",cmd_delta)
+        sudo_cmd_list = sudo_cmd.split()
+        # Get path for command:
+        if not re.search("/",sudo_cmd_list[0]): # no full path provided:
+            for path in dpsrc.paths:
+                print(f"[dbg] checking path: {path}/{sudo_cmd_list[0]}") # DEBUG
+                if os.path.exists(path+"/"+sudo_cmd_list[0]):
+                    my_sudo_cmd=path+"/"+sudo_cmd_list[0]
+                    print(f"[dbg] my_sudo_cmd: {my_sudo_cmd}") # DEBUG
+                    sudo_cmd_list[0] = my_sudo_cmd # overwrite the command with the full path
+                    cmd_delta_fixed_path = " ".join(sudo_cmd_list)
+                    print(f"[dbg] Running cmd: sudo {cmd_delta_fixed_path}") # DEBUG
+                    run("sudo "+cmd_delta_fixed_path,dpsrc,session,prompt_ui)
+        else:
+            run(cmd_delta,dpsrc,session,prompt_ui)
         return
     elif cmd_delta.startswith("dps_uid_gen"):
         dps_uid_gen.gen_uids(cmd_delta,session,prompt_ui)
