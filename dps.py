@@ -8,7 +8,7 @@
 #
 #
 ### IMPORT LIBRARIES:
-version = "v1.6.22e (Sudo Echo)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+version = "v1.6.23a (Target Lock)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
 import os # for the commands, of course. These will be passed ot the shell.
 from sys import exit as exit # for exit.
 from sys import path as path # for reading files.
@@ -445,18 +445,36 @@ class DPS:
             string_0 = session.UID + "@" + session.HOSTNAME + "@" + net_device
             string_1 = self.path
             line_len = len(string_0) - len(string_1) - 2
+
+
+
             self.message = [
                 ("class:line","\n┌─┬"),
                 ("class:grey_no","["),
                 ("class:red",session.UID),
                 ("class:grey","@"),
                 ("class:text",session.HOSTNAME),
-                ("class:grey","@"),
+                ("class:grey","::"),
                 ("class:text",net_device),
-                ("class:grey_no","]\n"),
-                ("class:line","│▒└"),
-                ("class:grey_no","[")
+                ("class:grey_no","]"),
             ]
+            if "TARGET" in session.VARIABLES:
+                target = f"{session.VARIABLES['TARGET']}"
+                self.message.append(("class:red_grey"," "))
+                self.message.append(("class:red_grey","TARGET"))
+                self.message.append(("class:red_grey",": "))
+                self.message.append(("class:red_grey",f"░▒ {target} ▒░ "))
+                line_len+=3
+            self.message.append(("class:grey","\n"))
+            self.message.append(("class:line","│"))
+            if "TARGET" in session.VARIABLES:
+                self.message.append(("class:red","▒"))
+            else:
+                self.message.append(("class:line","▒"))
+
+            self.message.append(("class:line","└"))
+
+            self.message.append(("class:grey_no","["))
             self.message.append(("class:char","/"))
             for text in path_list:
                 if text != "":
@@ -632,6 +650,8 @@ class DPS:
                 '':'fg:#fff italic',
                 'text':'italic underline nobold fg:#b8af9e',
                 'red':'noitalic bold fg:#bf3000',
+                'red_u':'noitalic bold underline fg:#bf3000',
+                'red_grey':'noitalic bold fg:#bf3000 bg:#1a1a1a',
                 'char':'italic nobold fg:#82806d',
                 'line':'noitalic nobold fg:#82806d',
                 'keyb':'noitalic nobold fg:#737063',
@@ -639,7 +659,7 @@ class DPS:
                 'arrw_1':'noitalic nobold fg:#737063',
                 'arrw_2':'noitalic nobold fg:#8a8675',
                 'grey':'italic nobold fg:#737063',
-                'grey_no':'noitalic nobold fg:#737063'
+                'grey_no':'noitalic nobold fg:#737063',
             })
 
         #  
