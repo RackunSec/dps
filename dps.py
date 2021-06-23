@@ -8,7 +8,7 @@
 #
 #
 ### IMPORT LIBRARIES:
-version = "v1.6.23a (Target Lock)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+version = "v1.6.23c (Target Comma)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
 import os # for the commands, of course. These will be passed ot the shell.
 from sys import exit as exit # for exit.
 from sys import path as path # for reading files.
@@ -715,7 +715,9 @@ def shell(dps):
             entry = entry.rstrip()
             cmd = resplit(r'[^\\],',entry)[5]
             if cmd != "" and cmd != "What": # remove CSV line head
-                dps.prompt_session.history.append_string(cmd.rstrip())
+                cmd_clean = cmd.rstrip()
+                cmd_clean = re.sub("\\\+,",",",cmd_clean) # This is to clean the CSV file's backslashes of the commas for our command history.
+                dps.prompt_session.history.append_string(cmd_clean)
     try:
         last_string = dps.prompt_session.prompt(auto_suggest=AutoSuggestFromHistory())
         dps_cmd.hook(last_string,dpsrc,session,prompt_ui,dps)

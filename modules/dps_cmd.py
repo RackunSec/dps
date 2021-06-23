@@ -115,9 +115,6 @@ def hook(cmd,dpsrc,session,prompt_ui,dps):
     if len(cmd_count)>1:
         new_cmd = []
         for cmd_count_iter in cmd_count:
-            #print(f"cmd_count_iter:{cmd_count_iter}") # DEBUG
-            #print(cmd_count_iter.split()[0])
-            #print(f"processing: {cmd_count_iter} and cmd_count_iter.split()[0]:{cmd_count_iter.split()[0]}")
             if len(dpsrc.aliases) > 0 and cmd_count_iter.split()[0] in dpsrc.aliases: # we will rewrite the command with the alias.
                 cmd_split = cmd_count_iter.split() # split the command up to get the first element
                 if dpsrc.aliases[cmd_split[0]] not in cmd_count_iter: # it's not already there:
@@ -125,11 +122,10 @@ def hook(cmd,dpsrc,session,prompt_ui,dps):
                     cmd_split[0]=cmd_base # overwrite it
                     new_cmd.append(" ".join(cmd_split))
                 else:
-                    #print(f"{dpsrc.aliases[cmd_split[0]]} is already in {cmd_count_iter}") # DEBUG
                     new_cmd.append(" ".join(cmd_split)) # put it all back.
             else:
-                #print(f"{cmd_count_iter.split()[0]} not in aliases.")
                 new_cmd.append(cmd_count_iter) # place it in, untouched.
+        #new_cmd[0] = "null"
         cmd_delta=" | ".join(new_cmd)
         cmd_delta = re.sub("\s+"," ",cmd_delta)
         cmd_delta = re.sub("\s+\|\s+","|",cmd_delta) # clean up pipes.
@@ -178,7 +174,7 @@ def hook(cmd,dpsrc,session,prompt_ui,dps):
         return
     elif cmd_delta.startswith("dps_wifi"):
         dps_wifi.set(cmd_delta,session,prompt_ui)
-    elif cmd_delta.startswith("def "): # def var: val
+    elif cmd_delta.startswith("def ") or cmd_delta=="def": # def var: val
         dps_env.define_var(cmd,session,prompt_ui)
     elif re.match("^\s?sudo",cmd_delta): # for sudo, we will need the command's full path:
         sudo_cmd = re.sub(".*sudo(\s+)?","",cmd_delta)
@@ -190,7 +186,7 @@ def hook(cmd,dpsrc,session,prompt_ui,dps):
             all_paths_standard.append("/usr/sbin")
             all_paths_standard.append("/sbin")
             for path in all_paths_standard:
-                #print(f"[dbg] checking path: {path}/{sudo_cmd_list[0]}") # DEBUG
+                print(f"[dbg] checking path: {path}/{sudo_cmd_list[0]}") # DEBUG
                 if os.path.exists(path+"/"+sudo_cmd_list[0]):
                     my_sudo_cmd=path+"/"+sudo_cmd_list[0]
                     #print(f"[dbg] my_sudo_cmd: {my_sudo_cmd}") # DEBUG
@@ -210,6 +206,14 @@ def hook(cmd,dpsrc,session,prompt_ui,dps):
 
     elif(cmd_delta=="dps_stats"):
         dps_stats.show(prompt_ui)
+    elif(cmd_delta.startswith("dps_which")):
+        if len(cmd_delta.split())>1:
+            #print(f"{prompt_ui.bcolors['OKGREEN']}{prompt_ui.bcolors['ENDC']} Checking command {cmd_delta.split()[1]}")
+            for path in dpsrc.paths:
+                if(os.path.exists(path+cmd_delta.split()[1])):
+                    print(f"{prompt_ui.bcolors['OKGREEN']}{prompt_ui.bcolors['ENDC']} {path+cmd_delta.split()[1]}")
+        else:
+            print(f"{prompt_ui.bcolors['WARN']}{prompt_ui.bcolors['ENDC']} Usage: {prompt_ui.bcolors['GREEN']}dps_which (command/binary){prompt_ui.bcolors['ENDC']}")
     elif(cmd_delta=="dps_update"):
         dps_update.app(session,prompt_ui)
     elif(cmd_delta=="dps_alias"):

@@ -46,13 +46,21 @@ def define_var(cmd,session,prompt_ui):
     ENDC=prompt_ui.bcolors['ENDC']
     BOLD=prompt_ui.bcolors['BOLD']
     OKGREEN=prompt_ui.bcolors['OKGREEN']
+    GREEN=prompt_ui.bcolors['GREEN']
     FAIL=prompt_ui.bcolors['FAIL']
+    # SHOW ALL VARS:
+    if cmd == "def":
+        print(f"{OKGREEN}{ENDC} All user defined session variables:")
+        print(session.VARIABLES)
+        #for key in session.VARIABLES:
+        #    print(f"{key}")
+        return
     if re.search('"[^"]+"',cmd): # defining a variable that is in quotes
         val = re.sub('[^"]+"([^"]+)".*','\\1',cmd)
         key = cmd.split()[1]
         key=re.sub(":","",key)
         session.VARIABLES[key]=val
-        print(f"\n ▹ Defining variable {BOLD}{OKGREEN}{key}{ENDC} value {BOLD}{OKGREEN}{val}{ENDC} for this DPS session.\n")
+        print(f"\n{OKGREEN}{ENDC} Defining variable {BOLD}{GREEN}{key}{ENDC} value {BOLD}{GREEN}{val}{ENDC} for this DPS session.\n")
         return
     else:
         if len(cmd.split())==3:
@@ -60,7 +68,7 @@ def define_var(cmd,session,prompt_ui):
                 key=cmd.split()[1]
                 key=re.sub(":$","",key) # drop the colon
                 val=cmd.split()[2]
-                print(f"\n ▹ Defining variable {BOLD}{OKGREEN}{key}{ENDC} value {BOLD}{OKGREEN}{val}{ENDC} for this DPS session.\n")
+                print(f"\n{OKGREEN}{ENDC} Defining variable {BOLD}{GREEN}{key}{ENDC} value {BOLD}{GREEN}{val}{ENDC} for this DPS session.\n")
                 session.VARIABLES[key]=val
                 return
             else:
