@@ -8,7 +8,7 @@
 #
 #
 ### IMPORT LIBRARIES:
-version = "v1.6.24a (LoFi Bunnies)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+version = "v1.6.24ff (NASA)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
 import os # for the commands, of course. These will be passed ot the shell.
 from sys import exit as exit # for exit.
 from sys import path as path # for reading files.
@@ -270,12 +270,30 @@ class DPS:
             ]
         elif dpsrc.prompt_theme == 1: # MINIMAL SKULL
             self.message = [
-                ('class:parens_open_outer','('),
-                ('class:parens_open','('),
-                ('class:dps','dps'),
-                ('class:parens_close',')'),
-                ('class:parens_close_outer',')'),
-                ('class:skull','☠️  '),
+                ('class:line_d','\n ┏━'),
+                ('class:castle_d','🌙 '),
+                ('class:line_d','━━━━'),
+                ('class:line_d','━━━'),
+                ('class:castle_d','★ '),
+                ('class:line_d','━'),
+                ('class:line_d','━━━━━━━━━━━━━━━━━━🛸━━━━┓ '),
+                ('class:line_m','\n ┃'),
+                ('class:castle_m','  ⋆ 🚀 '),
+                ('class:line_m','.      '),
+                ('class:castle_m','★            ★'),
+                ('class:line_m','     .    ┃ \n'),
+                ('class:line',' ┃         🌎       .    🛰  .           '),
+                ('class:line','┃ \n'),
+                ('class:line_l',' ┃'),
+                ('class:castle_l','   ⋆       ⋆                  .   🪐  '),
+                ('class:line_l',' ┃ '),
+                ('class:line','\n ┗━━━━━━━━━━━━━━━━━━━━━ '),
+                ('class:castle','⋆ '),
+                ('class:line','━━━━━━━━━━━━━━┛ '),
+                ('class:prompt','\n 📡 '),
+                ('class:prompt_0',''),
+                ('class:prompt_1',''),
+                ('class:prompt_2',' '),
             ]
         elif dpsrc.prompt_theme == 2 or dpsrc.prompt_theme == 3 or dpsrc.prompt_theme == 4: # MINIMAL
             self.message = [
@@ -498,18 +516,24 @@ class DPS:
         ## BUILD THEMES HERE, TEST COLORS THOROUGHLY (256bit):
         ###===========================================
         #####
-        ### MINIMAL SKULL THEME
+        ### NASA THEME:
         if dpsrc.prompt_theme == 1:
                 self.style = Style.from_dict({
-                    # User input (default text).
-                    '':          'italic #af5f00',
-                    # Prompt.
-                    'parens_open': '#af0000',
-                    'parens_open_outer': '#af5f00',
-                    'dps':       'italic #870000',
-                    'parens_close_outer':    '#af5f00',
-                    'parens_close':    '#af0000',
-                    'skull':    '#8e8e8e',
+                    '':          'italic #aaa',
+                    'line_l':'bold noitalic bg:#313131 fg:#3f3f3f',
+                    'line':'bold noitalic bg:#2a2a2a fg:#3f3f3f',
+                    'line_m':'bold noitalic bg:#222222 fg:#3f3f3f',
+                    'line_d':'bold noitalic bg:#181818 fg:#3f3f3f',
+
+                    'castle_l':'noitalic bg:#313131 fg:#ccc',
+                    'castle':'noitalic bg:#2a2a2a fg:#ccc',
+                    'castle_m':'noitalic bg:#222222 fg:#ccc',
+                    'castle_d':'noitalic bg:#181818 fg:#ccc',
+                    'prompt':'bold noitalic fg:#42cdff',
+                    'prompt_0':'noitalic fg:#525252',
+                    'prompt_1':'noitalic fg:#8a8a8a',
+                    'prompt_2':'noitalic fg:#aaaaaa',
+
                 })
         elif dpsrc.prompt_theme == 2:
             #####

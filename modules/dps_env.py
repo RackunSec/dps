@@ -116,7 +116,7 @@ def prompt(args,dpsrc,prompt_ui):
 def theme_names(theme_int):
     all_themes = {
         0: "Default",
-        1: "Minimal Skull",
+        1: "NASA",
         2: "Minimal 1",
         3: "Minimal 2",
         4: "Minimal 3",
