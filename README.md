@@ -93,3 +93,10 @@ This project requires Python3 and the following Python modules,
 To update DPS, simply use the `dps_update` command and restart the shell. This will pull the latest version down to your repository that is defined in the `~/.dps/config/dpsrc` file that gets generated upon first run of the shell.
 
 ![DPS Update Screenshot](images/screenshots/dpsupdate2.PNG)
+
+## TODO
+This is a work in progress, so please check this area regularly if using this shell.
+* TAB-autocomplete paths interpolated into commands - as of now, you can only tab-autocomplete paths at the end of your commands.
+* Offload themes into it's own class
+* Clean up code to make long vars in prompt_ui.bcolors shorter and more readable
+* de-duplicate history in session (pressing up or down should only show a single instance of a command ran multiple times)
