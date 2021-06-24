@@ -16,21 +16,11 @@ You can now define command aliases into the `dpsrc` file:
 These are set with PRMPT_STYL in the `~/.dps/config/dpsrc` file or with the `dps_config prompt (0-9)` built-in command.
 #### DPS Default Theme:
 `PRMPT_STYL` value of `0` or `DPS` using `dps_config`
-
-![DPS theme 0](images/screenshots/dps_0.png)
-#### Pirate Theme:
-`PRMPT_STYL` value of `1` or `PIRATE` using `dps_config`
-
-![DPS theme 2](images/screenshots/pirate_1.png)
-#### Boneyard Theme:
-`PRMPT_STYL` value of `2` or `BONEYARD` using `dps_config`
-
-![DPS theme 3](images/screenshots/boneyard_new_2.png)
-#### 1980s Theme:
-`PRMPT_STYL` value of `3` or `1980S` using `dps_config`
-
-![DPS theme 3](images/screenshots/1980s_3.png)
-
+You can now easily set your theme by issuing the following command:
+```bash
+dps_config --show-all
+```
+and choosing a number listed as the theme. Restart the shell to take effect.
 #### Nouveau Theme:
 `PROMPT_STYLE` value of `5` or `Nouveau` using `dps_config`
 
@@ -60,6 +50,7 @@ The following keyboard shortcuts are available,
 ### Custom Modules
 The following are built-in commands,
 * **dps_uid_gen** - generate a list of UIDs from a CSV file
+* **dps_update** - pull the latest version from this repository - restart shell to take effect
 * **dps_alias** - display all user-defined aliases in the dps.ini file
 * **dps_update** - updates DPS using GitPython as defined by DPS_bin_path in dps.ini file
 * **dps_wifi_mon** - set a Wi-Fi device into monitor mode
