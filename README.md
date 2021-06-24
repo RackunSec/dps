@@ -63,7 +63,9 @@ The following are built-in commands,
 * **clear** - clear the terminal
 * **cd** - change current working directory
 * **history** - view your command history for your current session file (ALL HISTORY)
-
+### Other Features
+* **Define a Target** - Some themes, including "Polar Mint","Bew" and "Terminator" will display the current target in the prompt for your penetation test report's screenshots.
+* **Timestamps** - if the "timestamps" value is "True" under the "[Options]" section pf the `~/.dps/config/dpsrc` file, you will get a bright green timestamp in the top of the command output for your Obsidian Notes Timelines, or penetration testing report's screenshots.
 ## INSTALLATION
 To install DPS, simply install the requirements using pip3 and clone the repository anywhere on your filesystem (root access required if installing for all users):
 ```
