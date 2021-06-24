@@ -128,7 +128,7 @@ def theme_names(theme_int):
         10: "Japan",
         11: "Polar Mint",
         12: "Flight",
-        13: "Cyberpunk",
+        13: "Terminator",
     }
     if theme_int == "all":
         return all_themes
