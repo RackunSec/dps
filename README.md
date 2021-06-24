@@ -55,6 +55,7 @@ The following keyboard shortcuts are available,
 * **CTRL+P** - enter the previous command into the temrinal
 * **CTRL+C** - exit the current subprocess gracefully
 * **CTRL+R** - search history
+* **Command Suggestions** - These are pulled from your history (log file entries in ~/.dps/logs/)
 * **Up and Down arrows** - flip through command history
 ### Custom Modules
 The following are built-in commands,
@@ -63,6 +64,8 @@ The following are built-in commands,
 * **dps_update** - updates DPS using GitPython as defined by DPS_bin_path in dps.ini file
 * **dps_wifi_mon** - set a Wi-Fi device into monitor mode
 * **dps_stats** - show log stats
+* **dps_which** - show which command is ran in your ~/.dps/config/dpsrc paths
+* **dps_import_log** - import historical logs for CTRL+r reverse search purposes and suggestions
 * **dps_config** - set configuration options, such as prompt style
 * **clear** - clear the terminal
 * **cd** - change current working directory
