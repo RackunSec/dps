@@ -4,24 +4,25 @@ A simple shell wrapper for superior logging capabilities. All commands are logge
 # The Shell
 ## CONFIGURATION
 The `~/.dps/config/dpsrc` file contains the user-defined settings and variables. See the ![dps.ini.example](dps.ini.example) example config file for syntax. This file and all directories used by DPS are automatically generated in the effective user's home directory within `~/.dps/`.
-### Autocomplete Feature
+## Autocomplete Feature
+The tab-autocomplete feature is a custom implementation of those you may be familiar with from other (more)popular shells. You can hit TAB to autocomplete (the end of the entry only) file locations, binary paths, and commands in your Paths section of the `~/.dps/config/dpsrc` file.
 ![Screenshot of auto-complete text](images/screenshots/autocomplete.png)
-### Built-In Programming Logic
+## Built-In Programming Logic
 ![foreach() function screenshot](images/screenshots/foreach.png)
-### Aliases
+## Aliases
 You can now define command aliases into the `dpsrc` file:
 
 ![DPS Aliases](images/screenshots/aliases.png)
-### Shell Themes
+## Shell Themes
 These are set with PRMPT_STYL in the `~/.dps/config/dpsrc` file or with the `dps_config prompt (0-9)` built-in command.
-#### DPS Default Theme:
+### DPS Default Theme:
 `PRMPT_STYL` value of `0` or `DPS` using `dps_config`
 You can now easily set your theme by issuing the following command:
 ```bash
 dps_config --show-all
 ```
 and choosing a number listed as the theme. Restart the shell to take effect.
-#### Nouveau Theme:
+### Nouveau Theme:
 `PROMPT_STYLE` value of `5` or `Nouveau` using `dps_config`
 
 ![DPS_theme_5](images/screenshots/nouveau-screenshot-2.png)
