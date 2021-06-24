@@ -6,6 +6,7 @@ A simple shell wrapper for superior logging capabilities. All commands are logge
 The `~/.dps/config/dpsrc` file contains the user-defined settings and variables. See the ![dps.ini.example](dps.ini.example) example config file for syntax. This file and all directories used by DPS are automatically generated in the effective user's home directory within `~/.dps/`.
 ## Autocomplete Feature
 The tab-autocomplete feature is a custom implementation of those you may be familiar with from other (more)popular shells. You can hit TAB to autocomplete (the end of the entry only) file locations, binary paths, and commands in your Paths section of the `~/.dps/config/dpsrc` file.
+
 ![Screenshot of auto-complete text](images/screenshots/autocomplete.png)
 ## Built-In Programming Logic
 ![foreach() function screenshot](images/screenshots/foreach.png)
