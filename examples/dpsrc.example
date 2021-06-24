@@ -13,7 +13,8 @@ egrep = GREP_COLOR='01;94' egrep --color
 [Secrets]
 wpsan_api = 00000000000000000000000000000
 nessus_license = 0000-0000-0000-0000
-log_backup_key = 000000000000000000000000000
+dps_log_key = 000000000000000000000000000
 
 [Options]
 timestamps = True
+log_delimiter = ,

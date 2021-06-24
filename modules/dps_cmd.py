@@ -218,6 +218,8 @@ def hook(cmd,dpsrc,session,prompt_ui,dps):
         dps_update.app(session,prompt_ui)
     elif(cmd_delta=="dps_alias"):
         dps_env.show_alias(dpsrc,prompt_ui)
+    elif(cmd_delta=="dps_import_log"):
+        dps_log.import_log(session,prompt_ui,dps)
     elif(cmd_delta.startswith("dps_config")):
         args = re.sub("dps_config","",cmd_delta).split() # make an array
         if len(args) > 0:

@@ -21,6 +21,24 @@ modules_list={
             'file': 'dps_stats.py',
             'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
         },
+    'dps_which':
+        {'title':'DPS Which',
+            'desc':'Show which binary will be called.',
+            'category':'System',
+            'args':['command'],
+            'syntax_examples':['dps_which crackmapexec'],
+            'file': 'dps.py',
+            'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
+        },
+    'dps_import_log':
+        {'title':'DPS Import History Logs into Session History',
+            'desc':'Import one or all history logs in your ~/.dps/logs directory.',
+            'category':'System',
+            'args':[],
+            'syntax_examples':['dps_import_log'],
+            'file': 'dps_log.py',
+            'author':{'name':'RackunSec','url':'https://github.com/RackunSec/'}
+        },
     'dps_env':
         {'title':'DPS Session and Environment Information',
             'desc':'Displays all session and environment information.',
