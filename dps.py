@@ -290,10 +290,11 @@ class DPS:
                 ('class:line','\n ┗━━━━━━━━━━━━━━━━━━━━━ '),
                 ('class:castle','⋆ '),
                 ('class:line','━━━━━━━━━━━━━━┛ '),
-                ('class:prompt','\n 📡 '),
+                ('class:line','\n 📡 '),
                 ('class:prompt_0',''),
                 ('class:prompt_1',''),
                 ('class:prompt_2',' '),
+                ('class:prompt'," ")
             ]
         elif dpsrc.prompt_theme == 2 or dpsrc.prompt_theme == 3 or dpsrc.prompt_theme == 4: # MINIMAL
             self.message = [
@@ -530,9 +531,9 @@ class DPS:
                     'castle_m':'noitalic bg:#222222 fg:#ccc',
                     'castle_d':'noitalic bg:#181818 fg:#ccc',
                     'prompt':'bold noitalic fg:#42cdff',
-                    'prompt_0':'noitalic fg:#525252',
-                    'prompt_1':'noitalic fg:#8a8a8a',
-                    'prompt_2':'noitalic fg:#aaaaaa',
+                    'prompt_0':'noitalic bg:#222222 fg:#525252',
+                    'prompt_1':'noitalic bg:#1c1c1c fg:#8a8a8a',
+                    'prompt_2':'noitalic bg:#1c1c1c fg:#aaaaaa',
 
                 })
         elif dpsrc.prompt_theme == 2:
