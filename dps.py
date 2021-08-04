@@ -8,7 +8,7 @@
 #
 #
 ### IMPORT LIBRARIES:
-version = "v1.6.24ff (NASA)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
+version = "v1.8.4a (Pumpkins)" # update this each time we push to the repo (version (year),(mo),(day),(revision))
 import os # for the commands, of course. These will be passed ot the shell.
 from sys import exit as exit # for exit.
 from sys import path as path # for reading files.
@@ -511,6 +511,23 @@ class DPS:
             self.message.append(("class:arrw_1","▹"))
             self.message.append(("class:arrw_2","▹ "))
 
+        elif dpsrc.prompt_theme==14: # Triangular:
+            # break up the path:
+            path_array = self.path.split("/")
+            self.message = [
+                ('class:uid', f" {session.UID} ░▒▓"),
+                ('class:uid_bg', f" "),
+            ]
+
+            for path in path_array:
+                if path != "":
+                    self.message.append(("class:text_path_space_dot",f"")) # add the name
+                    self.message.append(("class:text_path",f"{path}")) # add the name
+                    self.message.append(("class:text_path_space",f"")) # add the name
+                    self.message.append(("class:uid_bg_slash","  ")) # add the slash
+            self.message.append(("class:prompt","\n"))
+            self.message.append(("class:uid_bg_prompt","┗━▷  ")) # add the slash
+
     def __init__(self):
         self.path = os.getcwd()
         ###===========================================
@@ -536,6 +553,18 @@ class DPS:
                     'prompt_2':'noitalic bg:#1c1c1c fg:#aaaaaa',
 
                 })
+        elif dpsrc.prompt_theme==14:
+            self.style = Style.from_dict({
+                '':'italic',
+                'grey_0':'noitalic bg:#2e2e2e',
+                'uid':'bold noitalic bg:#f04a0e fg:#2e2e2e',
+                'uid_bg':'noitalic fg:#f04a0e bg:#2e2e2e',
+                'uid_bg_slash':'noitalic fg:#f04a0e bg:#2e2e2e bold',
+                'uid_bg_prompt':'noitalic bold fg:#f04a0e',
+                'text_path':'italic bold fg:#aaa bg:#2e2e2e',
+                'text_path_space':'noitalic bold bg:#2e2e2e',
+                'text_path_space_dot':'noitalic bold fg: #666 bg:#2e2e2e',
+            })
         elif dpsrc.prompt_theme == 2:
             #####
             ### BONEYARD:

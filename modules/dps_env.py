@@ -129,6 +129,7 @@ def theme_names(theme_int):
         11: "Polar Mint",
         12: "Flight",
         13: "Terminator",
+        14: "October",
     }
     if theme_int == "all":
         return all_themes
